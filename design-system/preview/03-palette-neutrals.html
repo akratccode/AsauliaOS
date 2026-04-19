@@ -1,0 +1,26 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><link rel="stylesheet" href="_card.css">
+<style>
+.row2 { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; }
+.sw { border-radius: 12px; padding: 14px; min-height: 72px; display:flex; flex-direction:column; justify-content:space-between; box-shadow: var(--stroke-inner); }
+.sw .nm { font-size: 12px; font-weight: 500; color: #fff; }
+.sw .hx { font-family: var(--font-mono); font-size: 11px; color: var(--fg-3); }
+.fg-swatches { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.fg { background: var(--bg-2); border-radius: 12px; padding: 14px; box-shadow: var(--stroke-inner); }
+.fg .dot { width: 20px; height: 20px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: middle; border: 1px solid rgba(255,255,255,0.08); }
+</style></head>
+<body><div class="card">
+  <div class="row2">
+    <div class="sw" style="background:#05070F"><span class="nm">bg-0</span><span class="hx">#05070F</span></div>
+    <div class="sw" style="background:#080C1A"><span class="nm">bg-1</span><span class="hx">#080C1A</span></div>
+    <div class="sw" style="background:#0E1428"><span class="nm">bg-2</span><span class="hx">#0E1428</span></div>
+    <div class="sw" style="background:#151D38"><span class="nm">bg-3</span><span class="hx">#151D38</span></div>
+    <div class="sw" style="background:#1D2648"><span class="nm">bg-4</span><span class="hx">#1D2648</span></div>
+  </div>
+  <div class="fg-swatches">
+    <div class="fg"><span class="dot" style="background:#F3F5FB"></span><span style="color:#F3F5FB;font-size:13px">fg-1</span><div class="mono" style="margin-top:4px">#F3F5FB</div></div>
+    <div class="fg"><span class="dot" style="background:#BDC4DB"></span><span style="color:#BDC4DB;font-size:13px">fg-2</span><div class="mono" style="margin-top:4px">#BDC4DB</div></div>
+    <div class="fg"><span class="dot" style="background:#7E87A8"></span><span style="color:#7E87A8;font-size:13px">fg-3</span><div class="mono" style="margin-top:4px">#7E87A8</div></div>
+    <div class="fg"><span class="dot" style="background:#4A5273"></span><span style="color:#4A5273;font-size:13px">fg-4</span><div class="mono" style="margin-top:4px">#4A5273</div></div>
+  </div>
+</div></body></html>

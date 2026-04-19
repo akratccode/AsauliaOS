@@ -27,11 +27,11 @@ State is persisted on each step so users can drop out and resume. Use a simple c
 
 ### 1. Route group
 
-- [ ] `app/(onboarding)/layout.tsx` — shared header with progress indicator (3 steps).
-- [ ] `app/(onboarding)/brand/page.tsx`
-- [ ] `app/(onboarding)/plan/page.tsx`
-- [ ] `app/(onboarding)/payment/page.tsx`
-- [ ] `app/(onboarding)/complete/page.tsx` — landing after success; redirects to `/dashboard` after a moment.
+- [x] `app/(onboarding)/layout.tsx` — shared header with progress indicator (3 steps).
+- [x] `app/(onboarding)/brand/page.tsx`
+- [x] `app/(onboarding)/plan/page.tsx`
+- [x] `app/(onboarding)/payment/page.tsx`
+- [x] `app/(onboarding)/complete/page.tsx` — landing after success; redirects to `/dashboard` after a moment.
 
 Middleware: authenticated users with no `brand_members` row or whose brand has `status = 'trial'` are routed through onboarding. Users with `status = 'active'` go to `/dashboard`.
 
@@ -84,7 +84,7 @@ Confirm action: `savePlan` server action:
 
 This is the first Stripe integration. Prefer **Stripe Checkout in embedded mode** over Elements for speed — you get PCI compliance for free and less code.
 
-- [ ] Create a Stripe product "Asaulia Platform" and a price object per slider step (see below for strategy) — or one "metered" product.
+- [x] Create a Stripe product "Asaulia Platform" and a price object per slider step (see below for strategy) — or one "metered" product.
 
 **Pricing model with Stripe** (critical decision, follow this):
 
@@ -111,13 +111,13 @@ For this phase, it's acceptable to simulate the "active" transition via a page r
 
 ### 5. Onboarding guard
 
-- [ ] Middleware utility: on each authenticated request, look up the user's `brand_members` → brand status. If `status = 'trial'` and the current path is not under `/onboarding/*`, redirect to the appropriate next step.
-- [ ] Conversely, if `status = 'active'` and the path is under `/onboarding/*`, redirect to `/dashboard`.
+- [x] Middleware utility: on each authenticated request, look up the user's `brand_members` → brand status. If `status = 'trial'` and the current path is not under `/onboarding/*`, redirect to the appropriate next step.
+- [x] Conversely, if `status = 'active'` and the path is under `/onboarding/*`, redirect to `/dashboard`.
 
 ### 6. Ability to back out
 
-- [ ] Each step has a "Back" button.
-- [ ] "Resume onboarding" email after 24 hours of inactivity in a step. Defer to Phase 12 for the email itself — for now, just schedule the job stub.
+- [x] Each step has a "Back" button.
+- [x] "Resume onboarding" email after 24 hours of inactivity in a step. Defer to Phase 12 for the email itself — for now, just schedule the job stub.
 
 ### 7. UI polish (minimum viable)
 
@@ -128,8 +128,8 @@ For this phase, it's acceptable to simulate the "active" transition via a page r
 
 ### 8. Ensure plan history integrity
 
-- [ ] Add a DB trigger OR a server-side guard: inserting a `plans` row with `effective_to = null` automatically closes any previous open row for the same brand by setting its `effective_to = new.effective_from`.
-- [ ] Equivalent behavior via a transaction in `lib/db/plans.ts` is acceptable and preferred (easier to test). Always run the update + insert in a single transaction.
+- [x] Add a DB trigger OR a server-side guard: inserting a `plans` row with `effective_to = null` automatically closes any previous open row for the same brand by setting its `effective_to = new.effective_from`.
+- [x] Equivalent behavior via a transaction in `lib/db/plans.ts` is acceptable and preferred (easier to test). Always run the update + insert in a single transaction.
 
 ---
 

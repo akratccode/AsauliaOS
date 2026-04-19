@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><link rel="stylesheet" href="_card.css">
+<style>
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.c { padding: 18px; border-radius: 14px; background: var(--bg-2); box-shadow: var(--stroke-inner); display: flex; flex-direction: column; gap: 10px; }
+.c.elevated { background: var(--bg-3); box-shadow: var(--stroke-inner-strong); }
+.c .lb { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-3); }
+.c .big { font-size: 32px; font-weight: 500; letter-spacing: -0.01em; color: var(--fg-1); font-variant-numeric: tabular-nums; }
+.c .sub { font-size: 13px; color: var(--fg-3); font-variant-numeric: tabular-nums; }
+.trend { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #35D39A; font-weight: 500; }
+</style></head>
+<body><div class="card">
+  <div class="grid">
+    <div class="c">
+      <span class="lb">Attributed sales</span>
+      <span class="big">$4,230</span>
+      <span class="sub">12 of 30 days · <span class="trend">▲ 14% vs last</span></span>
+    </div>
+    <div class="c elevated">
+      <span class="lb">Projected invoice</span>
+      <span class="big">$899</span>
+      <span class="sub">Closes Nov 14 · $299 fixed + $600 variable</span>
+    </div>
+  </div>
+</div></body></html>

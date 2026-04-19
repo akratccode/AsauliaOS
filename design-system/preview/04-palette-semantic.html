@@ -1,0 +1,22 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><link rel="stylesheet" href="_card.css">
+<style>
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tile { border-radius: 12px; padding: 16px; box-shadow: var(--stroke-inner); display:flex; flex-direction:column; gap: 8px; min-height: 96px; }
+.tile .nm { font-weight: 500; font-size: 13px; }
+.tile .hx { font-family: var(--font-mono); font-size: 11px; opacity: 0.75; }
+.tile .pill { align-self: flex-start; padding: 4px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500; }
+.pricing-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+</style></head>
+<body><div class="card">
+  <div class="grid">
+    <div class="tile" style="background:rgba(53,211,154,0.14);color:#35D39A"><span class="nm">success</span><span class="pill" style="background:#35D39A;color:#002419">Paid</span><span class="hx">#35D39A</span></div>
+    <div class="tile" style="background:rgba(245,181,68,0.14);color:#F5B544"><span class="nm">warning</span><span class="pill" style="background:#F5B544;color:#2A1F00">Cooldown</span><span class="hx">#F5B544</span></div>
+    <div class="tile" style="background:rgba(255,90,106,0.12);color:#FF5A6A"><span class="nm">danger</span><span class="pill" style="background:#FF5A6A;color:#2B0006">Rejected</span><span class="hx">#FF5A6A</span></div>
+  </div>
+  <div class="label" style="margin-top:4px">Pricing semantics</div>
+  <div class="pricing-row">
+    <div class="tile" style="background:rgba(127,149,255,0.14);color:#7F95FF"><span class="nm">pricing-fixed</span><span class="hx">#7F95FF · $ monthly retainer</span></div>
+    <div class="tile" style="background:rgba(53,211,154,0.14);color:#35D39A"><span class="nm">pricing-variable</span><span class="hx">#35D39A · % of attributed sales</span></div>
+  </div>
+</div></body></html>

@@ -31,8 +31,8 @@ app/(contractor)/
 
 ### 1. Shell
 
-- [ ] Layout similar to client layout but narrower sidebar; contractor palette can be a different accent to signal context.
-- [ ] "My earnings projected this period" chip in the top bar — always visible, motivates the contractor.
+- [x] Layout similar to client layout but narrower sidebar; contractor palette can be a different accent to signal context.
+- [x] "My earnings projected this period" chip in the top bar — always visible, motivates the contractor.
 
 ### 2. Contractor onboarding
 

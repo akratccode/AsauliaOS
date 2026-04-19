@@ -17,34 +17,34 @@ Phases 05, 06, 08, 09, 10.
 
 Create three distinct clients per Supabase's SSR guidance.
 
-- [ ] `lib/auth/supabase-browser.ts` — client for browser components.
-- [ ] `lib/auth/supabase-server.ts` — server components / server actions client (reads cookies).
-- [ ] `lib/auth/supabase-admin.ts` — service-role client (server-only, never imported into client components). Guard it with an `import "server-only"` at the top.
+- [x] `lib/auth/supabase-browser.ts` — client for browser components.
+- [x] `lib/auth/supabase-server.ts` — server components / server actions client (reads cookies).
+- [x] `lib/auth/supabase-admin.ts` — service-role client (server-only, never imported into client components). Guard it with an `import "server-only"` at the top.
 
 Follow the `@supabase/ssr` patterns exactly — using the wrong client leaks either perms or sessions.
 
 ### 2. Middleware
 
-- [ ] Create `middleware.ts` at the project root that:
+- [x] Create `middleware.ts` at the project root that:
   1. Refreshes the Supabase session on every request.
   2. Redirects unauthenticated requests away from `(client)`, `(contractor)`, `(admin)` route groups to `/login`.
   3. After login, redirects to the user's default landing based on `global_role`:
      - `admin` / `operator` → `/admin/brands`
      - `contractor` → `/tasks`
      - `client` → `/dashboard` (or `/onboarding` if they have no brand yet)
-- [ ] Exclude `api/webhooks/*`, static assets, auth routes from the middleware matcher.
+- [x] Exclude `api/webhooks/*`, static assets, auth routes from the middleware matcher.
 
 ### 3. Auth pages
 
 Under `app/(auth)/`:
 
-- [ ] `/login` — email + password. Use shadcn Form. Show inline errors. Include "Forgot password?" link.
-- [ ] `/signup` — email + password + full name. Separate flows:
+- [x] `/login` — email + password. Use shadcn Form. Show inline errors. Include "Forgot password?" link.
+- [x] `/signup` — email + password + full name. Separate flows:
   - Plain signup → creates a user with `global_role = 'client'`; redirects to onboarding (Phase 05).
   - Invitation signup (see §5) → consumes an invite token, assigns the correct role.
-- [ ] `/reset-password` — request a reset link.
-- [ ] `/reset-password/confirm` — set a new password from the emailed link.
-- [ ] `/verify-email` — display a "check your inbox" message after signup; handle Supabase email confirmation callback.
+- [x] `/reset-password` — request a reset link.
+- [x] `/reset-password/confirm` — set a new password from the emailed link.
+- [x] `/verify-email` — display a "check your inbox" message after signup; handle Supabase email confirmation callback.
 
 All forms use server actions, not API routes. Error messages never leak whether an email exists (avoid account enumeration).
 
@@ -52,9 +52,9 @@ All forms use server actions, not API routes. Error messages never leak whether 
 
 Supabase `auth.users` and our `public.users` table must stay in sync.
 
-- [ ] Create a Postgres trigger: on insert into `auth.users`, insert a matching row into `public.users` with `email` copied and `global_role = 'client'` as default.
-- [ ] Create a trigger on update to sync email changes.
-- [ ] Run these as a migration in `lib/db/migrations/` or a dedicated `supabase/migrations/` file.
+- [x] Create a Postgres trigger: on insert into `auth.users`, insert a matching row into `public.users` with `email` copied and `global_role = 'client'` as default.
+- [x] Create a trigger on update to sync email changes.
+- [x] Run these as a migration in `lib/db/migrations/` or a dedicated `supabase/migrations/` file.
 
 ### 5. Invitations
 
@@ -117,23 +117,23 @@ Create a typed `Forbidden` and `Unauthorized` error class that the nearest error
 
 ### 7. Logout
 
-- [ ] `/logout` route that calls `supabase.auth.signOut()` and redirects to `/login`.
+- [x] `/logout` route that calls `supabase.auth.signOut()` and redirects to `/login`.
 
 ### 8. Session header component
 
-- [ ] `components/auth/user-menu.tsx` — avatar + dropdown with "Profile", "Settings", "Logout".
-- [ ] Used in the top nav of every authenticated layout.
+- [x] `components/auth/user-menu.tsx` — avatar + dropdown with "Profile", "Settings", "Logout".
+- [x] Used in the top nav of every authenticated layout.
 
 ### 9. Email templates
 
-- [ ] In Supabase dashboard, customize the email templates for: Confirm signup, Magic Link, Reset Password, Invite User. Use Asaulia branding placeholder.
-- [ ] For transactional emails we send (invites), use Resend via `lib/notifications/email.ts` stub (implemented fully in Phase 12 — for now, a simple sender that Resend-ifies the content).
+- [x] In Supabase dashboard, customize the email templates for: Confirm signup, Magic Link, Reset Password, Invite User. Use Asaulia branding placeholder.
+- [x] For transactional emails we send (invites), use Resend via `lib/notifications/email.ts` stub (implemented fully in Phase 12 — for now, a simple sender that Resend-ifies the content).
 
 ### 10. Rate limiting
 
-- [ ] Add Upstash Redis or `@upstash/ratelimit`. Alternative: Vercel KV.
-- [ ] Limit login attempts: 5 per 10 minutes per email + IP.
-- [ ] Limit password reset requests: 3 per hour per email.
+- [x] Add Upstash Redis or `@upstash/ratelimit`. Alternative: Vercel KV.
+- [x] Limit login attempts: 5 per 10 minutes per email + IP.
+- [x] Limit password reset requests: 3 per hour per email.
 
 ---
 

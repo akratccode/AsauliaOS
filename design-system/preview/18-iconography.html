@@ -1,0 +1,23 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><link rel="stylesheet" href="_card.css">
+<style>
+.grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; }
+.ic { background: var(--bg-2); box-shadow: var(--stroke-inner); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ic svg { width: 20px; height: 20px; color: var(--fg-1); stroke-width: 1.5; }
+.ic .nm { font-family: var(--font-mono); font-size: 10px; color: var(--fg-3); }
+.footnote { font-size: 12px; color: var(--fg-3); margin-top: 4px; }
+.footnote code { font-family: var(--font-mono); color: var(--fg-2); background: var(--bg-3); padding: 1px 5px; border-radius: 4px; }
+</style></head>
+<body><div class="card">
+  <div class="grid">
+    <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg><span class="nm">mic</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h2"/><path d="M6 8v8"/><path d="M10 4v16"/><path d="M14 8v8"/><path d="M18 4v16"/><path d="M22 12h-2"/></svg><span class="nm">waveform</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="7" rx="1"/></svg><span class="nm">kanban</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg><span class="nm">trending-up</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="4" x2="14" y2="4"/><line x1="10" y1="4" x2="3" y2="4"/><line x1="21" y1="12" x2="12" y2="12"/><line x1="8" y1="12" x2="3" y2="12"/><line x1="21" y1="20" x2="16" y2="20"/><line x1="12" y1="20" x2="3" y2="20"/></svg><span class="nm">sliders</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l3-2 3 2 3-2 3 2 3-2 3 2V2l-3 2-3-2-3 2-3-2-3 2Z"/></svg><span class="nm">receipt</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="nm">users</span></div>
+    <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v1"/><path d="M5 6h14l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><rect x="9" y="10" width="6" height="4" rx="1"/></svg><span class="nm">command</span></div>
+  </div>
+  <div class="footnote">System icon set: <code>lucide</code> · 1.5px stroke · 24px grid · rounded caps. <br>Current color inherits; active icons use <code>--asaulia-blue</code>, inactive <code>--fg-3</code>.</div>
+</div></body></html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><link rel="stylesheet" href="_card.css">
+<style>
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.btn { font-family: var(--font-sans); font-size: 14px; font-weight: 500; padding: 10px 16px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; line-height: 1; letter-spacing: -0.01em; transition: all 120ms cubic-bezier(0.22,0.61,0.36,1); }
+.btn-primary { background: var(--asaulia-blue); color: #fff; box-shadow: 0 0 0 0 rgba(58,91,255,0); }
+.btn-primary:hover { background: #4A6BFF; box-shadow: 0 0 0 4px rgba(58,91,255,0.22); }
+.btn-secondary { background: var(--bg-3); color: var(--fg-1); box-shadow: var(--stroke-inner); }
+.btn-secondary:hover { background: #1A2340; }
+.btn-ghost { background: transparent; color: var(--fg-2); }
+.btn-ghost:hover { color: var(--fg-1); background: rgba(255,255,255,0.04); }
+.btn-danger { background: rgba(255,90,106,0.14); color: #FF5A6A; border-color: rgba(255,90,106,0.25); }
+.btn-pill { border-radius: 9999px; padding: 8px 14px; font-size: 13px; background: var(--bg-2); color: var(--fg-2); box-shadow: var(--stroke-inner); }
+.btn-pill.active { background: var(--bg-4); color: var(--fg-1); }
+.btn-icon { padding: 10px; }
+</style></head>
+<body><div class="card">
+  <div class="row">
+    <button class="btn btn-primary">Approve deliverable</button>
+    <button class="btn btn-secondary">Cancel</button>
+    <button class="btn btn-ghost">View details</button>
+    <button class="btn btn-danger">Reject</button>
+  </div>
+  <div class="row">
+    <button class="btn btn-pill active">All</button>
+    <button class="btn btn-pill">Attributed</button>
+    <button class="btn btn-pill">Unattributed</button>
+    <button class="btn btn-pill">This period</button>
+    <button class="btn btn-icon btn-secondary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+  </div>
+</div></body></html>

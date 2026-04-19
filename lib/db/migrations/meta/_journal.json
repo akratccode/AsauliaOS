@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1776570361026,
+      "tag": "0000_foamy_the_hunter",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776570695925,
+      "tag": "0001_massive_black_tarantula",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776571749820,
+      "tag": "0003_deliverables_mentions_archived",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776575192286,
+      "tag": "0004_brand_contractor_weights",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1776576420867,
+      "tag": "0005_phase11_billing_payouts",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776577352064,
+      "tag": "0006_phase12_notifications_chat",
+      "breakpoints": true
+    }
+  ]
+}

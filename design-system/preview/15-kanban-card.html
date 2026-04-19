@@ -1,0 +1,27 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><link rel="stylesheet" href="_card.css">
+<style>
+.kcard { background: var(--bg-2); box-shadow: var(--stroke-inner); border-radius: 14px; padding: 14px; display:flex; flex-direction:column; gap:10px; width: 260px; }
+.head { display: flex; justify-content: space-between; align-items: center; }
+.type { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-3); }
+.share { font-family: var(--font-mono); font-size: 12px; color: var(--fg-2); }
+.title { font-size: 15px; font-weight: 500; line-height: 1.35; color: var(--fg-1); }
+.meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--fg-3); }
+.av { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, #F5B544, #FF5A6A); display: inline-block; margin-right: 6px; vertical-align: middle; }
+.pill { padding: 3px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500; background: rgba(245,181,68,0.14); color: #F5B544; }
+.row { display:flex; gap: 12px; }
+</style></head>
+<body><div class="card">
+  <div class="row">
+    <div class="kcard">
+      <div class="head"><span class="type">ad creative</span><span class="share">14%</span></div>
+      <div class="title">Instagram Reel · holiday launch hook</div>
+      <div class="meta"><span><span class="av"></span>Bruno</span><span class="pill">Due Nov 2</span></div>
+    </div>
+    <div class="kcard" style="background: var(--bg-3); box-shadow: var(--stroke-inner-strong);">
+      <div class="head"><span class="type">landing page</span><span class="share">22%</span></div>
+      <div class="title">New homepage · value-first rewrite</div>
+      <div class="meta"><span><span class="av" style="background:linear-gradient(135deg,#35D39A,#3A5BFF)"></span>Ana</span><span class="pill" style="background:rgba(53,211,154,0.16);color:#35D39A">In review</span></div>
+    </div>
+  </div>
+</div></body></html>

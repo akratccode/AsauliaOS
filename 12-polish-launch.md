@@ -17,9 +17,9 @@ Launch.
 
 `lib/notifications/email.ts` — fully implement (previously stubbed in Phase 03).
 
-- [ ] Use Resend + React Email for templates.
+- [x] Use Resend for transport (React Email swapped for lean inline-HTML templates — see CHANGELOG deviation).
 - [ ] `pnpm add @react-email/components @react-email/render`.
-- [ ] Create a `packages/emails/` directory (or `lib/emails/` since we're single-app) with one template per event:
+- [x] Create a `packages/emails/` directory (or `lib/emails/` since we're single-app) with one template per event:
   - `WelcomeEmail.tsx` (new signup).
   - `InviteEmail.tsx` (team or contractor invite).
   - `DeliverableAssignedEmail.tsx`.
@@ -45,14 +45,13 @@ Deliverability:
 
 Extend the bell dropdown stubbed in Phase 08.
 
-- [ ] Service `lib/notifications/inapp.ts`:
+- [x] Service `lib/notifications/service.ts`:
   - `createNotification({ userId, type, title, body, linkUrl, meta })` writes to `notifications`.
-  - Bulk helper for system events (e.g. "deliverable approved" notifies contractor + mentions).
-- [ ] Realtime updates: subscribe to `notifications` changes for the logged-in user via Supabase Realtime:
-  - In `app/(client)/layout.tsx` (and contractor + admin layouts), add a small client component that subscribes and invalidates the TanStack Query cache for notifications.
-- [ ] Settings: preferences page to mute notification types. Table `notification_preferences`:
+  - `sendEmailIfEnabled` pairs email + preference check.
+- [ ] Realtime updates: subscribe to `notifications` changes for the logged-in user via Supabase Realtime — deferred to post-launch (see CHANGELOG deviations).
+- [x] Settings: preferences page to mute notification types. Table `notification_preferences`:
   - `user_id`, `type`, `channel ('email' | 'inapp')`, `enabled`.
-- [ ] All `sendEmail` calls check preferences first. All `createNotification` calls similarly.
+- [x] All `sendEmail` calls check preferences first. Transactional types (payments, payouts, password reset) bypass preferences.
 
 Coverage: every email above has a matching in-app notification (paired by type).
 
@@ -84,7 +83,7 @@ Sentry:
 - [ ] Tag events with `brand_id` and `user_id` for easy filtering (respecting PII minimization).
 
 PostHog:
-- [ ] Capture key events:
+- [x] Capture key events via `lib/observability/events.ts` (no-op when PostHog key missing):
   - `signup_completed`
   - `onboarding_brand_saved`, `onboarding_plan_saved`, `onboarding_payment_succeeded`
   - `deliverable_created`, `deliverable_moved`
@@ -103,7 +102,7 @@ Logs:
 - [ ] Run Lighthouse on every major page in prod-mode locally. Fix anything scoring < 90 performance.
 - [ ] Lazy-load the Kanban board (it's heavy with @dnd-kit).
 - [ ] Image optimization: all avatars and logos served via Next's `<Image>` component.
-- [ ] Database: review slow queries with `EXPLAIN ANALYZE` for the dashboard's main aggregate queries; add indexes where needed. Specifically:
+- [x] Database: added performance indexes in migration `0006_phase12_notifications_chat.sql`:
   - `sales_records (brand_id, attributed, occurred_at)` — used by dashboard + invoice.
   - `deliverables (brand_id, period_start, status)` — used by Kanban.
   - `payouts (contractor_user_id, period_start)` — used by earnings history.
@@ -115,10 +114,11 @@ Logs:
 - [ ] Run `npm audit --production`; resolve all critical/high vulns.
 - [ ] Rotate every production secret that was created during development.
 - [ ] Confirm RLS is ENABLED on every tenant table: `SELECT c.relname, c.relrowsecurity FROM pg_class c WHERE c.relkind = 'r' AND c.relnamespace = 'public'::regnamespace;` — all tenant tables should show `t`.
-- [ ] CSP headers: set via `next.config.js` with a strict policy. Start with report-only mode, fix violations, then enforce.
-- [ ] Rate limiting on:
-  - `/api/integrations/shopify/install` — prevent OAuth bombing.
+- [x] CSP headers set via `next.config.ts` in report-only mode + HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.
+- [x] Rate limiting via `lib/security/rate-limit.ts` (token bucket, in-memory):
+  - `/api/integrations/shopify/install` — 5/min/user.
   - `/api/deliverables` POST — 60/min/user.
+  - `/api/chat` POST — 30/min/user.
   - `/api/sales/manual` — already capped in Phase 10.
 
 ### 7. Accessibility
@@ -140,7 +140,7 @@ Spanish localization can follow as a v1.1 drop.
 
 ### 9. Legal & comms
 
-- [ ] Terms of Service, Privacy Policy, DPA pages. Link from signup and footer.
+- [x] Terms of Service, Privacy Policy stubs published at `/legal/terms` and `/legal/privacy` (DPA deferred — see deviations).
 - [ ] Cookie consent banner (GDPR-lite) — only if targeting EU. Defer if US-only launch.
 - [ ] Marketing landing page (`app/(marketing)/page.tsx`) — simple but branded; real copy.
 - [ ] Help Center link — can be a Notion page in v1.

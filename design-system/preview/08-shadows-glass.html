@@ -1,0 +1,17 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><link rel="stylesheet" href="_card.css">
+<style>
+.bg { background: radial-gradient(60% 50% at 50% 100%, rgba(58,91,255,0.45), rgba(58,91,255,0) 70%), var(--bg-0); padding: 18px; border-radius: 14px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.tile { padding: 16px; border-radius: 14px; display:flex; flex-direction:column; gap:4px; }
+.t-inner { background: var(--bg-2); box-shadow: var(--stroke-inner); }
+.t-inner-strong { background: var(--bg-2); box-shadow: var(--stroke-inner-strong); }
+.t-glass { background: rgba(21,29,56,0.78); backdrop-filter: blur(22px) saturate(1.2); box-shadow: var(--stroke-inner-strong); border: 1px solid rgba(255,255,255,0.08); }
+.nm { font-size: 13px; font-weight: 500; color: var(--fg-1); }
+.ds { font-size: 11px; font-family: var(--font-mono); color: var(--fg-3); }
+</style></head>
+<body><div class="card"><div class="bg"><div class="grid">
+  <div class="tile t-inner"><span class="nm">stroke-inner</span><span class="ds">artifact cards</span></div>
+  <div class="tile t-inner-strong"><span class="nm">stroke-inner-strong</span><span class="ds">voice / modal</span></div>
+  <div class="tile t-glass"><span class="nm">glass + blur</span><span class="ds">voice card only</span></div>
+</div></div></div></body></html>
