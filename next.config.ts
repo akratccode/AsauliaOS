@@ -1,5 +1,4 @@
-import path from 'node:path';
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const I18N_REQUEST_PATH = './i18n/request.ts';
@@ -23,12 +22,7 @@ const cspReportOnly = [
   "base-uri 'self'",
 ].join('; ');
 
-const nextConfig: NextConfig = {
-  turbopack: {
-    resolveAlias: {
-      'next-intl/config': path.resolve(process.cwd(), I18N_REQUEST_PATH),
-    },
-  },
+const baseConfig: NextConfig = {
   async headers() {
     return [
       {
@@ -45,4 +39,19 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+// Next 16 moved Turbopack config from `experimental.turbo` to the top-level
+// `turbopack` key, but next-intl@3's plugin still writes its `resolveAlias`
+// for `next-intl/config` into the old location. Lift it to the new key and
+// strip the deprecated one so dev stops warning and the alias actually binds.
+// Remove once we upgrade to next-intl@4 (native Next 16 support).
+const wrapped = withNextIntl(baseConfig) as NextConfig & {
+  experimental?: { turbo?: { resolveAlias?: Record<string, string> } } & Record<string, unknown>;
+};
+
+if (wrapped.experimental && 'turbo' in wrapped.experimental) {
+  const { turbo, ...restExperimental } = wrapped.experimental;
+  wrapped.turbopack = { ...(wrapped.turbopack ?? {}), ...(turbo ?? {}) };
+  wrapped.experimental = Object.keys(restExperimental).length > 0 ? restExperimental : undefined;
+}
+
+export default wrapped as NextConfig;
