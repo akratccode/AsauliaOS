@@ -35,6 +35,7 @@ alter table public.deliverables enable row level security;
 alter table public.deliverable_attachments enable row level security;
 alter table public.deliverable_comments enable row level security;
 alter table public.deliverable_activity enable row level security;
+alter table public.deliverable_comment_mentions enable row level security;
 alter table public.sales_integrations enable row level security;
 alter table public.sales_records enable row level security;
 alter table public.invoices enable row level security;
@@ -97,6 +98,16 @@ create policy deliverable_activity_select on public.deliverable_activity
     exists (
       select 1 from public.deliverables d
       where d.id = deliverable_id
+        and (public.is_brand_member(d.brand_id) or d.assignee_user_id = auth.uid() or public.is_staff())
+    )
+  );
+
+create policy deliverable_comment_mentions_select on public.deliverable_comment_mentions
+  for select using (
+    exists (
+      select 1 from public.deliverable_comments c
+      join public.deliverables d on d.id = c.deliverable_id
+      where c.id = comment_id
         and (public.is_brand_member(d.brand_id) or d.assignee_user_id = auth.uid() or public.is_staff())
     )
   );

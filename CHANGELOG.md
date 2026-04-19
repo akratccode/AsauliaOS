@@ -76,4 +76,25 @@ All user-visible changes per phase. Phases are completed in dependency order
 - Resume-onboarding email job scheduling is deferred to Phase 12 (the phase file explicitly marks this as Phase 12 work).
 - Logo upload to Supabase Storage is deferred until Phase 12 polish — the brand form currently omits the file input so onboarding stays functional even when Storage isn't provisioned.
 
-### Phase 06 — pending
+### Phase 06 — Deliverables system
+- Schema additions: `deliverables.archived_at` column + new `deliverable_comment_mentions` table. Migration `0003_deliverables_mentions_archived.sql`. RLS policy added for the new table. The legacy hand-written auth-triggers migration was renamed to `manual_auth_triggers.sql` (outside the numbered drizzle journal) to avoid a collision with the new generated migration.
+- Domain modules under `lib/deliverables/`:
+  - `transitions.ts` — the full status transition matrix (`todo → in_progress → in_review → done | rejected`, `rejected → in_progress`, `done → in_review` reopen) with actor-level gating (admin/operator/client_owner/assignee).
+  - `permissions.ts` — resolves `AuthContext` + brand relationship into capability flags (`canCreate`, `canAssign`, `canSetFixedShare`, `canDelete`, `canComment`, `canAttach`, `resolveTransitionActor`).
+  - `allocation.ts` — `summarizeAllocation` + `validateAllocation(brandId, period)` producing `exact` / `over_allocated` / `under_allocated` flags; `validateSingleShareBps` enforces the 50% safety rail.
+  - `attachments.ts` — MIME allow-list (images, PDFs, office docs, markdown, zip, Figma, PSD), 25 MB cap, 5-minute signed URL constant, `buildAttachmentPath(brand_*/deliverable_*/uuid-name)`.
+  - `mentions.ts` — extracts `@username` tokens from markdown, ignoring code fences and inline code.
+- `lib/billing/period.ts` stub — `monthStringToPeriod`, `currentUtcMonth`, `currentUtcPeriod`. Fully replaced in Phase 11 but already consumed by the deliverables list page.
+- `lib/deliverables/service.ts` — single entry point for every mutation. Every call logs to `deliverable_activity`. `addComment` transactionally persists `deliverable_comment_mentions` for resolved brand-member / assigned-contractor handles. Server-side RBAC via `resolveTransitionActor` — invalid-transition throws `InvalidTransitionError`; forbidden moves throw `Forbidden`.
+- API routes under `app/api/deliverables/` — `GET|POST /`, `PATCH|DELETE /[id]`, `GET|POST /[id]/comments`, `GET|POST /[id]/attachments`, `GET /[id]/activity`. All validated with Zod, errors mapped to `401 | 403 | 400 invalid_input | 400 invalid_transition | 500`.
+- Kanban UI — `components/kanban/` with `Board.tsx` (DndContext, optimistic-update + server reconciliation + snap-back toast when a transition is invalid), `Column.tsx` (per-status droppable with live share-bps sum), `Card.tsx` (draggable — title, type tag, due date, share %, comments/attachments counts), `DeliverableSheet.tsx` (comments + activity timeline, post-comment form).
+- `app/(client)/deliverables/page.tsx` — SSR page resolving the caller's brand, reading the current or requested period, batching comment + attachment counts through two grouped queries, and rendering the Board with an allocation banner.
+- Tests: `tests/unit/deliverables.test.ts` — every valid transition accepted, every arbitrary one rejected; actor matrix covering assignee/client_owner/admin/operator; allocation exact/over/under; attachment allow-list + size cap (25 MB); path sanitization; mention extractor (single, multiple, code-fence/inline-code exclusion); period helpers (including leap years and current UTC). `tests/setup.ts` now seeds baseline env vars so `@/lib/db`-importing tests can load without a real database URL.
+
+#### Deviations from phase file
+- Playwright integration scenarios (drag-as-assignee → reload, non-assignee 403) are deferred to Phase 12 alongside the rest of the e2e suite — they need running Supabase + Next.js + a seeded DB.
+- Supabase Storage bucket + signed-URL generation plumbing (the `deliverable-attachments` bucket + 5-minute expiry downloads) is declared in code (path helpers, constants) but not provisioned against a live Supabase — the upload endpoint accepts metadata only. The direct-to-Storage upload UX lands in Phase 12 polish once the bucket exists.
+- List-view filters (assignee / type / status dropdowns + month picker + search + List / Kanban toggle) are not wired — the current page defaults to Kanban + current UTC month. The SSR page reads `?brandId` and `?period=YYYY-MM` from the URL today; the richer filter UI arrives in Phase 08 (client dashboard polish).
+- Realtime stays out (phase file explicitly marks Phase 12).
+
+### Phase 07 — pending

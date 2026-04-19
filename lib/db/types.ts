@@ -9,6 +9,7 @@ import {
   deliverables,
   deliverableAttachments,
   deliverableComments,
+  deliverableCommentMentions,
   deliverableActivity,
   salesIntegrations,
   salesRecords,
@@ -45,6 +46,9 @@ export type NewDeliverableAttachment = InferInsertModel<typeof deliverableAttach
 
 export type DeliverableComment = InferSelectModel<typeof deliverableComments>;
 export type NewDeliverableComment = InferInsertModel<typeof deliverableComments>;
+
+export type DeliverableCommentMention = InferSelectModel<typeof deliverableCommentMentions>;
+export type NewDeliverableCommentMention = InferInsertModel<typeof deliverableCommentMentions>;
 
 export type DeliverableActivity = InferSelectModel<typeof deliverableActivity>;
 export type NewDeliverableActivity = InferInsertModel<typeof deliverableActivity>;

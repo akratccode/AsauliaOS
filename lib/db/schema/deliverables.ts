@@ -35,6 +35,7 @@ export const deliverables = pgTable(
     createdByUserId: uuid('created_by_user_id').references(() => users.id, {
       onDelete: 'set null',
     }),
+    archivedAt: timestamp('archived_at', { withTimezone: true, mode: 'date' }),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
@@ -46,6 +47,17 @@ export const deliverables = pgTable(
     ),
   }),
 );
+
+export const deliverableCommentMentions = pgTable('deliverable_comment_mentions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  commentId: uuid('comment_id')
+    .notNull()
+    .references(() => deliverableComments.id, { onDelete: 'cascade' }),
+  mentionedUserId: uuid('mentioned_user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
 
 export const deliverableAttachments = pgTable('deliverable_attachments', {
   id: uuid('id').primaryKey().defaultRandom(),
