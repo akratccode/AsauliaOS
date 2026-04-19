@@ -1,7 +1,12 @@
 'use client';
 
 import { useActionState } from 'react';
-import { confirmPasswordResetAction, type ActionState } from '../../actions';
+import { useTranslations } from 'next-intl';
+import {
+  confirmPasswordResetAction,
+  type ActionState,
+  type AuthErrorCode,
+} from '../../actions';
 import { AuthField, FormAlert, SubmitButton } from '@/components/auth/form-primitives';
 
 export function ConfirmResetForm() {
@@ -9,17 +14,39 @@ export function ConfirmResetForm() {
     confirmPasswordResetAction,
     undefined,
   );
+  const tFields = useTranslations('auth.fields');
+  const tActions = useTranslations('auth.actions');
+  const tAuthErrors = useTranslations('auth.errors');
+  const tErrors = useTranslations('errors');
+
+  function translateError(code: AuthErrorCode | undefined): string | null {
+    if (!code) return null;
+    switch (code) {
+      case 'password_too_short':
+        return tAuthErrors('passwordTooShort');
+      case 'reset_failed':
+        return tAuthErrors('resetFailed');
+      case 'validation':
+        return tAuthErrors('validation');
+      case 'generic':
+      default:
+        return tErrors('generic');
+    }
+  }
+
+  const errorMessage = translateError(state?.error);
+
   return (
     <form action={formAction} className="space-y-4">
       <AuthField
-        label="New password"
+        label={tFields('newPassword')}
         name="password"
         type="password"
         autoComplete="new-password"
         required
       />
-      {state?.error ? <FormAlert tone="error">{state.error}</FormAlert> : null}
-      <SubmitButton pending={pending}>Save new password</SubmitButton>
+      {errorMessage ? <FormAlert tone="error">{errorMessage}</FormAlert> : null}
+      <SubmitButton pending={pending}>{tActions('saveNewPassword')}</SubmitButton>
     </form>
   );
 }

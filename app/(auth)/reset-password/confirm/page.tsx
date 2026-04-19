@@ -1,15 +1,18 @@
+import { getTranslations } from 'next-intl/server';
 import { ConfirmResetForm } from './confirm-form';
 
-export const metadata = { title: 'Set a new password · Asaulia' };
+export async function generateMetadata() {
+  const t = await getTranslations('auth.resetPassword.confirm');
+  return { title: t('metadata') };
+}
 
-export default function ConfirmResetPage() {
+export default async function ConfirmResetPage() {
+  const t = await getTranslations('auth.resetPassword.confirm');
   return (
     <section className="space-y-6">
       <header className="space-y-2">
-        <h1 className="font-serif text-3xl italic">Choose a new password.</h1>
-        <p className="text-fg-3 text-sm">
-          Once saved we&apos;ll take you to sign in again.
-        </p>
+        <h1 className="font-serif text-3xl italic">{t('title')}</h1>
+        <p className="text-fg-3 text-sm">{t('subtitle')}</p>
       </header>
       <ConfirmResetForm />
     </section>

@@ -1,20 +1,26 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
-export const metadata = { title: 'Verify your email · Asaulia' };
+export async function generateMetadata() {
+  const t = await getTranslations('auth.verifyEmail');
+  return { title: t('metadata') };
+}
 
-export default function VerifyEmailPage() {
+export default async function VerifyEmailPage() {
+  const t = await getTranslations('auth.verifyEmail');
+  const tLinks = await getTranslations('auth.links');
+  const tActions = await getTranslations('auth.actions');
+
   return (
     <section className="space-y-6">
       <header className="space-y-2">
-        <h1 className="font-serif text-3xl italic">Check your inbox.</h1>
-        <p className="text-fg-3 text-sm">
-          We sent a confirmation link to your email. Click it to finish setting up your account.
-        </p>
+        <h1 className="font-serif text-3xl italic">{t('title')}</h1>
+        <p className="text-fg-3 text-sm">{t('subtitle')}</p>
       </header>
       <p className="text-fg-3 text-sm">
-        Already confirmed?{' '}
+        {tLinks('alreadyConfirmed')}{' '}
         <Link className="text-fg-1 underline-offset-4 hover:underline" href="/login">
-          Sign in
+          {tActions('signIn')}
         </Link>
       </p>
     </section>

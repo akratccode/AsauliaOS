@@ -29,5 +29,65 @@
     "tryAgain": "Por favor intenta de nuevo.",
     "validation": "Por favor revisá el formulario e intenta de nuevo.",
     "sessionExpired": "Tu sesión expiró. Por favor iniciá sesión de nuevo."
+  },
+  "auth": {
+    "fields": {
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "fullName": "Nombre completo",
+      "newPassword": "Nueva contraseña"
+    },
+    "actions": {
+      "signIn": "Iniciar sesión",
+      "createAccount": "Crear cuenta",
+      "sendResetLink": "Enviar enlace de recuperación",
+      "saveNewPassword": "Guardar nueva contraseña"
+    },
+    "links": {
+      "newHere": "¿Nuevo por acá?",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "alreadySignedUp": "¿Ya te registraste?",
+      "alreadyConfirmed": "¿Ya confirmaste?",
+      "backTo": "Volver a"
+    },
+    "login": {
+      "metadata": "Iniciar sesión · Asaulia",
+      "title": "Bienvenido de vuelta.",
+      "subtitle": "Iniciá sesión para continuar donde lo dejaste."
+    },
+    "signup": {
+      "metadata": "Crear cuenta · Asaulia",
+      "title": "Comenzá con Asaulia.",
+      "subtitleDefault": "Creá tu cuenta y elegí un plan en el siguiente paso.",
+      "subtitleInvite": "Terminá de configurar tu invitación."
+    },
+    "verifyEmail": {
+      "metadata": "Verificá tu correo · Asaulia",
+      "title": "Revisá tu bandeja de entrada.",
+      "subtitle": "Enviamos un enlace de confirmación a tu correo. Hacé clic para terminar de configurar tu cuenta."
+    },
+    "resetPassword": {
+      "request": {
+        "metadata": "Recuperar contraseña · Asaulia",
+        "title": "Recuperá tu contraseña.",
+        "subtitle": "Te enviaremos un enlace por correo para que elijas una nueva."
+      },
+      "confirm": {
+        "metadata": "Elegí una nueva contraseña · Asaulia",
+        "title": "Elegí una nueva contraseña.",
+        "subtitle": "Una vez guardada te llevaremos a iniciar sesión de nuevo."
+      }
+    },
+    "errors": {
+      "invalidCredentials": "No pudimos iniciar sesión con esas credenciales. Verificalas e intenta de nuevo.",
+      "rateLimited": "Demasiados intentos. Intenta de nuevo en unos minutos.",
+      "accountCreationFailed": "No pudimos crear esa cuenta. Probá con otro correo.",
+      "invalidInvitation": "Esta invitación ya no es válida.",
+      "validation": "Por favor revisá el formulario e intenta de nuevo.",
+      "resetTooManyRequests": "Demasiadas solicitudes de recuperación. Intenta más tarde.",
+      "resetInfo": "Si ese correo tiene una cuenta, enviamos un enlace de recuperación.",
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
+      "resetFailed": "No pudimos actualizar tu contraseña. Probá solicitando un nuevo enlace."
+    }
   }
 }

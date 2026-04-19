@@ -1,7 +1,11 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { SignupForm } from './signup-form';
 
-export const metadata = { title: 'Create account · Asaulia' };
+export async function generateMetadata() {
+  const t = await getTranslations('auth.signup');
+  return { title: t('metadata') };
+}
 
 export default async function SignupPage({
   searchParams,
@@ -9,22 +13,23 @@ export default async function SignupPage({
   searchParams: Promise<{ invite?: string }>;
 }) {
   const { invite } = await searchParams;
+  const t = await getTranslations('auth.signup');
+  const tLinks = await getTranslations('auth.links');
+  const tActions = await getTranslations('auth.actions');
 
   return (
     <section className="space-y-6">
       <header className="space-y-2">
-        <h1 className="font-serif text-3xl italic">Start with Asaulia.</h1>
+        <h1 className="font-serif text-3xl italic">{t('title')}</h1>
         <p className="text-fg-3 text-sm">
-          {invite
-            ? 'Finish setting up your invitation.'
-            : 'Create your account and pick a plan on the next step.'}
+          {invite ? t('subtitleInvite') : t('subtitleDefault')}
         </p>
       </header>
       <SignupForm inviteToken={invite} />
       <p className="text-fg-3 text-sm">
-        Already signed up?{' '}
+        {tLinks('alreadySignedUp')}{' '}
         <Link className="text-fg-1 underline-offset-4 hover:underline" href="/login">
-          Sign in
+          {tActions('signIn')}
         </Link>
       </p>
     </section>

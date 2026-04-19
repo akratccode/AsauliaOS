@@ -11,8 +11,22 @@ import { getSupabaseAdminClient } from '@/lib/auth/supabase-admin';
 import { loginLimiter, passwordResetLimiter } from '@/lib/auth/rate-limit';
 import { env } from '@/lib/env';
 
-const GENERIC_AUTH_ERROR =
-  "We couldn't sign you in with those credentials. Double-check and try again.";
+export type AuthErrorCode =
+  | 'invalid_credentials'
+  | 'rate_limited'
+  | 'account_creation_failed'
+  | 'invalid_invitation'
+  | 'validation'
+  | 'password_too_short'
+  | 'reset_too_many_requests'
+  | 'reset_failed'
+  | 'generic';
+
+export type AuthInfoCode = 'reset_info';
+
+export type ActionState =
+  | { error?: AuthErrorCode; info?: AuthInfoCode }
+  | undefined;
 
 function extractIp(forwarded: string | null): string {
   if (!forwarded) return 'unknown';
@@ -42,8 +56,6 @@ const loginSchema = z.object({
   password: z.string().min(8),
 });
 
-export type ActionState = { error?: string; info?: string } | undefined;
-
 export async function signInAction(
   _prev: ActionState,
   formData: FormData,
@@ -53,7 +65,7 @@ export async function signInAction(
     password: formData.get('password'),
   });
   if (!parsed.success) {
-    return { error: GENERIC_AUTH_ERROR };
+    return { error: 'invalid_credentials' };
   }
 
   const hdrs = await headers();
@@ -61,13 +73,13 @@ export async function signInAction(
   const key = `login:${parsed.data.email.toLowerCase()}:${ip}`;
   const limited = await loginLimiter.limit(key);
   if (!limited.success) {
-    return { error: 'Too many attempts. Try again in a few minutes.' };
+    return { error: 'rate_limited' };
   }
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error || !data.user) {
-    return { error: GENERIC_AUTH_ERROR };
+    return { error: 'invalid_credentials' };
   }
 
   const next = (formData.get('next') as string | null) ?? (await landingForRole(data.user.id));
@@ -92,7 +104,7 @@ export async function signUpAction(
     inviteToken: formData.get('inviteToken') || undefined,
   });
   if (!parsed.success) {
-    return { error: 'Please check the form and try again.' };
+    return { error: 'validation' };
   }
 
   let invite: typeof invitations.$inferSelect | undefined;
@@ -110,7 +122,7 @@ export async function signUpAction(
       .limit(1);
     invite = rows[0];
     if (!invite || invite.email.toLowerCase() !== parsed.data.email.toLowerCase()) {
-      return { error: 'This invitation is no longer valid.' };
+      return { error: 'invalid_invitation' };
     }
   }
 
@@ -125,7 +137,7 @@ export async function signUpAction(
   });
 
   if (error || !data.user) {
-    return { error: "We couldn't create that account. Try a different email." };
+    return { error: 'account_creation_failed' };
   }
 
   const admin = getSupabaseAdminClient();
@@ -178,21 +190,21 @@ export async function requestPasswordResetAction(
 ): Promise<ActionState> {
   const parsed = resetRequestSchema.safeParse({ email: formData.get('email') });
   if (!parsed.success) {
-    return { info: 'If that email has an account, we sent a reset link.' };
+    return { info: 'reset_info' };
   }
 
   const hdrs = await headers();
   const ip = extractIp(hdrs.get('x-forwarded-for'));
   const limited = await passwordResetLimiter.limit(`reset:${parsed.data.email.toLowerCase()}:${ip}`);
   if (!limited.success) {
-    return { error: 'Too many reset requests. Try again later.' };
+    return { error: 'reset_too_many_requests' };
   }
 
   const supabase = await createSupabaseServerClient();
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${env.NEXT_PUBLIC_APP_URL}/reset-password/confirm`,
   });
-  return { info: 'If that email has an account, we sent a reset link.' };
+  return { info: 'reset_info' };
 }
 
 const resetConfirmSchema = z.object({ password: z.string().min(8) });
@@ -203,11 +215,11 @@ export async function confirmPasswordResetAction(
 ): Promise<ActionState> {
   const parsed = resetConfirmSchema.safeParse({ password: formData.get('password') });
   if (!parsed.success) {
-    return { error: 'Password must be at least 8 characters.' };
+    return { error: 'password_too_short' };
   }
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
-  if (error) return { error: 'Could not update your password. Try requesting a new link.' };
+  if (error) return { error: 'reset_failed' };
   redirect('/login');
 }
 
