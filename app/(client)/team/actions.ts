@@ -8,7 +8,20 @@ import { db, schema } from '@/lib/db';
 import { resolveActiveBrand, requireClientBrandAccess } from '@/lib/brand/context';
 import { createInvitation } from '@/lib/auth/admin-ops';
 
-export type TeamActionState = { error?: string; info?: string } | undefined;
+export type TeamErrorCode =
+  | 'no_active_brand'
+  | 'only_owner_can_invite'
+  | 'valid_email_and_role'
+  | 'only_owner_can_revoke'
+  | 'invalid_request';
+
+export type TeamInfoCode = 'invitation_sent' | 'invitation_revoked';
+
+export type TeamActionState =
+  | { error: TeamErrorCode }
+  | { info: 'invitation_sent'; email: string }
+  | { info: 'invitation_revoked' }
+  | undefined;
 
 const inviteSchema = z.object({
   email: z.string().email(),
@@ -21,17 +34,17 @@ export async function inviteTeamMemberAction(
 ): Promise<TeamActionState> {
   const actor = await requireAuth();
   const { active } = await resolveActiveBrand(actor);
-  if (!active) return { error: 'No active brand' };
+  if (!active) return { error: 'no_active_brand' };
   const { role } = await requireClientBrandAccess(actor, active.id);
   if (role !== 'owner' && actor.globalRole !== 'admin' && actor.globalRole !== 'operator') {
-    return { error: 'Only owners can invite members.' };
+    return { error: 'only_owner_can_invite' };
   }
 
   const parsed = inviteSchema.safeParse({
     email: formData.get('email'),
     role: formData.get('role'),
   });
-  if (!parsed.success) return { error: 'Provide a valid email and role.' };
+  if (!parsed.success) return { error: 'valid_email_and_role' };
 
   await createInvitation({
     scope: 'brand',
@@ -42,7 +55,7 @@ export async function inviteTeamMemberAction(
   });
 
   revalidatePath('/team');
-  return { info: `Invitation sent to ${parsed.data.email}.` };
+  return { info: 'invitation_sent', email: parsed.data.email };
 }
 
 const revokeSchema = z.object({ invitationId: z.string().uuid() });
@@ -53,14 +66,14 @@ export async function revokeInvitationAction(
 ): Promise<TeamActionState> {
   const actor = await requireAuth();
   const { active } = await resolveActiveBrand(actor);
-  if (!active) return { error: 'No active brand' };
+  if (!active) return { error: 'no_active_brand' };
   const { role } = await requireClientBrandAccess(actor, active.id);
   if (role !== 'owner' && actor.globalRole !== 'admin' && actor.globalRole !== 'operator') {
-    return { error: 'Only owners can revoke invitations.' };
+    return { error: 'only_owner_can_revoke' };
   }
 
   const parsed = revokeSchema.safeParse({ invitationId: formData.get('invitationId') });
-  if (!parsed.success) return { error: 'Invalid request.' };
+  if (!parsed.success) return { error: 'invalid_request' };
 
   await db
     .delete(schema.invitations)
@@ -72,5 +85,5 @@ export async function revokeInvitationAction(
     );
 
   revalidatePath('/team');
-  return { info: 'Invitation revoked.' };
+  return { info: 'invitation_revoked' };
 }

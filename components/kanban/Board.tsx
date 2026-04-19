@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { DndContext, type DragEndEvent } from '@dnd-kit/core';
+import { useTranslations } from 'next-intl';
 import { KanbanColumnView } from './Column';
 import { KANBAN_COLUMNS } from './constants';
 import type { KanbanDeliverable } from './types';
@@ -13,10 +14,20 @@ type Props = {
   initialDeliverables: KanbanDeliverable[];
 };
 
+const STATUS_LABEL_KEYS: Record<DeliverableStatus, 'todo' | 'inProgress' | 'inReview' | 'done' | 'rejected'> = {
+  todo: 'todo',
+  in_progress: 'inProgress',
+  in_review: 'inReview',
+  done: 'done',
+  rejected: 'rejected',
+};
+
 export function Board({ initialDeliverables }: Props) {
   const [cards, setCards] = useState<KanbanDeliverable[]>(initialDeliverables);
   const [openId, setOpenId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const t = useTranslations('kanban.board');
+  const tStatus = useTranslations('statuses.deliverable');
 
   const grouped = useMemo(() => {
     const map: Record<DeliverableStatus, KanbanDeliverable[]> = {
@@ -39,7 +50,12 @@ export function Board({ initialDeliverables }: Props) {
     if (!card || card.status === targetStatus) return;
 
     if (!isValidTransition(card.status, targetStatus)) {
-      setToast(`Can't move ${card.status.replace('_', ' ')} → ${targetStatus.replace('_', ' ')}`);
+      setToast(
+        t('invalidTransition', {
+          from: tStatus(STATUS_LABEL_KEYS[card.status]),
+          to: tStatus(STATUS_LABEL_KEYS[targetStatus]),
+        }),
+      );
       setTimeout(() => setToast(null), 2500);
       return;
     }
@@ -59,7 +75,7 @@ export function Board({ initialDeliverables }: Props) {
       setCards((prev) =>
         prev.map((c) => (c.id === deliverableId ? { ...c, status: previous } : c)),
       );
-      setToast('Change rejected');
+      setToast(t('changeRejected'));
       setTimeout(() => setToast(null), 2500);
     }
   }

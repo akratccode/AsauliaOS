@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 import { requireAuth } from '@/lib/auth/rbac';
 import { resolveActiveBrand, requireClientBrandAccess } from '@/lib/brand/context';
 import { ensureThreadForBrand, listMessages, markRead } from '@/lib/chat/service';
@@ -6,6 +8,11 @@ import { db, schema } from '@/lib/db';
 import { inArray } from 'drizzle-orm';
 import { formatDate } from '@/lib/format';
 import { ChatComposer } from './composer';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('client.chat');
+  return { title: t('metadata') };
+}
 
 export default async function ChatPage() {
   const actor = await requireAuth();
@@ -26,19 +33,19 @@ export default async function ChatPage() {
     : [];
   const byId = new Map(users.map((u) => [u.id, u]));
 
+  const t = await getTranslations('client.chat');
+
   return (
     <main className="mx-auto flex h-[calc(100vh-4rem)] w-full max-w-3xl flex-col p-6">
       <header className="mb-4">
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Support</p>
-        <h1 className="text-fg-1 font-serif text-3xl italic">Chat with Asaulia</h1>
-        <p className="text-fg-3 mt-1 text-xs">
-          Your team + Asaulia staff. Async — we reply within a business day.
-        </p>
+        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('supportHeader')}</p>
+        <h1 className="text-fg-1 font-serif text-3xl italic">{t('chatWithAsaulia')}</h1>
+        <p className="text-fg-3 mt-1 text-xs">{t('asyncNote')}</p>
       </header>
 
       <section className="border-fg-4/15 bg-bg-1 flex-1 space-y-3 overflow-y-auto rounded-2xl border p-4">
         {messages.length === 0 ? (
-          <p className="text-fg-3 text-sm">No messages yet. Say hello.</p>
+          <p className="text-fg-3 text-sm">{t('noMessages')}</p>
         ) : (
           messages.map((m) => {
             const user = byId.get(m.userId);
@@ -51,7 +58,7 @@ export default async function ChatPage() {
                   }`}
                 >
                   <div className="text-fg-3 mb-1 text-xs">
-                    {user?.fullName ?? user?.email ?? 'Unknown'} · {formatDate(m.createdAt)}
+                    {user?.fullName ?? user?.email ?? '—'} · {formatDate(m.createdAt)}
                   </div>
                   <div className="whitespace-pre-wrap">{m.content}</div>
                 </div>

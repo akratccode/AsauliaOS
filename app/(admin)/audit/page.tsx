@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { and, desc, eq, gte, lte, SQL } from 'drizzle-orm';
+import { getTranslations } from 'next-intl/server';
 import { db, schema } from '@/lib/db';
 import { formatDate } from '@/lib/format';
 
@@ -11,12 +12,18 @@ type SearchParams = Promise<{
   to?: string;
 }>;
 
+export async function generateMetadata() {
+  const t = await getTranslations('admin.audit');
+  return { title: t('metadata') };
+}
+
 export default async function AdminAuditLogPage({
   searchParams,
 }: {
   searchParams: SearchParams;
 }) {
   const sp = await searchParams;
+  const t = await getTranslations('admin.audit');
 
   const conditions: SQL[] = [];
   if (sp.actor) conditions.push(eq(schema.auditLog.actorUserId, sp.actor));
@@ -47,31 +54,28 @@ export default async function AdminAuditLogPage({
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-6">
       <header>
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Ops</p>
-        <h1 className="text-fg-1 font-serif text-3xl italic">Audit log</h1>
-        <p className="text-fg-3 mt-1 text-xs">
-          Last 200 events. Every plan change, role mutation, invoice action, and payout is recorded
-          here with before/after diffs.
-        </p>
+        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('opsLabel')}</p>
+        <h1 className="text-fg-1 font-serif text-3xl italic">{t('auditTitle')}</h1>
+        <p className="text-fg-3 mt-1 text-xs">{t('auditDesc')}</p>
       </header>
 
       <form method="get" className="grid gap-3 md:grid-cols-5 text-xs">
         <input
           name="actor"
           defaultValue={sp.actor ?? ''}
-          placeholder="Actor user id"
+          placeholder={t('actorUserId')}
           className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-3 py-1.5 font-mono"
         />
         <input
           name="entity_type"
           defaultValue={sp.entity_type ?? ''}
-          placeholder="Entity type"
+          placeholder={t('entityType')}
           className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-3 py-1.5"
         />
         <input
           name="action"
           defaultValue={sp.action ?? ''}
-          placeholder="Action"
+          placeholder={t('action')}
           className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-3 py-1.5"
         />
         <input
@@ -91,6 +95,7 @@ export default async function AdminAuditLogPage({
             type="submit"
             className="bg-asaulia-blue text-fg-on-blue rounded-md px-3 py-1.5"
           >
+            { }
             Apply
           </button>
         </div>
@@ -98,7 +103,7 @@ export default async function AdminAuditLogPage({
 
       <section className="border-fg-4/15 bg-bg-1 rounded-2xl border divide-fg-4/10 divide-y">
         {rows.length === 0 ? (
-          <p className="text-fg-3 p-5 text-sm">No events match these filters.</p>
+          <p className="text-fg-3 p-5 text-sm">{t('noEvents')}</p>
         ) : (
           rows.map((r) => (
             <details key={r.id} className="group">
@@ -115,26 +120,26 @@ export default async function AdminAuditLogPage({
                           href={`/admin/brands/${r.brandId}`}
                           className="hover:text-fg-1 hover:underline"
                         >
-                          brand
+                          {t('brand')}
                         </Link>
                       </>
                     ) : null}
                   </div>
                 </div>
                 <div className="text-fg-3 text-xs text-right">
-                  <div>{r.actorEmail ?? 'system'}</div>
+                  <div>{r.actorEmail ?? t('system')}</div>
                   <div>{formatDate(r.createdAt)}</div>
                 </div>
               </summary>
               <div className="bg-bg-2 grid gap-3 p-5 md:grid-cols-2">
                 <div>
-                  <p className="text-fg-3 mb-1 text-xs uppercase tracking-[0.12em]">Before</p>
+                  <p className="text-fg-3 mb-1 text-xs uppercase tracking-[0.12em]">{t('before')}</p>
                   <pre className="text-fg-2 bg-bg-1 border-fg-4/10 overflow-x-auto rounded-md border p-3 text-xs">
                     {JSON.stringify(r.before ?? null, null, 2)}
                   </pre>
                 </div>
                 <div>
-                  <p className="text-fg-3 mb-1 text-xs uppercase tracking-[0.12em]">After</p>
+                  <p className="text-fg-3 mb-1 text-xs uppercase tracking-[0.12em]">{t('after')}</p>
                   <pre className="text-fg-2 bg-bg-1 border-fg-4/10 overflow-x-auto rounded-md border p-3 text-xs">
                     {JSON.stringify(r.after ?? null, null, 2)}
                   </pre>

@@ -1,5 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 import { requireAuth } from '@/lib/auth/rbac';
 import { db, schema } from '@/lib/db';
 import {
@@ -11,6 +13,11 @@ import { ProfileForm } from '../profile/ProfileForm';
 import { StartConnectButton, RefreshConnectButton } from './ConnectButton';
 
 type SearchParams = Promise<{ return?: string; refresh?: string }>;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('contractor.onboarding');
+  return { title: t('metadata') };
+}
 
 export default async function ContractorOnboardingPage({
   searchParams,
@@ -45,17 +52,18 @@ export default async function ContractorOnboardingPage({
 
   const connect = await readConnectState(actor.userId);
 
+  const t = await getTranslations('contractor.onboarding');
+  const tProfile = await getTranslations('contractor.profile');
+
   return (
     <main className="mx-auto w-full max-w-3xl space-y-6 p-6">
       <header>
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Welcome</p>
-        <h1 className="text-fg-1 font-serif text-3xl italic">Set up your contractor account</h1>
-        <p className="text-fg-3 mt-2 text-sm">
-          Two quick steps so we can assign you work and pay you on time.
-        </p>
+        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('welcomeLabel')}</p>
+        <h1 className="text-fg-1 font-serif text-3xl italic">{t('onboardingTitle')}</h1>
+        <p className="text-fg-3 mt-2 text-sm">{t('twoSteps')}</p>
       </header>
 
-      <Step number={1} title="Profile basics" done={Boolean(profile?.headline)}>
+      <Step number={1} title={t('profileBasics')} done={Boolean(profile?.headline)}>
         <ProfileForm
           defaultHeadline={profile?.headline ?? ''}
           defaultSkills={(profile?.skills ?? []).join(', ')}
@@ -63,29 +71,36 @@ export default async function ContractorOnboardingPage({
         />
       </Step>
 
-      <Step number={2} title="Payout setup" done={connect.chargesEnabled && connect.payoutsEnabled}>
+      <Step number={2} title={t('payoutSetup')} done={connect.chargesEnabled && connect.payoutsEnabled}>
         {!isStripeConfigured() ? (
-          <p className="text-fg-3 text-sm">
-            Stripe is not configured in this environment. Contact the Asaulia team — we&apos;ll add your
-            account manually.
-          </p>
+          <p className="text-fg-3 text-sm">{t('stripeNotConfigured')}</p>
         ) : (
           <div className="space-y-3">
-            <p className="text-fg-2 text-sm">
-              We use Stripe Connect Express. You&apos;ll give Stripe the bank details directly — we never
-              see them. Takes ~2 minutes.
-            </p>
-            <ConnectStatusRow label="Details submitted" ok={connect.detailsSubmitted} />
-            <ConnectStatusRow label="Charges enabled" ok={connect.chargesEnabled} />
-            <ConnectStatusRow label="Payouts enabled" ok={connect.payoutsEnabled} />
+            <p className="text-fg-2 text-sm">{t('stripeExpress')}</p>
+            <ConnectStatusRow
+              label={tProfile('detailsSubmitted')}
+              ok={connect.detailsSubmitted}
+              readyLabel={tProfile('ready')}
+              pendingLabel={t('pending')}
+            />
+            <ConnectStatusRow
+              label={tProfile('chargesEnabled')}
+              ok={connect.chargesEnabled}
+              readyLabel={tProfile('ready')}
+              pendingLabel={t('pending')}
+            />
+            <ConnectStatusRow
+              label={tProfile('payoutsEnabled')}
+              ok={connect.payoutsEnabled}
+              readyLabel={tProfile('ready')}
+              pendingLabel={t('pending')}
+            />
             <div className="flex flex-wrap gap-3 pt-1">
               <StartConnectButton />
               {connect.accountId && !connect.onboardingComplete && <RefreshConnectButton />}
             </div>
             {sp.refresh && (
-              <p className="text-warning text-xs">
-                Stripe asked for a refresh. Restart the link above to continue.
-              </p>
+              <p className="text-warning text-xs">{t('stripeRefresh')}</p>
             )}
           </div>
         )}
@@ -125,7 +140,17 @@ function Step({
   );
 }
 
-function ConnectStatusRow({ label, ok }: { label: string; ok: boolean }) {
+function ConnectStatusRow({
+  label,
+  ok,
+  readyLabel,
+  pendingLabel,
+}: {
+  label: string;
+  ok: boolean;
+  readyLabel: string;
+  pendingLabel: string;
+}) {
   return (
     <div className="flex items-center justify-between text-xs">
       <span className="text-fg-3">{label}</span>
@@ -134,7 +159,7 @@ function ConnectStatusRow({ label, ok }: { label: string; ok: boolean }) {
           ok ? 'bg-asaulia-green/15 text-asaulia-green' : 'bg-bg-2 text-fg-3'
         }`}
       >
-        {ok ? 'ready' : 'pending'}
+        {ok ? readyLabel : pendingLabel}
       </span>
     </div>
   );

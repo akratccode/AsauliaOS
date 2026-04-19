@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { XIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 type DeliverableDetail = {
   id: string;
@@ -38,6 +39,7 @@ export function DeliverableSheet({ deliverableId, onClose }: Props) {
   const [activity, setActivity] = useState<Activity[]>([]);
   const [commentDraft, setCommentDraft] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const t = useTranslations('kanban.deliverableSheet');
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +62,7 @@ export function DeliverableSheet({ deliverableId, onClose }: Props) {
       // Placeholder detail using id
       setDetail({
         id: deliverableId,
+         
         title: 'Deliverable',
         description: null,
         status: 'todo',
@@ -98,7 +101,7 @@ export function DeliverableSheet({ deliverableId, onClose }: Props) {
     <div className="fixed inset-0 z-50 flex">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t('closeLabel')}
         className="bg-bg-0/60 flex-1 backdrop-blur-sm"
         onClick={onClose}
       />
@@ -113,7 +116,7 @@ export function DeliverableSheet({ deliverableId, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t('closeLabel')}
             className="text-fg-2 hover:text-fg-1 transition"
           >
             <XIcon className="h-5 w-5" />
@@ -125,7 +128,7 @@ export function DeliverableSheet({ deliverableId, onClose }: Props) {
         ) : null}
 
         <section>
-          <h3 className="text-fg-2 mb-2 text-xs uppercase tracking-[0.12em]">Comments</h3>
+          <h3 className="text-fg-2 mb-2 text-xs uppercase tracking-[0.12em]">{t('comments')}</h3>
           <ul className="space-y-2">
             {comments.map((c) => (
               <li
@@ -140,7 +143,7 @@ export function DeliverableSheet({ deliverableId, onClose }: Props) {
             <textarea
               value={commentDraft}
               onChange={(e) => setCommentDraft(e.target.value)}
-              placeholder="Write a comment (markdown + @mentions)"
+              placeholder={t('writeComment')}
               rows={3}
               className="border-fg-4/20 bg-bg-1 text-fg-1 block w-full rounded-md border px-3 py-2 text-sm outline-none"
             />
@@ -149,13 +152,13 @@ export function DeliverableSheet({ deliverableId, onClose }: Props) {
               disabled={submitting || !commentDraft.trim()}
               className="bg-asaulia-blue text-bg-0 rounded-md px-3 py-1.5 text-sm font-medium disabled:opacity-50"
             >
-              {submitting ? 'Sending…' : 'Comment'}
+              {submitting ? t('sending') : t('comment')}
             </button>
           </form>
         </section>
 
         <section>
-          <h3 className="text-fg-2 mb-2 text-xs uppercase tracking-[0.12em]">Activity</h3>
+          <h3 className="text-fg-2 mb-2 text-xs uppercase tracking-[0.12em]">{t('activity')}</h3>
           <ul className="text-fg-2 space-y-1 text-xs">
             {activity.map((a) => (
               <li key={a.id}>

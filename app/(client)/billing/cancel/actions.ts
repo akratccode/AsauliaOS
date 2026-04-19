@@ -7,9 +7,22 @@ import { db, schema } from '@/lib/db';
 import { resolveActiveBrand, requireClientBrandAccess } from '@/lib/brand/context';
 import { getStripe, isStripeConfigured } from '@/lib/billing/stripe';
 
+export type BillingErrorCode =
+  | 'no_active_brand'
+  | 'brand_not_found'
+  | 'only_owner_can_cancel'
+  | 'only_owner_can_reverse'
+  | 'subscription_already_cancelled'
+  | 'subscription_already_terminated'
+  | 'no_pending_cancellation'
+  | 'stripe_cancel_failed'
+  | 'stripe_reversal_failed';
+
+export type BillingInfoCode = 'cancellation_scheduled';
+
 export type CancelActionState =
-  | { error: string }
-  | { success: true; cancelledAt: string }
+  | { ok: false; error: BillingErrorCode; detail?: string }
+  | { ok: true; info?: BillingInfoCode; cancelledAt: string }
   | undefined;
 
 /**
@@ -24,10 +37,10 @@ export async function cancelSubscriptionAction(
 ): Promise<CancelActionState> {
   const actor = await requireAuth();
   const { active } = await resolveActiveBrand(actor);
-  if (!active) return { error: 'No active brand' };
+  if (!active) return { ok: false, error: 'no_active_brand' };
   const { role } = await requireClientBrandAccess(actor, active.id);
   if (role !== 'owner' && actor.globalRole !== 'admin' && actor.globalRole !== 'operator') {
-    return { error: 'Only the brand owner can cancel the subscription.' };
+    return { ok: false, error: 'only_owner_can_cancel' };
   }
 
   const [brand] = await db
@@ -40,8 +53,10 @@ export async function cancelSubscriptionAction(
     .from(schema.brands)
     .where(eq(schema.brands.id, active.id))
     .limit(1);
-  if (!brand) return { error: 'Brand not found' };
-  if (brand.status === 'cancelled') return { error: 'Subscription already cancelled.' };
+  if (!brand) return { ok: false, error: 'brand_not_found' };
+  if (brand.status === 'cancelled') {
+    return { ok: false, error: 'subscription_already_cancelled' };
+  }
 
   const now = new Date();
 
@@ -56,7 +71,11 @@ export async function cancelSubscriptionAction(
         .set({ cancelledAt: cancelAt, updatedAt: now })
         .where(eq(schema.brands.id, brand.id));
     } catch (err) {
-      return { error: err instanceof Error ? err.message : 'Stripe cancel failed' };
+      return {
+        ok: false,
+        error: 'stripe_cancel_failed',
+        detail: err instanceof Error ? err.message : undefined,
+      };
     }
   } else {
     // No Stripe subscription yet (e.g. trial brand that never completed checkout).
@@ -78,7 +97,7 @@ export async function cancelSubscriptionAction(
 
   revalidatePath('/billing');
   revalidatePath('/plan');
-  return { success: true, cancelledAt: now.toISOString() };
+  return { ok: true, info: 'cancellation_scheduled', cancelledAt: now.toISOString() };
 }
 
 /**
@@ -91,10 +110,10 @@ export async function undoCancelSubscriptionAction(
 ): Promise<CancelActionState> {
   const actor = await requireAuth();
   const { active } = await resolveActiveBrand(actor);
-  if (!active) return { error: 'No active brand' };
+  if (!active) return { ok: false, error: 'no_active_brand' };
   const { role } = await requireClientBrandAccess(actor, active.id);
   if (role !== 'owner' && actor.globalRole !== 'admin' && actor.globalRole !== 'operator') {
-    return { error: 'Only the brand owner can reverse the cancellation.' };
+    return { ok: false, error: 'only_owner_can_reverse' };
   }
 
   const [brand] = await db
@@ -107,9 +126,11 @@ export async function undoCancelSubscriptionAction(
     .from(schema.brands)
     .where(eq(schema.brands.id, active.id))
     .limit(1);
-  if (!brand) return { error: 'Brand not found' };
-  if (!brand.cancelledAt) return { error: 'No pending cancellation.' };
-  if (brand.status === 'cancelled') return { error: 'Subscription already terminated.' };
+  if (!brand) return { ok: false, error: 'brand_not_found' };
+  if (!brand.cancelledAt) return { ok: false, error: 'no_pending_cancellation' };
+  if (brand.status === 'cancelled') {
+    return { ok: false, error: 'subscription_already_terminated' };
+  }
 
   const now = new Date();
   if (brand.stripeSubscriptionId && isStripeConfigured()) {
@@ -118,7 +139,11 @@ export async function undoCancelSubscriptionAction(
         cancel_at_period_end: false,
       });
     } catch (err) {
-      return { error: err instanceof Error ? err.message : 'Stripe reversal failed' };
+      return {
+        ok: false,
+        error: 'stripe_reversal_failed',
+        detail: err instanceof Error ? err.message : undefined,
+      };
     }
   }
   await db
@@ -138,5 +163,5 @@ export async function undoCancelSubscriptionAction(
 
   revalidatePath('/billing');
   revalidatePath('/plan');
-  return { success: true, cancelledAt: now.toISOString() };
+  return { ok: true, cancelledAt: now.toISOString() };
 }

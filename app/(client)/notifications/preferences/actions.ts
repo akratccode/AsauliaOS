@@ -19,7 +19,12 @@ const MUTABLE_TYPES: NotificationType[] = [
   'chat_message',
 ];
 
-export type PrefState = { success: true } | { error: string } | undefined;
+export type NotificationsErrorCode = 'check_fields';
+
+export type PrefState =
+  | { success: true }
+  | { error: NotificationsErrorCode }
+  | undefined;
 
 export async function saveNotificationPreferencesAction(
   _prev: PrefState,
@@ -27,22 +32,26 @@ export async function saveNotificationPreferencesAction(
 ): Promise<PrefState> {
   const actor = await requireAuth();
 
-  for (const type of MUTABLE_TYPES) {
-    if (isTransactionalType(type)) continue;
-    for (const channel of ['email', 'inapp'] as const) {
-      const enabled = formData.get(`${type}:${channel}`) === 'on';
-      await db
-        .insert(schema.notificationPreferences)
-        .values({ userId: actor.userId, type, channel, enabled })
-        .onConflictDoUpdate({
-          target: [
-            schema.notificationPreferences.userId,
-            schema.notificationPreferences.type,
-            schema.notificationPreferences.channel,
-          ],
-          set: { enabled, updatedAt: new Date() },
-        });
+  try {
+    for (const type of MUTABLE_TYPES) {
+      if (isTransactionalType(type)) continue;
+      for (const channel of ['email', 'inapp'] as const) {
+        const enabled = formData.get(`${type}:${channel}`) === 'on';
+        await db
+          .insert(schema.notificationPreferences)
+          .values({ userId: actor.userId, type, channel, enabled })
+          .onConflictDoUpdate({
+            target: [
+              schema.notificationPreferences.userId,
+              schema.notificationPreferences.type,
+              schema.notificationPreferences.channel,
+            ],
+            set: { enabled, updatedAt: new Date() },
+          });
+      }
     }
+  } catch {
+    return { error: 'check_fields' };
   }
 
   revalidatePath('/notifications/preferences');

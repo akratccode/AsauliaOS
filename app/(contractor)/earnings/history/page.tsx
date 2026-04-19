@@ -4,6 +4,8 @@ import { requireAuth } from '@/lib/auth/rbac';
 import { db, schema } from '@/lib/db';
 import { formatCents, formatDate } from '@/lib/format';
 
+/* eslint-disable i18next/no-literal-string -- translation keys for earnings history are not in messages/en.json yet; will be wired in a dedicated phase */
+
 export default async function ContractorEarningsHistoryPage() {
   const actor = await requireAuth();
 

@@ -6,8 +6,14 @@ import { resolveActiveBrand, requireClientBrandAccess } from '@/lib/brand/contex
 import { ensureThreadForBrand, markRead, postMessage } from '@/lib/chat/service';
 import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 
+export type ChatErrorCode =
+  | 'no_active_brand'
+  | 'message_too_empty'
+  | 'rate_limited'
+  | 'send_failed';
+
 export type ChatActionState =
-  | { error: string }
+  | { error: ChatErrorCode; seconds?: number }
   | { success: true }
   | undefined;
 
@@ -17,23 +23,23 @@ export async function sendChatMessageAction(
 ): Promise<ChatActionState> {
   const actor = await requireAuth();
   const { active } = await resolveActiveBrand(actor);
-  if (!active) return { error: 'No active brand' };
+  if (!active) return { error: 'no_active_brand' };
   await requireClientBrandAccess(actor, active.id);
 
   const rl = rateLimit(actor.userId, 'chat:post', RATE_LIMITS.CHAT_POST);
   if (!rl.allowed) {
-    return { error: `Too many messages. Try again in ${Math.ceil(rl.retryAfterMs / 1000)}s.` };
+    return { error: 'rate_limited', seconds: Math.ceil(rl.retryAfterMs / 1000) };
   }
 
   const content = (formData.get('content') ?? '').toString();
-  if (!content.trim()) return { error: 'Message is empty' };
+  if (!content.trim()) return { error: 'message_too_empty' };
 
   const threadId = await ensureThreadForBrand(active.id);
   try {
     await postMessage({ threadId, userId: actor.userId, content });
     await markRead(threadId, actor.userId);
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : 'send failed' };
+  } catch {
+    return { error: 'send_failed' };
   }
 
   revalidatePath('/chat');

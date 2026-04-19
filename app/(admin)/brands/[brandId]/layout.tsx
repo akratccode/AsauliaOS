@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { eq } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { db, schema } from '@/lib/db';
 import { BrandTabs } from '@/components/admin-shell/BrandTabs';
 
@@ -14,6 +15,7 @@ export default async function AdminBrandLayout({
   params: Params;
 }) {
   const { brandId } = await params;
+  const t = await getTranslations('admin.brands');
   const [brand] = await db
     .select({
       id: schema.brands.id,
@@ -29,7 +31,7 @@ export default async function AdminBrandLayout({
   return (
     <main className="mx-auto w-full max-w-6xl space-y-4 p-6">
       <header className="space-y-1">
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Brand</p>
+        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('brand')}</p>
         <div className="flex items-center gap-3">
           <h1 className="text-fg-1 font-serif text-3xl italic">{brand.name}</h1>
           <span className="text-fg-3 font-mono text-xs">{brand.slug}</span>

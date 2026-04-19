@@ -61,6 +61,7 @@ export default async function ClientLayout({ children }: { children: ReactNode }
               active={{ id: active.id, name: active.name }}
               brands={available.map((b) => ({ id: b.id, name: b.name }))}
             />
+            {/* eslint-disable-next-line i18next/no-literal-string -- billing window label, key not yet available */}
             <span className="text-fg-3 hidden text-xs md:inline">
               Period · {window.label}
             </span>

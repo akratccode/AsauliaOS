@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 type Brand = { id: string; name: string };
 
@@ -13,6 +14,7 @@ type Props = {
 export function BrandSwitcher({ active, brands }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const t = useTranslations('nav.brandSwitcher');
 
   if (brands.length <= 1) {
     return (
@@ -41,7 +43,7 @@ export function BrandSwitcher({ active, brands }: Props) {
       value={active.id}
       onChange={onChange}
       disabled={busy}
-      aria-label="Active brand"
+      aria-label={t('ariaLabel')}
       className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-2 py-1 text-sm"
     >
       {brands.map((b) => (

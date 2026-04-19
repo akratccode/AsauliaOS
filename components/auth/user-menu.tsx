@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { LogOut, Settings, User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 type Props = {
   email: string;
@@ -12,6 +13,7 @@ type Props = {
 export function UserMenu({ email, fullName }: Props) {
   const [open, setOpen] = useState(false);
   const initials = (fullName || email).slice(0, 2).toUpperCase();
+  const t = useTranslations('nav.userMenu');
 
   return (
     <div className="relative">
@@ -37,20 +39,20 @@ export function UserMenu({ email, fullName }: Props) {
             href="/profile"
             className="text-fg-2 hover:bg-bg-2 flex items-center gap-2 rounded px-2 py-1.5 text-sm"
           >
-            <User className="size-3.5" /> Profile
+            <User className="size-3.5" /> {t('profile')}
           </Link>
           <Link
             href="/settings"
             className="text-fg-2 hover:bg-bg-2 flex items-center gap-2 rounded px-2 py-1.5 text-sm"
           >
-            <Settings className="size-3.5" /> Settings
+            <Settings className="size-3.5" /> {t('settings')}
           </Link>
           <form action="/logout" method="post">
             <button
               type="submit"
               className="text-fg-2 hover:bg-bg-2 flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm"
             >
-              <LogOut className="size-3.5" /> Log out
+              <LogOut className="size-3.5" /> {t('logOut')}
             </button>
           </form>
         </div>

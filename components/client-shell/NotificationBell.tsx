@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 type Item = {
   id: string;
@@ -21,6 +22,7 @@ type Props = {
 export function NotificationBell({ items, unreadCount }: Props) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const t = useTranslations('nav.notifications');
 
   const markAllRead = async () => {
     await fetch('/api/notifications/read-all', { method: 'POST' });
@@ -31,11 +33,11 @@ export function NotificationBell({ items, unreadCount }: Props) {
     <div className="relative">
       <button
         type="button"
-        aria-label="Notifications"
+        aria-label={t('ariaLabel')}
         onClick={() => setOpen((v) => !v)}
         className="border-fg-4/20 bg-bg-2 text-fg-2 hover:text-fg-1 relative rounded-md border px-2 py-1 text-xs"
       >
-        Notifications
+        {t('title')}
         {unreadCount > 0 && (
           <span className="bg-asaulia-blue text-fg-on-blue ml-2 rounded-full px-1.5 text-[10px]">
             {unreadCount}
@@ -45,19 +47,19 @@ export function NotificationBell({ items, unreadCount }: Props) {
       {open && (
         <div className="border-fg-4/20 bg-bg-1 absolute right-0 z-20 mt-2 w-80 rounded-lg border p-3 shadow-lg">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-fg-2 text-xs uppercase tracking-[0.12em]">Recent</span>
+            <span className="text-fg-2 text-xs uppercase tracking-[0.12em]">{t('recent')}</span>
             {unreadCount > 0 && (
               <button
                 type="button"
                 onClick={markAllRead}
                 className="text-asaulia-blue-soft text-xs hover:underline"
               >
-                Mark all as read
+                {t('markAllAsRead')}
               </button>
             )}
           </div>
           {items.length === 0 ? (
-            <p className="text-fg-3 p-2 text-xs">Nothing yet.</p>
+            <p className="text-fg-3 p-2 text-xs">{t('empty')}</p>
           ) : (
             <ul className="space-y-1">
               {items.map((item) => {

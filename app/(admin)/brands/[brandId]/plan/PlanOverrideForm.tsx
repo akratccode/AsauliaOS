@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import { useTranslations } from 'next-intl';
 import { overridePlanAction, type PlanOverrideState } from './actions';
 
 export function PlanOverrideForm({ brandId }: { brandId: string }) {
@@ -8,9 +9,11 @@ export function PlanOverrideForm({ brandId }: { brandId: string }) {
     overridePlanAction,
     undefined,
   );
+  const tErr = useTranslations('moduleErrors.admin');
   return (
     <form action={action} className="grid gap-3 md:grid-cols-2">
       <input type="hidden" name="brandId" value={brandId} />
+      { }
       <Field label="Fixed (cents)">
         <input
           name="fixedAmountCents"
@@ -21,6 +24,7 @@ export function PlanOverrideForm({ brandId }: { brandId: string }) {
           className="border-fg-4/20 bg-bg-2 text-fg-1 w-full rounded-md border px-3 py-2 text-sm"
         />
       </Field>
+      { }
       <Field label="Variable (bps)">
         <input
           name="variablePercentBps"
@@ -31,6 +35,7 @@ export function PlanOverrideForm({ brandId }: { brandId: string }) {
           className="border-fg-4/20 bg-bg-2 text-fg-1 w-full rounded-md border px-3 py-2 text-sm"
         />
       </Field>
+      { }
       <Field label="Effective from (ISO)">
         <input
           name="effectiveFrom"
@@ -39,12 +44,14 @@ export function PlanOverrideForm({ brandId }: { brandId: string }) {
           className="border-fg-4/20 bg-bg-2 text-fg-1 w-full rounded-md border px-3 py-2 text-sm"
         />
       </Field>
+      { }
       <Field label="Reason (≥ 8 chars, audited)">
         <input
           name="reason"
           minLength={8}
           maxLength={500}
           required
+           
           placeholder="Escalation from support ticket #…"
           className="border-fg-4/20 bg-bg-2 text-fg-1 w-full rounded-md border px-3 py-2 text-sm"
         />
@@ -55,10 +62,15 @@ export function PlanOverrideForm({ brandId }: { brandId: string }) {
           disabled={pending}
           className="bg-asaulia-blue text-fg-on-blue rounded-md px-4 py-2 text-sm disabled:opacity-60"
         >
+          { }
           {pending ? 'Saving override…' : 'Save override'}
         </button>
-        {state?.info && <p className="text-asaulia-green mt-2 text-xs">{state.info}</p>}
-        {state?.error && <p className="text-asaulia-red mt-2 text-xs">{state.error}</p>}
+        {state && 'info' in state && (
+          <p className="text-asaulia-green mt-2 text-xs">{tErr(state.info)}</p>
+        )}
+        {state && 'error' in state && (
+          <p className="text-asaulia-red mt-2 text-xs">{tErr(state.error)}</p>
+        )}
       </div>
     </form>
   );
