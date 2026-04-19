@@ -716,6 +716,23 @@
       "active": "active",
       "paused": "paused"
     },
+    "brandPlan": {
+      "historyTitle": "Plan history",
+      "noPlans": "No plans on file.",
+      "from": "from {date}",
+      "until": "until {date}",
+      "current": "current",
+      "active": "active",
+      "overrideTitle": "Override",
+      "overrideDesc": "Bypasses the client-side cooldown. Every override is audit-logged with the reason.",
+      "fixedCents": "Fixed (cents)",
+      "variableBps": "Variable (bps)",
+      "effectiveFrom": "Effective from (ISO)",
+      "reasonLabel": "Reason (≥ 8 chars, audited)",
+      "reasonPlaceholder": "Escalation from support ticket #…",
+      "save": "Save override",
+      "saving": "Saving override…"
+    },
     "brandContractors": {
       "assignedTitle": "Assigned contractors",
       "noActiveAssignments": "No active assignments yet.",
