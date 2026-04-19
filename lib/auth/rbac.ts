@@ -35,8 +35,39 @@ async function defaultAuthResolver(): Promise<AuthContext | null> {
     .limit(1);
 
   const profile = row[0];
-  if (!profile) return null;
-  return { userId: profile.id, email: profile.email, globalRole: profile.globalRole };
+  if (profile) {
+    return { userId: profile.id, email: profile.email, globalRole: profile.globalRole };
+  }
+
+  // Supabase user exists but the profile row is missing — happens when the
+  // auth.users → public.users trigger (manual_auth_triggers.sql) hasn't been
+  // applied, or the user predates it. Self-heal by inserting the row so we
+  // don't bounce into a /login ↔ /dashboard redirect loop.
+  const email = data.user.email ?? '';
+  const fullName =
+    (data.user.user_metadata?.full_name as string | undefined) ??
+    (data.user.user_metadata?.name as string | undefined) ??
+    null;
+
+  const [inserted] = await db
+    .insert(users)
+    .values({ id: data.user.id, email, fullName })
+    .onConflictDoNothing({ target: users.id })
+    .returning({ id: users.id, email: users.email, globalRole: users.globalRole });
+
+  if (inserted) {
+    return { userId: inserted.id, email: inserted.email, globalRole: inserted.globalRole };
+  }
+
+  const [existing] = await db
+    .select({ id: users.id, email: users.email, globalRole: users.globalRole })
+    .from(users)
+    .where(eq(users.id, data.user.id))
+    .limit(1);
+
+  return existing
+    ? { userId: existing.id, email: existing.email, globalRole: existing.globalRole }
+    : null;
 }
 
 async function defaultBrandRoleResolver(
