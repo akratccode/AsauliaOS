@@ -48,6 +48,13 @@ export class InvalidTransitionError extends Error {
   }
 }
 
+export class DeliverablesFrozenError extends Error {
+  code = 'deliverables_frozen' as const;
+  constructor() {
+    super('Deliverables are frozen while the brand is past due');
+  }
+}
+
 type CreateInput = {
   brandId: string;
   title: string;
@@ -209,6 +216,20 @@ export async function updateDeliverableStatus(
   const transitionActor: TransitionActor | null = resolveTransitionActor(actor, context);
   if (!transitionActor || !canActorTransition(transitionActor, from, nextStatus)) {
     throw new Forbidden(`Cannot move deliverable from ${from} to ${nextStatus}`);
+  }
+
+  // Phase 11 dunning: when a brand is frozen, block acceptance transitions so
+  // unpaid work does not close out. Admin/operator can still reject or send
+  // back to in_progress. Clients and assignees cannot accept.
+  if (nextStatus === 'done') {
+    const [brand] = await db
+      .select({ frozen: schema.brands.deliverablesFrozen })
+      .from(schema.brands)
+      .where(eq(schema.brands.id, existing.brandId))
+      .limit(1);
+    if (brand?.frozen && transitionActor !== 'admin') {
+      throw new DeliverablesFrozenError();
+    }
   }
 
   const completedAt = nextStatus === 'done' ? new Date() : existing.completedAt;

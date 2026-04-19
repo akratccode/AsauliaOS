@@ -69,3 +69,20 @@ export const payoutStatusEnum = pgEnum('payout_status', [
   'paid',
   'failed',
 ]);
+
+export const ledgerKindEnum = pgEnum('ledger_kind', [
+  'invoice_issued',
+  'invoice_paid',
+  'payout_sent',
+  'payout_failed',
+  'refund',
+  'stripe_fee',
+  'adjustment',
+  'carryover',
+]);
+
+export const billingJobStatusEnum = pgEnum('billing_job_status', [
+  'running',
+  'completed',
+  'failed',
+]);

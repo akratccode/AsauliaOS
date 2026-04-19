@@ -4,6 +4,7 @@ import {
   text,
   timestamp,
   integer,
+  boolean,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { users } from './users';
@@ -23,6 +24,8 @@ export const brands = pgTable('brands', {
   stripeSubscriptionId: text('stripe_subscription_id'),
   timezone: text('timezone').notNull().default('UTC'),
   billingCycleDay: integer('billing_cycle_day'),
+  deliverablesFrozen: boolean('deliverables_frozen').notNull().default(false),
+  pastDueSince: timestamp('past_due_since', { withTimezone: true, mode: 'date' }),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   cancelledAt: timestamp('cancelled_at', { withTimezone: true, mode: 'date' }),

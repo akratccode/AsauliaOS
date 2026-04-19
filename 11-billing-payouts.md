@@ -195,12 +195,12 @@ Expose via `finances/page.tsx` (Phase 10).
 
 ### 9. Edge cases checklist
 
-- [ ] Brand on day N where N > 28: mitigated by capping `billing_cycle_day` at 28 in the schema (Phase 02).
-- [ ] Timezone DST: cycle boundaries are computed in brand tz; DST transitions may make a cycle 23h or 25h. Accept — we don't prorate at that granularity.
-- [ ] Integration goes offline mid-period: variable is computed only on sales we actually have; communicate clearly. If sales are later recovered via backfill, they enter the next period's invoice (not retroactive).
-- [ ] Attribution rules changed mid-period: per Phase 07, only open-period sales are reclassified. Closed period invoices stay stable.
-- [ ] Manual sale added after cycle close: it goes into the NEXT period, regardless of its `occurred_at`. Admin is warned.
-- [ ] Contractor Stripe Connect account deactivated right before payout: payout marked `failed`, admin notified, owner gets retry CTA on their profile page.
+- [x] Brand on day N where N > 28: mitigated by capping `billing_cycle_day` at 28 in the schema (Phase 02) and re-clamped in `clampAnchorDay` (Phase 11).
+- [x] Timezone DST: cycle boundaries are UTC instants (we don't store brand-local offsets); DST never shifts a cycle. Documented in `lib/billing/period.ts`.
+- [x] Integration goes offline mid-period: variable is computed only on the sales we have; backfill enters the next period (we never rewrite closed invoices — guarded by the `invoices_brand_period_unique` index).
+- [x] Attribution rules changed mid-period: Phase 07's `attributedSalesForPeriod` reads the current rules; closed invoices carry `attributed_sales_cents` and `plan_snapshot` so the closed total is locked.
+- [x] Manual sale added after cycle close: falls into the NEXT period via the billing-jobs idempotency lock; admin warned via the `sales` page breakdown.
+- [x] Contractor Stripe Connect account deactivated right before payout: `settleContractorShare` emits `pending_setup`, preserves the carryover on `contractor_profiles.payout_carryover_cents`, and inserts a failed payout row for the admin queue.
 
 ---
 

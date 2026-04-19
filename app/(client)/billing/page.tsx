@@ -9,6 +9,7 @@ import { attributedSalesForPeriod } from '@/lib/integrations/service';
 import { currentAndUpcomingPlan } from '@/lib/plans/change';
 import { quote } from '@/lib/pricing';
 import { formatCents, formatDate } from '@/lib/format';
+import { UndoCancelForm } from './undo-cancel-form';
 
 export default async function BillingPage() {
   const actor = await requireAuth();
@@ -20,6 +21,10 @@ export default async function BillingPage() {
     .select({
       billingCycleDay: schema.brands.billingCycleDay,
       stripeCustomerId: schema.brands.stripeCustomerId,
+      status: schema.brands.status,
+      cancelledAt: schema.brands.cancelledAt,
+      deliverablesFrozen: schema.brands.deliverablesFrozen,
+      pastDueSince: schema.brands.pastDueSince,
     })
     .from(schema.brands)
     .where(eq(schema.brands.id, active.id))
@@ -118,6 +123,39 @@ export default async function BillingPage() {
           <p className="text-fg-2 mt-1 text-xs">
             Update your payment method to resolve.
           </p>
+          {brand?.deliverablesFrozen && (
+            <p className="text-fg-2 mt-2 text-xs">
+              Deliverables are frozen until payment is received.
+            </p>
+          )}
+        </section>
+      )}
+
+      {brand?.cancelledAt && brand.status !== 'cancelled' && (
+        <section className="border-fg-4/20 bg-bg-1 rounded-2xl border p-4 text-sm">
+          <p className="text-fg-1 font-medium">Subscription set to cancel</p>
+          <p className="text-fg-2 mt-1 text-xs">
+            Ends on {formatDate(brand.cancelledAt)}. You can reverse this before then.
+          </p>
+          <UndoCancelForm />
+        </section>
+      )}
+
+      {!brand?.cancelledAt && brand?.status !== 'cancelled' && (
+        <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
+          <div className="text-fg-3 text-xs uppercase tracking-[0.12em]">
+            Cancel subscription
+          </div>
+          <p className="text-fg-2 mt-2 text-sm">
+            Your plan stays active through the current cycle. Variable fees
+            are prorated for days your plan was active.
+          </p>
+          <Link
+            href="/billing/cancel"
+            className="border-asaulia-red/40 text-asaulia-red hover:bg-asaulia-red/5 mt-3 inline-block rounded-md border px-3 py-1.5 text-xs"
+          >
+            Cancel at period end
+          </Link>
         </section>
       )}
 

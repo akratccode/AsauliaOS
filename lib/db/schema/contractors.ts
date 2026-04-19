@@ -26,6 +26,7 @@ export const contractorProfiles = pgTable('contractor_profiles', {
   stripeConnectAccountId: text('stripe_connect_account_id'),
   payoutOnboardingComplete: boolean('payout_onboarding_complete').notNull().default(false),
   status: contractorStatusEnum('status').notNull().default('pending'),
+  payoutCarryoverCents: integer('payout_carryover_cents').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
