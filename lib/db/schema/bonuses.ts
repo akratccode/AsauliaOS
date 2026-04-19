@@ -11,6 +11,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { brands } from './brands';
 import { users } from './users';
+import { financeRegionEnum } from './enums';
 
 export const contractorBonusConditionEnum = pgEnum('contractor_bonus_condition', [
   'all_deliverables_done',
@@ -37,6 +38,7 @@ export const contractorBonuses = pgTable(
     periodEnd: date('period_end', { mode: 'string' }).notNull(),
     amountCents: integer('amount_cents').notNull(),
     currency: char('currency', { length: 3 }).notNull().default('USD'),
+    financeRegion: financeRegionEnum('finance_region').notNull().default('us'),
     conditionType: contractorBonusConditionEnum('condition_type')
       .notNull()
       .default('manual'),

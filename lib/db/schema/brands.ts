@@ -5,10 +5,16 @@ import {
   timestamp,
   integer,
   boolean,
+  char,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { users } from './users';
-import { brandMemberRoleEnum, brandStatusEnum } from './enums';
+import {
+  brandMemberRoleEnum,
+  brandStatusEnum,
+  brandPaymentMethodEnum,
+  financeRegionEnum,
+} from './enums';
 
 export const brands = pgTable('brands', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -26,6 +32,9 @@ export const brands = pgTable('brands', {
   billingCycleDay: integer('billing_cycle_day'),
   deliverablesFrozen: boolean('deliverables_frozen').notNull().default(false),
   pastDueSince: timestamp('past_due_since', { withTimezone: true, mode: 'date' }),
+  financeRegion: financeRegionEnum('finance_region').notNull().default('us'),
+  paymentMethod: brandPaymentMethodEnum('payment_method').notNull().default('stripe_subscription'),
+  currency: char('currency', { length: 3 }).notNull().default('USD'),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   cancelledAt: timestamp('cancelled_at', { withTimezone: true, mode: 'date' }),

@@ -25,6 +25,9 @@ export default async function AdminBrandsPage({
       slug: schema.brands.slug,
       status: schema.brands.status,
       createdAt: schema.brands.createdAt,
+      financeRegion: schema.brands.financeRegion,
+      currency: schema.brands.currency,
+      paymentMethod: schema.brands.paymentMethod,
       fixedAmountCents: schema.plans.fixedAmountCents,
       variablePercentBps: schema.plans.variablePercentBps,
     })
@@ -43,9 +46,17 @@ export default async function AdminBrandsPage({
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-6">
-      <header>
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('portfolioLabel')}</p>
-        <h1 className="text-fg-1 font-serif text-3xl italic">{t('brandsTitle')}</h1>
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('portfolioLabel')}</p>
+          <h1 className="text-fg-1 font-serif text-3xl italic">{t('brandsTitle')}</h1>
+        </div>
+        <Link
+          href="/admin/brands/new"
+          className="bg-asaulia-blue text-fg-on-blue rounded-md px-3 py-1.5 text-xs"
+        >
+          {t('createManual')}
+        </Link>
       </header>
 
       <form method="get" className="flex flex-wrap gap-3 text-xs">
@@ -81,6 +92,7 @@ export default async function AdminBrandsPage({
             <tr className="border-fg-4/10 text-fg-3 border-b text-xs uppercase tracking-[0.12em]">
               <th className="px-4 py-2 text-left">{t('brand')}</th>
               <th className="px-4 py-2 text-left">{t('status')}</th>
+              <th className="px-4 py-2 text-left">{t('region')}</th>
               <th className="px-4 py-2 text-right">{t('plan')}</th>
               <th className="px-4 py-2 text-right">{t('signedUp')}</th>
             </tr>
@@ -88,7 +100,7 @@ export default async function AdminBrandsPage({
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td className="text-fg-3 px-4 py-4" colSpan={4}>
+                <td className="text-fg-3 px-4 py-4" colSpan={5}>
                   {t('noBrands')}
                 </td>
               </tr>
@@ -117,9 +129,21 @@ export default async function AdminBrandsPage({
                       {r.status}
                     </span>
                   </td>
+                  <td className="px-4 py-2">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] ${
+                        r.financeRegion === 'co'
+                          ? 'bg-asaulia-blue/15 text-asaulia-blue'
+                          : 'bg-bg-2 text-fg-2'
+                      }`}
+                    >
+                      {r.financeRegion === 'co' ? t('regionCo') : t('regionUs')}
+                      {r.paymentMethod === 'manual' ? ` · ${t('manualSuffix')}` : ''}
+                    </span>
+                  </td>
                   <td className="text-fg-2 px-4 py-2 text-right text-xs">
                     {r.fixedAmountCents != null
-                      ? `${formatCents(r.fixedAmountCents)} + ${((r.variablePercentBps ?? 0) / 100).toFixed(1)}%`
+                      ? `${formatCents(r.fixedAmountCents, r.currency)} + ${((r.variablePercentBps ?? 0) / 100).toFixed(1)}%`
                       : '—'}
                   </td>
                   <td className="text-fg-3 px-4 py-2 text-right text-xs">

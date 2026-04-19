@@ -23,6 +23,8 @@ type LedgerKind =
 export async function writeLedger(entry: {
   kind: LedgerKind;
   amountCents: number;
+  currency?: string;
+  financeRegion?: 'us' | 'co';
   brandId?: string;
   contractorUserId?: string;
   invoiceId?: string;
@@ -45,6 +47,8 @@ export async function writeLedger(entry: {
     .values({
       kind: entry.kind,
       amountCents: entry.amountCents,
+      currency: entry.currency ?? 'USD',
+      financeRegion: entry.financeRegion ?? 'us',
       brandId: entry.brandId ?? null,
       contractorUserId: entry.contractorUserId ?? null,
       invoiceId: entry.invoiceId ?? null,

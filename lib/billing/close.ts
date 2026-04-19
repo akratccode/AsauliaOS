@@ -25,6 +25,9 @@ type BrandForClose = {
   billingCycleDay: number | null;
   status: 'trial' | 'active' | 'past_due' | 'paused' | 'cancelled';
   cancelledAt: Date | null;
+  financeRegion: 'us' | 'co';
+  paymentMethod: 'stripe_subscription' | 'manual';
+  currency: string;
 };
 
 /**
@@ -93,6 +96,12 @@ export async function closeCycleForBrand(params: {
     attributedSalesCents: effectiveSalesCents,
   });
 
+  // Manual-payment brands produce `open` invoices (no Stripe side-effect) so
+  // the admin can mark them paid after confirming the wire transfer.
+  // Stripe brands start as `draft` and flip to `open` via the Stripe webhook.
+  const isManual = brand.paymentMethod === 'manual';
+  const invoiceCurrency = brand.currency || q.currency;
+
   const [inserted] = await db
     .insert(schema.invoices)
     .values({
@@ -101,8 +110,10 @@ export async function closeCycleForBrand(params: {
       periodEnd,
       fixedAmountCents: q.fixedAmountCents,
       variableAmountCents: q.variableAmountCents,
-      currency: q.currency,
-      status: 'draft',
+      currency: invoiceCurrency,
+      financeRegion: brand.financeRegion,
+      status: isManual ? 'open' : 'draft',
+      issuedAt: isManual ? now : undefined,
       planSnapshot: {
         planId: plan.id,
         fixedAmountCents: plan.fixedAmountCents,
@@ -120,13 +131,18 @@ export async function closeCycleForBrand(params: {
   // Stripe side-effect: attach the variable fee to the upcoming subscription
   // invoice so fixed + variable appear as one charge. Fixed comes from the
   // subscription's recurring price; we only add the variable line.
-  if (brand.stripeCustomerId && q.variableAmountCents > 0 && isStripeConfigured()) {
+  if (
+    !isManual &&
+    brand.stripeCustomerId &&
+    q.variableAmountCents > 0 &&
+    isStripeConfigured()
+  ) {
     const stripe = getStripe();
     const description = `Variable fee — ${periodStart} to ${periodEnd}`;
     await stripe.invoiceItems.create({
       customer: brand.stripeCustomerId,
       amount: q.variableAmountCents,
-      currency: q.currency.toLowerCase(),
+      currency: invoiceCurrency.toLowerCase(),
       description,
       ...(brand.stripeSubscriptionId ? { subscription: brand.stripeSubscriptionId } : {}),
       metadata: {
@@ -141,6 +157,8 @@ export async function closeCycleForBrand(params: {
   await writeLedger({
     kind: 'invoice_issued',
     amountCents: q.totalAmountCents,
+    currency: invoiceCurrency,
+    financeRegion: brand.financeRegion,
     brandId: brand.id,
     invoiceId: inserted.id,
     description: `Invoice issued for ${periodStart}..${periodEnd}`,
@@ -206,6 +224,9 @@ export async function findBrandsDueForClose(params: {
       billingCycleDay: schema.brands.billingCycleDay,
       status: schema.brands.status,
       cancelledAt: schema.brands.cancelledAt,
+      financeRegion: schema.brands.financeRegion,
+      paymentMethod: schema.brands.paymentMethod,
+      currency: schema.brands.currency,
     })
     .from(schema.brands);
 

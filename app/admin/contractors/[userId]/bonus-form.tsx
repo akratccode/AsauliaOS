@@ -50,6 +50,17 @@ export function ContractorBonusForm({
           </select>
         </label>
         <label className="flex flex-col gap-1">
+          <span className="text-fg-3">{t('financeRegion')}</span>
+          <select
+            name="financeRegion"
+            defaultValue="us"
+            className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-2 py-1.5"
+          >
+            <option value="us">{t('regionUs')}</option>
+            <option value="co">{t('regionCo')}</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
           <span className="text-fg-3">{t('periodStart')}</span>
           <input
             type="date"

@@ -19,6 +19,8 @@ type InvoiceForPayout = {
   periodEnd: string;
   fixedAmountCents: number;
   variableAmountCents: number;
+  currency: string;
+  financeRegion: 'us' | 'co';
 };
 
 /**
@@ -202,6 +204,42 @@ async function settleContractorShare(params: {
     return { kind: 'carried', contractorUserId, amountCents: total };
   }
 
+  // Colombia (manual) flow: don't require Stripe Connect. Leave the payout in
+  // `pending` so the admin can mark it paid from the finances dashboard after
+  // wiring the money manually.
+  if (invoice.financeRegion === 'co') {
+    const [pendingManual] = await db
+      .insert(schema.payouts)
+      .values({
+        contractorUserId,
+        periodStart: invoice.periodStart,
+        periodEnd: invoice.periodEnd,
+        amountCents: total,
+        currency: invoice.currency,
+        financeRegion: invoice.financeRegion,
+        status: 'pending',
+        breakdown,
+      })
+      .onConflictDoUpdate({
+        target: [schema.payouts.contractorUserId, schema.payouts.periodStart],
+        set: {
+          amountCents: total,
+          currency: invoice.currency,
+          financeRegion: invoice.financeRegion,
+          status: 'pending',
+          updatedAt: now,
+        },
+      })
+      .returning({ id: schema.payouts.id });
+    await db
+      .update(schema.contractorProfiles)
+      .set({ payoutCarryoverCents: 0, updatedAt: now })
+      .where(eq(schema.contractorProfiles.userId, contractorUserId));
+    return pendingManual
+      ? { kind: 'pending_setup', contractorUserId, amountCents: total }
+      : { kind: 'skipped', reason: 'payout_insert_failed' };
+  }
+
   if (!profile?.stripeConnectAccountId || !profile.payoutOnboardingComplete) {
     // Preserve the carryover (so they don't lose the accumulated amount) and
     // surface a pending-setup record by inserting a failed payout row.
@@ -210,6 +248,8 @@ async function settleContractorShare(params: {
       periodStart: invoice.periodStart,
       periodEnd: invoice.periodEnd,
       amountCents: total,
+      currency: invoice.currency,
+      financeRegion: invoice.financeRegion,
       status: 'failed',
       failureReason: 'stripe_connect_incomplete',
       breakdown,
@@ -230,12 +270,20 @@ async function settleContractorShare(params: {
       periodStart: invoice.periodStart,
       periodEnd: invoice.periodEnd,
       amountCents: total,
+      currency: invoice.currency,
+      financeRegion: invoice.financeRegion,
       status: 'processing',
       breakdown,
     })
     .onConflictDoUpdate({
       target: [schema.payouts.contractorUserId, schema.payouts.periodStart],
-      set: { amountCents: total, status: 'processing', updatedAt: now },
+      set: {
+        amountCents: total,
+        currency: invoice.currency,
+        financeRegion: invoice.financeRegion,
+        status: 'processing',
+        updatedAt: now,
+      },
     })
     .returning({ id: schema.payouts.id });
 
@@ -251,7 +299,7 @@ async function settleContractorShare(params: {
       const transfer = await stripe.transfers.create(
         {
           amount: total,
-          currency: 'usd',
+          currency: invoice.currency.toLowerCase(),
           destination: profile.stripeConnectAccountId,
           description: `Asaulia payout — ${invoice.periodStart}..${invoice.periodEnd}`,
           metadata: {
@@ -283,6 +331,8 @@ async function settleContractorShare(params: {
       await writeLedger({
         kind: 'payout_failed',
         amountCents: total,
+        currency: invoice.currency,
+        financeRegion: invoice.financeRegion,
         contractorUserId,
         brandId: invoice.brandId,
         invoiceId: invoice.id,
@@ -308,6 +358,8 @@ async function settleContractorShare(params: {
   await writeLedger({
     kind: 'payout_sent',
     amountCents: -total,
+    currency: invoice.currency,
+    financeRegion: invoice.financeRegion,
     contractorUserId,
     brandId: invoice.brandId,
     invoiceId: invoice.id,
@@ -349,6 +401,8 @@ export async function findInvoicesDueForPayout(params: {
       periodEnd: schema.invoices.periodEnd,
       fixedAmountCents: schema.invoices.fixedAmountCents,
       variableAmountCents: schema.invoices.variableAmountCents,
+      currency: schema.invoices.currency,
+      financeRegion: schema.invoices.financeRegion,
     })
     .from(schema.invoices)
     .leftJoin(
