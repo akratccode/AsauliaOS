@@ -606,7 +606,122 @@
       "skills": "Skills",
       "ready": "ready",
       "incomplete": "incomplete",
-      "noContractors": "No contractors match."
+      "noContractors": "No contractors match.",
+      "actions": "Actions",
+      "impersonate": "Impersonate"
+    },
+    "impersonation": {
+      "bannerActive": "Impersonating user",
+      "stop": "Stop impersonating"
+    },
+    "bonuses": {
+      "title": "Conditional bonuses",
+      "brand": "Brand",
+      "anyBrand": "Any brand",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "amountCents": "Amount (cents)",
+      "conditionType": "Condition",
+      "conditionAll": "All deliverables done",
+      "conditionMin": "Minimum deliverables done",
+      "conditionManual": "Manual",
+      "conditionMinCount": "Minimum count",
+      "note": "Note",
+      "create": "Add bonus",
+      "creating": "Adding…",
+      "createdInfo": "Bonus created.",
+      "evaluate": "Evaluate conditions",
+      "evaluating": "Evaluating…",
+      "evaluatedInfo": "{count} bonus(es) updated.",
+      "markEarned": "Mark earned",
+      "markForfeited": "Mark forfeited",
+      "markPaid": "Mark paid",
+      "colPeriod": "Period",
+      "colBrand": "Brand",
+      "colCondition": "Condition",
+      "colAmount": "Amount",
+      "colStatus": "Status",
+      "colActions": "Actions",
+      "empty": "No bonuses yet.",
+      "condition": {
+        "all_deliverables_done": "All deliverables done",
+        "min_deliverables_done": "Minimum deliverables done",
+        "manual": "Manual"
+      },
+      "status": {
+        "pending": "Pending",
+        "earned": "Earned",
+        "forfeited": "Forfeited",
+        "paid": "Paid"
+      }
+    },
+    "recurrences": {
+      "title": "Recurring deliverables",
+      "newTitle": "New recurrence",
+      "titleLabel": "Title",
+      "typeLabel": "Type",
+      "description": "Description",
+      "assignee": "Assignee",
+      "unassigned": "Unassigned",
+      "frequency": "Frequency",
+      "frequencyDaily": "Daily",
+      "frequencyWeekly": "Weekly",
+      "frequencyMonthly": "Monthly",
+      "intervalCount": "Every",
+      "nextRunOn": "Start on",
+      "shareBps": "Fixed share (bps)",
+      "create": "Create recurrence",
+      "creating": "Creating…",
+      "createdInfo": "Recurrence created.",
+      "colTitle": "Title",
+      "colFrequency": "Frequency",
+      "colNextRun": "Next run",
+      "colAssignee": "Assignee",
+      "colActive": "Active",
+      "colActions": "Actions",
+      "pause": "Pause",
+      "resume": "Resume",
+      "delete": "Delete",
+      "empty": "No recurrences yet.",
+      "active": "active",
+      "paused": "paused"
+    },
+    "deliverablePlanner": {
+      "planTitle": "Plan a new deliverable",
+      "titleLabel": "Title",
+      "typeLabel": "Type",
+      "typeContent": "Content post",
+      "typeAd": "Ad creative",
+      "typeLanding": "Landing page",
+      "typeSeo": "SEO article",
+      "typeEmail": "Email sequence",
+      "typeStrategy": "Strategy doc",
+      "typeCustom": "Custom",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "assignee": "Assignee",
+      "unassigned": "Unassigned",
+      "dueDate": "Due date",
+      "shareBps": "Fixed share (bps)",
+      "description": "Description",
+      "create": "Create deliverable",
+      "creating": "Creating…",
+      "createdInfo": "Deliverable created.",
+      "assign": "Assign",
+      "colTitle": "Title",
+      "colType": "Type",
+      "colStatus": "Status",
+      "colShare": "Share (bps)",
+      "colDue": "Due",
+      "colAssignee": "Assignee",
+      "empty": "No deliverables yet. Use the planner above.",
+      "kanbanLink": "Open Kanban →",
+      "allocationSummary": "Fixed allocation: {percent}% · {flag}.",
+      "flag": {
+        "exact": "on target",
+        "over_allocated": "over allocated",
+        "under_allocated": "under allocated"
+      }
     },
     "finances": {
       "metadata": "Finances · Admin",
@@ -735,7 +850,23 @@
     },
     "admin": {
       "planOverrideSuccess": "Plan override saved.",
-      "planOverrideError": "Provide valid inputs."
+      "planOverrideError": "Provide valid inputs.",
+      "deliverablePlanner": {
+        "invalid_input": "Please check the fields and try again.",
+        "unauthorized": "Sign in to continue.",
+        "forbidden": "Only admins can plan deliverables.",
+        "generic": "Something went wrong. Try again."
+      },
+      "bonuses": {
+        "invalid_input": "Please check the fields and try again.",
+        "forbidden": "Only admins can manage bonuses.",
+        "generic": "Something went wrong. Try again."
+      },
+      "recurrences": {
+        "invalid_input": "Please check the fields and try again.",
+        "forbidden": "Only admins can manage recurrences.",
+        "generic": "Something went wrong. Try again."
+      }
     }
   }
 }

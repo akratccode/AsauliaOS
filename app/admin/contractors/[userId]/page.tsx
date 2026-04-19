@@ -1,13 +1,19 @@
 import { and, desc, eq, isNull } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { db, schema } from '@/lib/db';
 import { formatCents, formatDate } from '@/lib/format';
+import { startImpersonationAction } from '@/app/actions/impersonation';
+import { ContractorBonusForm } from './bonus-form';
+import { BonusRowActions } from './bonus-row-actions';
+import { EvaluateBonusesForm } from './evaluate-form';
 
 type Params = Promise<{ userId: string }>;
 
 export default async function AdminContractorDetailPage({ params }: { params: Params }) {
   const { userId } = await params;
+  const t = await getTranslations('admin.contractors');
 
   const [user] = await db
     .select({
@@ -78,15 +84,56 @@ export default async function AdminContractorDetailPage({ params }: { params: Pa
   const rejected = deliverables.filter((d) => d.status === 'rejected').length;
   const rejectionRate = deliverables.length > 0 ? Math.round((rejected / deliverables.length) * 100) : 0;
 
+  const bonusRows = await db
+    .select({
+      id: schema.contractorBonuses.id,
+      brandId: schema.contractorBonuses.brandId,
+      brandName: schema.brands.name,
+      periodStart: schema.contractorBonuses.periodStart,
+      periodEnd: schema.contractorBonuses.periodEnd,
+      amountCents: schema.contractorBonuses.amountCents,
+      conditionType: schema.contractorBonuses.conditionType,
+      conditionMinCount: schema.contractorBonuses.conditionMinCount,
+      status: schema.contractorBonuses.status,
+      note: schema.contractorBonuses.note,
+      createdAt: schema.contractorBonuses.createdAt,
+    })
+    .from(schema.contractorBonuses)
+    .leftJoin(schema.brands, eq(schema.brands.id, schema.contractorBonuses.brandId))
+    .where(eq(schema.contractorBonuses.contractorUserId, userId))
+    .orderBy(desc(schema.contractorBonuses.createdAt))
+    .limit(50);
+
+  const activeBrands = assignments
+    .filter((a) => !a.endedAt)
+    .map((a) => ({ id: a.brandId, name: a.brandName }));
+
+  const today = new Date();
+  const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const lastOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const toDateStr = (d: Date) => d.toISOString().slice(0, 10);
+  const tBonus = await getTranslations('admin.bonuses');
+
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 p-6">
-      <header>
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Contractor</p>
-        <h1 className="text-fg-1 font-serif text-3xl italic">{user.fullName ?? user.email}</h1>
-        <p className="text-fg-3 mt-1 text-xs">
-          {user.email} · {user.timezone}
-          {profile?.headline ? ` · ${profile.headline}` : ''}
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('contractor')}</p>
+          <h1 className="text-fg-1 font-serif text-3xl italic">{user.fullName ?? user.email}</h1>
+          <p className="text-fg-3 mt-1 text-xs">
+            {user.email} · {user.timezone}
+            {profile?.headline ? ` · ${profile.headline}` : ''}
+          </p>
+        </div>
+        <form action={startImpersonationAction}>
+          <input type="hidden" name="targetUserId" value={user.id} />
+          <button
+            type="submit"
+            className="border-fg-4/20 text-fg-2 hover:bg-bg-2 rounded-md border px-3 py-1.5 text-xs"
+          >
+            {t('impersonate')}
+          </button>
+        </form>
       </header>
 
       <section className="grid gap-3 md:grid-cols-4">
@@ -150,6 +197,80 @@ export default async function AdminContractorDetailPage({ params }: { params: Pa
               </li>
             ))}
           </ul>
+        )}
+      </section>
+
+      <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-fg-1 font-serif text-lg italic">{tBonus('title')}</h2>
+          <EvaluateBonusesForm
+            contractorUserId={userId}
+            defaultPeriodStart={toDateStr(firstOfMonth)}
+            defaultPeriodEnd={toDateStr(lastOfMonth)}
+          />
+        </div>
+        <div className="mb-4">
+          <ContractorBonusForm
+            contractorUserId={userId}
+            brands={activeBrands}
+            defaultPeriodStart={toDateStr(firstOfMonth)}
+            defaultPeriodEnd={toDateStr(lastOfMonth)}
+          />
+        </div>
+        {bonusRows.length === 0 ? (
+          <p className="text-fg-3 text-sm">{tBonus('empty')}</p>
+        ) : (
+          <table className="w-full text-xs">
+            <thead className="text-fg-3 uppercase tracking-[0.1em]">
+              <tr>
+                <th className="px-2 py-2 text-left">{tBonus('colPeriod')}</th>
+                <th className="px-2 py-2 text-left">{tBonus('colBrand')}</th>
+                <th className="px-2 py-2 text-left">{tBonus('colCondition')}</th>
+                <th className="px-2 py-2 text-right">{tBonus('colAmount')}</th>
+                <th className="px-2 py-2 text-left">{tBonus('colStatus')}</th>
+                <th className="px-2 py-2 text-left">{tBonus('colActions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bonusRows.map((b) => (
+                <tr key={b.id} className="border-fg-4/10 border-t">
+                  <td className="text-fg-2 px-2 py-2">
+                    {formatDate(b.periodStart)} – {formatDate(b.periodEnd)}
+                  </td>
+                  <td className="text-fg-2 px-2 py-2">{b.brandName ?? '—'}</td>
+                  <td className="text-fg-3 px-2 py-2">
+                    {b.conditionType === 'min_deliverables_done'
+                      ? `${tBonus(`condition.${b.conditionType}`)} (${b.conditionMinCount ?? 0})`
+                      : tBonus(`condition.${b.conditionType}` as 'condition.manual' | 'condition.all_deliverables_done' | 'condition.min_deliverables_done')}
+                    {b.note ? <div className="text-fg-4">{b.note}</div> : null}
+                  </td>
+                  <td className="text-fg-1 px-2 py-2 text-right">{formatCents(b.amountCents)}</td>
+                  <td className="px-2 py-2">
+                    <span
+                      className={`rounded-full px-2 py-0.5 ${
+                        b.status === 'earned'
+                          ? 'bg-asaulia-green/15 text-asaulia-green'
+                          : b.status === 'forfeited'
+                            ? 'bg-asaulia-red/15 text-asaulia-red'
+                            : b.status === 'paid'
+                              ? 'bg-bg-2 text-fg-2'
+                              : 'bg-warning/15 text-warning'
+                      }`}
+                    >
+                      {tBonus(`status.${b.status}` as 'status.pending' | 'status.earned' | 'status.forfeited' | 'status.paid')}
+                    </span>
+                  </td>
+                  <td className="px-2 py-2">
+                    <BonusRowActions
+                      bonusId={b.id}
+                      contractorUserId={userId}
+                      status={b.status}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </section>
 

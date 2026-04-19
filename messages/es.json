@@ -606,7 +606,122 @@
       "skills": "Habilidades",
       "ready": "listo",
       "incomplete": "incompleto",
-      "noContractors": "Sin contratistas que coincidan."
+      "noContractors": "Sin contratistas que coincidan.",
+      "actions": "Acciones",
+      "impersonate": "Suplantar"
+    },
+    "impersonation": {
+      "bannerActive": "Suplantando usuario",
+      "stop": "Detener suplantación"
+    },
+    "bonuses": {
+      "title": "Bonos condicionales",
+      "brand": "Marca",
+      "anyBrand": "Cualquier marca",
+      "periodStart": "Inicio del período",
+      "periodEnd": "Fin del período",
+      "amountCents": "Monto (centavos)",
+      "conditionType": "Condición",
+      "conditionAll": "Todos los entregables completados",
+      "conditionMin": "Mínimo de entregables completados",
+      "conditionManual": "Manual",
+      "conditionMinCount": "Cantidad mínima",
+      "note": "Nota",
+      "create": "Añadir bono",
+      "creating": "Añadiendo…",
+      "createdInfo": "Bono creado.",
+      "evaluate": "Evaluar condiciones",
+      "evaluating": "Evaluando…",
+      "evaluatedInfo": "{count} bono(s) actualizado(s).",
+      "markEarned": "Marcar ganado",
+      "markForfeited": "Marcar perdido",
+      "markPaid": "Marcar pagado",
+      "colPeriod": "Período",
+      "colBrand": "Marca",
+      "colCondition": "Condición",
+      "colAmount": "Monto",
+      "colStatus": "Estado",
+      "colActions": "Acciones",
+      "empty": "Sin bonos todavía.",
+      "condition": {
+        "all_deliverables_done": "Todos los entregables completados",
+        "min_deliverables_done": "Mínimo de entregables completados",
+        "manual": "Manual"
+      },
+      "status": {
+        "pending": "Pendiente",
+        "earned": "Ganado",
+        "forfeited": "Perdido",
+        "paid": "Pagado"
+      }
+    },
+    "recurrences": {
+      "title": "Entregables recurrentes",
+      "newTitle": "Nueva recurrencia",
+      "titleLabel": "Título",
+      "typeLabel": "Tipo",
+      "description": "Descripción",
+      "assignee": "Asignado a",
+      "unassigned": "Sin asignar",
+      "frequency": "Frecuencia",
+      "frequencyDaily": "Diaria",
+      "frequencyWeekly": "Semanal",
+      "frequencyMonthly": "Mensual",
+      "intervalCount": "Cada",
+      "nextRunOn": "Inicia el",
+      "shareBps": "Participación fija (bps)",
+      "create": "Crear recurrencia",
+      "creating": "Creando…",
+      "createdInfo": "Recurrencia creada.",
+      "colTitle": "Título",
+      "colFrequency": "Frecuencia",
+      "colNextRun": "Próxima",
+      "colAssignee": "Asignado",
+      "colActive": "Activa",
+      "colActions": "Acciones",
+      "pause": "Pausar",
+      "resume": "Reanudar",
+      "delete": "Eliminar",
+      "empty": "Sin recurrencias todavía.",
+      "active": "activa",
+      "paused": "pausada"
+    },
+    "deliverablePlanner": {
+      "planTitle": "Planificar un nuevo entregable",
+      "titleLabel": "Título",
+      "typeLabel": "Tipo",
+      "typeContent": "Post de contenido",
+      "typeAd": "Creatividad publicitaria",
+      "typeLanding": "Landing page",
+      "typeSeo": "Artículo SEO",
+      "typeEmail": "Secuencia de email",
+      "typeStrategy": "Doc de estrategia",
+      "typeCustom": "Personalizado",
+      "periodStart": "Inicio del período",
+      "periodEnd": "Fin del período",
+      "assignee": "Asignado a",
+      "unassigned": "Sin asignar",
+      "dueDate": "Fecha de entrega",
+      "shareBps": "Participación fija (bps)",
+      "description": "Descripción",
+      "create": "Crear entregable",
+      "creating": "Creando…",
+      "createdInfo": "Entregable creado.",
+      "assign": "Asignar",
+      "colTitle": "Título",
+      "colType": "Tipo",
+      "colStatus": "Estado",
+      "colShare": "Share (bps)",
+      "colDue": "Entrega",
+      "colAssignee": "Asignado",
+      "empty": "Sin entregables todavía. Usa el planificador arriba.",
+      "kanbanLink": "Abrir Kanban →",
+      "allocationSummary": "Asignación fija: {percent}% · {flag}.",
+      "flag": {
+        "exact": "en objetivo",
+        "over_allocated": "sobre asignado",
+        "under_allocated": "sub asignado"
+      }
     },
     "finances": {
       "metadata": "Finanzas · Admin",
@@ -735,7 +850,23 @@
     },
     "admin": {
       "planOverrideSuccess": "Anulación de plan guardada.",
-      "planOverrideError": "Proporcioná entradas válidas."
+      "planOverrideError": "Proporcioná entradas válidas.",
+      "deliverablePlanner": {
+        "invalid_input": "Verificá los campos e intentá de nuevo.",
+        "unauthorized": "Iniciá sesión para continuar.",
+        "forbidden": "Solo los admins pueden planificar entregables.",
+        "generic": "Algo salió mal. Intentá de nuevo."
+      },
+      "bonuses": {
+        "invalid_input": "Verificá los campos e intentá de nuevo.",
+        "forbidden": "Solo los admins pueden gestionar bonos.",
+        "generic": "Algo salió mal. Intentá de nuevo."
+      },
+      "recurrences": {
+        "invalid_input": "Verificá los campos e intentá de nuevo.",
+        "forbidden": "Solo los admins pueden gestionar recurrencias.",
+        "generic": "Algo salió mal. Intentá de nuevo."
+      }
     }
   }
 }
