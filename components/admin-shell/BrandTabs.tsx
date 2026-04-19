@@ -10,7 +10,8 @@ type TabDef =
   | { slug: string; ns: 'admin'; key: 'overviewTitle' | 'contractorsTitle' }
   | { slug: string; ns: 'navClient'; key: 'deliverables' | 'plan' | 'sales' }
   | { slug: string; ns: 'navAdmin'; key: 'invoices' | 'audit' }
-  | { slug: string; ns: 'recurrences'; key: 'title' };
+  | { slug: string; ns: 'recurrences'; key: 'title' }
+  | { slug: string; ns: 'commissionPool'; key: 'tabTitle' };
 
 const TABS: ReadonlyArray<TabDef> = [
   { slug: '', ns: 'admin', key: 'overviewTitle' },
@@ -18,6 +19,7 @@ const TABS: ReadonlyArray<TabDef> = [
   { slug: 'recurrences', ns: 'recurrences', key: 'title' },
   { slug: 'plan', ns: 'navClient', key: 'plan' },
   { slug: 'contractors', ns: 'admin', key: 'contractorsTitle' },
+  { slug: 'commission-pool', ns: 'commissionPool', key: 'tabTitle' },
   { slug: 'sales', ns: 'navClient', key: 'sales' },
   { slug: 'invoices', ns: 'navAdmin', key: 'invoices' },
   { slug: 'audit', ns: 'navAdmin', key: 'audit' },
@@ -30,6 +32,7 @@ export function BrandTabs({ brandId }: Props) {
   const tNavClient = useTranslations('nav.client');
   const tNavAdmin = useTranslations('nav.admin');
   const tRecurrences = useTranslations('admin.recurrences');
+  const tCommissionPool = useTranslations('admin.commissionPool');
   const base = `/admin/brands/${brandId}`;
 
   function labelFor(tab: TabDef): string {
@@ -39,6 +42,7 @@ export function BrandTabs({ brandId }: Props) {
     }
     if (tab.ns === 'navClient') return tNavClient(tab.key);
     if (tab.ns === 'recurrences') return tRecurrences('title');
+    if (tab.ns === 'commissionPool') return tCommissionPool('tabTitle');
     return tNavAdmin(tab.key);
   }
 
