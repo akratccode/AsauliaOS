@@ -34,7 +34,11 @@ const schema = z.object({
 });
 
 function parseEnv() {
-  const result = schema.safeParse(process.env);
+  const cleaned: Record<string, string | undefined> = {};
+  for (const [key, value] of Object.entries(process.env)) {
+    cleaned[key] = value === '' ? undefined : value;
+  }
+  const result = schema.safeParse(cleaned);
   if (!result.success) {
     const issues = result.error.issues
       .map((i) => `  - ${i.path.join('.')}: ${i.message}`)
