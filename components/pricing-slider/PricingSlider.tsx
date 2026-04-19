@@ -122,16 +122,23 @@ export function PricingSlider({
 
       <div className="border-fg-4/15 border-t pt-6 space-y-3">
         <label className="flex items-center justify-between text-sm">
-          <span className="text-fg-2">Expected monthly attributed sales</span>
-          <input
-            type="number"
-            min={0}
-            step={10_000}
-            value={projection}
-            onChange={(e) => setProjection(Math.max(0, Number(e.target.value)))}
-            className="border-fg-4/20 bg-bg-2 text-fg-1 w-28 rounded-md border px-2 py-1 text-right text-sm"
-            aria-label="Expected monthly attributed sales in cents"
-          />
+          <span className="text-fg-2">Expected monthly attributed sales (USD)</span>
+          <div className="relative">
+            <span className="text-fg-3 pointer-events-none absolute inset-y-0 left-2 flex items-center text-sm">
+              $
+            </span>
+            <input
+              type="number"
+              min={0}
+              step={100}
+              value={Math.round(projection / 100)}
+              onChange={(e) =>
+                setProjection(Math.max(0, Math.round(Number(e.target.value) * 100)))
+              }
+              className="border-fg-4/20 bg-bg-2 text-fg-1 w-32 rounded-md border py-1 pl-6 pr-2 text-right text-sm"
+              aria-label="Expected monthly attributed sales in US dollars"
+            />
+          </div>
         </label>
         <div className="grid grid-cols-3 gap-3 text-xs">
           <ProjectionCard
