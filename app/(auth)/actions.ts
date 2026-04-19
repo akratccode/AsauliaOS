@@ -34,7 +34,7 @@ async function landingForRole(userId: string): Promise<string> {
     .from(brandMembers)
     .where(eq(brandMembers.userId, userId))
     .limit(1);
-  return membership[0] ? '/dashboard' : '/onboarding';
+  return membership[0] ? '/dashboard' : '/onboarding/brand';
 }
 
 const loginSchema = z.object({
