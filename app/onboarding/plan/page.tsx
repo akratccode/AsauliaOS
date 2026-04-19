@@ -1,15 +1,18 @@
+import { getTranslations } from 'next-intl/server';
 import { PlanForm } from './plan-form';
 
-export const metadata = { title: 'Pick your plan · Asaulia' };
+export async function generateMetadata() {
+  const t = await getTranslations('onboarding.plan');
+  return { title: t('metadata') };
+}
 
-export default function PlanStepPage() {
+export default async function PlanStepPage() {
+  const t = await getTranslations('onboarding.plan');
   return (
     <section className="space-y-8">
       <header className="space-y-2">
-        <h1 className="font-serif text-3xl italic">Choose your split.</h1>
-        <p className="text-fg-3 text-sm">
-          Slide between a lean fixed base and a higher fixed fee with a smaller cut of sales.
-        </p>
+        <h1 className="font-serif text-3xl italic">{t('title')}</h1>
+        <p className="text-fg-3 text-sm">{t('subtitle')}</p>
       </header>
       <PlanForm />
     </section>

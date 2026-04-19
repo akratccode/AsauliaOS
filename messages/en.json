@@ -89,5 +89,66 @@
       "passwordTooShort": "Password must be at least 8 characters.",
       "resetFailed": "Could not update your password. Try requesting a new link."
     }
+  },
+  "onboarding": {
+    "brand": {
+      "metadata": "Brand setup · Asaulia",
+      "title": "Tell us about your brand.",
+      "subtitle": "Only the essentials. You can edit everything later.",
+      "fields": {
+        "name": "Brand name",
+        "slug": "URL slug",
+        "website": "Website",
+        "websitePlaceholder": "https://",
+        "timezone": "Timezone"
+      },
+      "submit": "Continue"
+    },
+    "plan": {
+      "metadata": "Pick your plan · Asaulia",
+      "title": "Choose your split.",
+      "subtitle": "Slide between a lean fixed base and a higher fixed fee with a smaller cut of sales.",
+      "submit": "Continue to payment",
+      "slider": {
+        "fixedLabel": "Monthly fixed fee",
+        "yourPlan": "Your plan",
+        "perMonth": "/ month",
+        "variableSuffix": "of attributed sales",
+        "projectedTotal": "Projected total",
+        "starter": "Starter",
+        "pro": "Pro",
+        "expectedSales": "Expected monthly attributed sales (USD)",
+        "expectedSalesAria": "Expected monthly attributed sales in US dollars",
+        "current": "Current"
+      }
+    },
+    "payment": {
+      "metadata": "Set up billing · Asaulia",
+      "title": "Set up billing.",
+      "subtitle": "We charge the fixed portion monthly; variable is reconciled at the close of each cycle.",
+      "submit": "Continue to Stripe",
+      "cancelledInfo": "Payment was cancelled. Try again when you're ready.",
+      "stripeInfo": "You'll be redirected to Stripe to save a card. No charge until your first billing cycle closes.",
+      "supportText": "Having trouble? Reach us at"
+    },
+    "complete": {
+      "metadata": "You're in · Asaulia",
+      "title": "You're in.",
+      "subtitle": "Taking you to your dashboard now.",
+      "skipLink": "Skip ahead"
+    },
+    "errors": {
+      "invalidInput": "Please check the brand fields and try again.",
+      "slugTaken": "We couldn't reserve that brand name. Try a different one.",
+      "invalidPlan": "That plan is not valid. Try sliding again.",
+      "planMismatch": "The fixed and variable portions do not match. Please try again.",
+      "stripeFailed": "Stripe did not return a checkout URL.",
+      "paymentPending": "Payment was cancelled. Try again when you're ready.",
+      "noBrand": "Start with the brand setup step first.",
+      "noBrandRestart": "Restart onboarding to set up billing.",
+      "brandNotFound": "We lost track of your brand. Please restart onboarding.",
+      "noPlan": "Pick a plan before setting up payment.",
+      "generic": "Something went wrong. Please try again."
+    }
   }
 }

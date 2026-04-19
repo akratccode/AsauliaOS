@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   PRICING,
   formatBps,
@@ -23,6 +24,7 @@ export function PricingSlider({
   name = 'fixedAmountCents',
   variableName = 'variablePercentBps',
 }: Props) {
+  const t = useTranslations('onboarding.plan.slider');
   const stops = useMemo(() => sliderStopsFixedCents(), []);
   const [fixedCents, setFixedCents] = useState(() =>
     snapToStops(defaultFixedCents, stops),
@@ -76,19 +78,19 @@ export function PricingSlider({
     >
       <div className="flex items-baseline justify-between gap-6">
         <div>
-          <div className="text-fg-4 text-xs uppercase tracking-[0.16em]">Your plan</div>
+          <div className="text-fg-4 text-xs uppercase tracking-[0.16em]">{t('yourPlan')}</div>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-fg-1 font-serif text-5xl italic">
               {formatCents(fixedCents)}
             </span>
-            <span className="text-fg-3 text-sm">/ month</span>
+            <span className="text-fg-3 text-sm">{t('perMonth')}</span>
           </div>
           <p className="text-fg-3 mt-1 text-sm" data-testid="derived-variable">
-            + {formatBps(variableBps)} of attributed sales
+            + {formatBps(variableBps)} {t('variableSuffix')}
           </p>
         </div>
         <div className="text-right">
-          <div className="text-fg-4 text-xs uppercase tracking-[0.16em]">Projected total</div>
+          <div className="text-fg-4 text-xs uppercase tracking-[0.16em]">{t('projectedTotal')}</div>
           <div className="text-fg-1 mt-1 font-serif text-3xl italic">
             {formatCents(selected.totalAmountCents)}
           </div>
@@ -103,8 +105,8 @@ export function PricingSlider({
         value={fixedCents}
         onChange={(e) => setFixedCents(Number(e.target.value))}
         onKeyDown={onKeyDown}
-        aria-label="Monthly fixed fee"
-        aria-valuetext={`${formatCents(fixedCents)} fixed, ${formatBps(variableBps)} variable`}
+        aria-label={t('fixedLabel')}
+        aria-valuetext={`${formatCents(fixedCents)} ${t('fixedLabel')} · ${formatBps(variableBps)} ${t('variableSuffix')}`}
         className="w-full accent-[var(--color-asaulia-blue)]"
       />
 
@@ -113,16 +115,16 @@ export function PricingSlider({
 
       <div className="flex items-center justify-between text-xs uppercase tracking-[0.12em]">
         <span className="text-fg-3">
-          Starter · {formatCents(PRICING.MIN_FIXED_CENTS)} + {formatBps(PRICING.MAX_VARIABLE_BPS)}
+          {t('starter')} · {formatCents(PRICING.MIN_FIXED_CENTS)} + {formatBps(PRICING.MAX_VARIABLE_BPS)}
         </span>
         <span className="text-fg-3">
-          Pro · {formatCents(PRICING.MAX_FIXED_CENTS)} + {formatBps(PRICING.MIN_VARIABLE_BPS)}
+          {t('pro')} · {formatCents(PRICING.MAX_FIXED_CENTS)} + {formatBps(PRICING.MIN_VARIABLE_BPS)}
         </span>
       </div>
 
       <div className="border-fg-4/15 border-t pt-6 space-y-3">
         <label className="flex items-center justify-between text-sm">
-          <span className="text-fg-2">Expected monthly attributed sales (USD)</span>
+          <span className="text-fg-2">{t('expectedSales')}</span>
           <div className="relative">
             <span className="text-fg-3 pointer-events-none absolute inset-y-0 left-2 flex items-center text-sm">
               $
@@ -136,25 +138,25 @@ export function PricingSlider({
                 setProjection(Math.max(0, Math.round(Number(e.target.value) * 100)))
               }
               className="border-fg-4/20 bg-bg-2 text-fg-1 w-32 rounded-md border py-1 pl-6 pr-2 text-right text-sm"
-              aria-label="Expected monthly attributed sales in US dollars"
+              aria-label={t('expectedSalesAria')}
             />
           </div>
         </label>
         <div className="grid grid-cols-3 gap-3 text-xs">
           <ProjectionCard
-            label="Current"
+            label={t('current')}
             sublabel={`${formatCents(fixedCents)} + ${formatBps(variableBps)}`}
             amount={selected.totalAmountCents}
             highlight={cheapest === 'current'}
           />
           <ProjectionCard
-            label="Starter"
+            label={t('starter')}
             sublabel={`${formatCents(PRICING.MIN_FIXED_CENTS)} + ${formatBps(PRICING.MAX_VARIABLE_BPS)}`}
             amount={starter.totalAmountCents}
             highlight={cheapest === 'starter'}
           />
           <ProjectionCard
-            label="Pro"
+            label={t('pro')}
             sublabel={`${formatCents(PRICING.MAX_FIXED_CENTS)} + ${formatBps(PRICING.MIN_VARIABLE_BPS)}`}
             amount={pro.totalAmountCents}
             highlight={cheapest === 'pro'}

@@ -1,19 +1,22 @@
+import { getTranslations } from 'next-intl/server';
 import { PaymentForm } from './payment-form';
 
-export const metadata = { title: 'Set up billing · Asaulia' };
+export async function generateMetadata() {
+  const t = await getTranslations('onboarding.payment');
+  return { title: t('metadata') };
+}
 
-export default function PaymentStepPage({
+export default async function PaymentStepPage({
   searchParams,
 }: {
   searchParams: Promise<{ cancelled?: string }>;
 }) {
+  const t = await getTranslations('onboarding.payment');
   return (
     <section className="space-y-8">
       <header className="space-y-2">
-        <h1 className="font-serif text-3xl italic">Set up billing.</h1>
-        <p className="text-fg-3 text-sm">
-          We charge the fixed portion monthly; variable is reconciled at the close of each cycle.
-        </p>
+        <h1 className="font-serif text-3xl italic">{t('title')}</h1>
+        <p className="text-fg-3 text-sm">{t('subtitle')}</p>
       </header>
       <PaymentForm searchParams={searchParams} />
     </section>
