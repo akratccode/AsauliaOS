@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { and, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth/rbac';
@@ -8,6 +8,7 @@ import { db, schema } from '@/lib/db';
 import { writeLedger } from '@/lib/billing/ledger';
 import { runPayoutsForInvoice } from '@/lib/billing/payout';
 import { currencyForRegion } from '@/lib/billing/region';
+import { tags } from '@/lib/cache/tags';
 
 const UuidSchema = z.string().uuid();
 const RegionSchema = z.enum(['us', 'co']);
@@ -117,6 +118,7 @@ export async function adminMarkInvoicePaidAction(
 
     revalidatePath('/admin/finances');
     revalidatePath('/admin/finances/invoices');
+    revalidateTag(tags.invoicesByRegion(invoice.financeRegion), 'max');
     return { ok: true, info: 'marked_paid' };
   } catch {
     return { ok: false, error: 'generic' };
@@ -182,6 +184,7 @@ export async function adminMarkPayoutPaidAction(
     });
 
     revalidatePath('/admin/finances/payouts');
+    revalidateTag(tags.payoutsByRegion(payout.financeRegion), 'max');
     return { ok: true, info: 'marked_paid' };
   } catch {
     return { ok: false, error: 'generic' };
@@ -300,6 +303,7 @@ export async function adminCloseFinancePeriodAction(
     });
 
     revalidatePath('/admin/finances/close');
+    revalidateTag(tags.financePeriods(financeRegion), 'max');
     return { ok: true, info: 'period_closed' };
   } catch {
     return { ok: false, error: 'generic' };
@@ -352,6 +356,7 @@ export async function adminReopenFinancePeriodAction(
     });
 
     revalidatePath('/admin/finances/close');
+    revalidateTag(tags.financePeriods(financeRegion), 'max');
     return { ok: true, info: 'period_reopened' };
   } catch {
     return { ok: false, error: 'generic' };
