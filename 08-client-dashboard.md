@@ -35,12 +35,12 @@ app/(client)/
 
 ### 1. Shell & navigation
 
-- [ ] `app/(client)/layout.tsx`:
+- [x] `app/(client)/layout.tsx`:
   - Left sidebar on desktop, bottom nav on mobile.
   - Nav items: Dashboard, Deliverables, Sales, Plan, Billing, Team, Settings.
   - Top bar: brand switcher (if user owns multiple brands), notifications bell, user menu.
   - Current billing period indicator: "Period: Oct 15 – Nov 14".
-- [ ] Empty state: if user's brand is brand-new and no deliverables exist yet, show a warm welcome with CTA "Your team will start delivering within 48 hours".
+- [x] Empty state: if user's brand is brand-new and no deliverables exist yet, show a warm welcome with CTA "Your team will start delivering within 48 hours".
 
 ### 2. Dashboard page
 
