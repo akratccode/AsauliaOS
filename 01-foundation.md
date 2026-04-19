@@ -15,20 +15,20 @@ Every subsequent phase depends on this one being solid.
 
 ### 1. Initialize the project
 
-- [ ] Run `pnpm create next-app@latest asaulia-platform --typescript --tailwind --app --eslint --src-dir=false --import-alias="@/*"`.
-- [ ] `cd asaulia-platform`.
-- [ ] Commit initial state: `git init && git add . && git commit -m "feat(phase-01): initial Next.js scaffold"`.
-- [ ] Verify `pnpm dev` renders the default page at `http://localhost:3000`.
+- [x] Run `pnpm create next-app@latest asaulia-platform --typescript --tailwind --app --eslint --src-dir=false --import-alias="@/*"`.
+- [x] `cd asaulia-platform`.
+- [x] Commit initial state: `git init && git add . && git commit -m "feat(phase-01): initial Next.js scaffold"`.
+- [x] Verify `pnpm dev` renders the default page at `http://localhost:3000`.
 
 ### 2. Configure TypeScript strictly
 
-- [ ] In `tsconfig.json`, set `"strict": true`, `"noUncheckedIndexedAccess": true`, `"noImplicitOverride": true`, `"noFallthroughCasesInSwitch": true`.
-- [ ] Add `"moduleResolution": "bundler"` if not present.
+- [x] In `tsconfig.json`, set `"strict": true`, `"noUncheckedIndexedAccess": true`, `"noImplicitOverride": true`, `"noFallthroughCasesInSwitch": true`.
+- [x] Add `"moduleResolution": "bundler"` if not present.
 
 ### 3. Install and configure shadcn/ui
 
-- [ ] `pnpm dlx shadcn@latest init` — pick Default, Slate, CSS variables: yes.
-- [ ] Add baseline components: `pnpm dlx shadcn@latest add button input label card dialog dropdown-menu tabs toast sonner form`.
+- [x] `pnpm dlx shadcn@latest init` — pick Default, Slate, CSS variables: yes.
+- [x] Add baseline components: `pnpm dlx shadcn@latest add button input label card dialog dropdown-menu tabs toast sonner form`.
 
 ### 4. Install core dependencies
 
@@ -43,9 +43,9 @@ pnpm add -D drizzle-kit vitest @vitest/ui @testing-library/react @testing-librar
 
 ### 5. Set up linting and formatting
 
-- [ ] Create `.prettierrc` with the Tailwind plugin: `{ "plugins": ["prettier-plugin-tailwindcss"] }`.
-- [ ] Extend ESLint config to include `"prettier"`, disable rules that conflict.
-- [ ] Add scripts to `package.json`:
+- [x] Create `.prettierrc` with the Tailwind plugin: `{ "plugins": ["prettier-plugin-tailwindcss"] }`.
+- [x] Extend ESLint config to include `"prettier"`, disable rules that conflict.
+- [x] Add scripts to `package.json`:
   ```json
   {
     "scripts": {
@@ -67,7 +67,7 @@ pnpm add -D drizzle-kit vitest @vitest/ui @testing-library/react @testing-librar
 
 ### 6. Configure Vitest
 
-- [ ] Create `vitest.config.ts`:
+- [x] Create `vitest.config.ts`:
   ```ts
   import { defineConfig } from 'vitest/config';
   import react from '@vitejs/plugin-react';
@@ -85,19 +85,19 @@ pnpm add -D drizzle-kit vitest @vitest/ui @testing-library/react @testing-librar
     },
   });
   ```
-- [ ] Install `@vitejs/plugin-react`: `pnpm add -D @vitejs/plugin-react`.
-- [ ] Create `tests/setup.ts`:
+- [x] Install `@vitejs/plugin-react`: `pnpm add -D @vitejs/plugin-react`.
+- [x] Create `tests/setup.ts`:
   ```ts
   import '@testing-library/jest-dom/vitest';
   ```
-- [ ] Write a sanity test `tests/unit/sanity.test.ts`:
+- [x] Write a sanity test `tests/unit/sanity.test.ts`:
   ```ts
   import { describe, it, expect } from 'vitest';
   describe('sanity', () => {
     it('adds', () => { expect(1 + 1).toBe(2); });
   });
   ```
-- [ ] `pnpm test` must pass.
+- [x] `pnpm test` must pass.
 
 ### 7. Create the folder structure
 
@@ -133,10 +133,10 @@ scripts
 
 ### 8. Environment configuration
 
-- [ ] Create `.env.example` with every variable listed in `ARCHITECTURE.md` §Environment variables, with placeholder values or empty strings.
-- [ ] Create `.env.local` from it and fill in at least the dev Supabase, dev Stripe test keys, and local `DATABASE_URL`.
-- [ ] Ensure `.env*.local` is in `.gitignore` (Next.js default already covers this — verify).
-- [ ] Create `lib/env.ts` that validates process.env with Zod and exports a typed `env` object:
+- [x] Create `.env.example` with every variable listed in `ARCHITECTURE.md` §Environment variables, with placeholder values or empty strings.
+- [x] Create `.env.local` from it and fill in at least the dev Supabase, dev Stripe test keys, and local `DATABASE_URL`.
+- [x] Ensure `.env*.local` is in `.gitignore` (Next.js default already covers this — verify).
+- [x] Create `lib/env.ts` that validates process.env with Zod and exports a typed `env` object:
   ```ts
   import { z } from 'zod';
   const schema = z.object({
@@ -153,14 +153,14 @@ scripts
 
 ### 9. Supabase local setup
 
-- [ ] Install the Supabase CLI: `brew install supabase/tap/supabase` (or the user's platform equivalent).
-- [ ] `supabase init` at the project root.
-- [ ] `supabase start` — verify it runs locally; copy the local URL and anon key to `.env.local`.
-- [ ] Commit the generated `supabase/` directory.
+- [x] Install the Supabase CLI: `brew install supabase/tap/supabase` (or the user's platform equivalent).
+- [x] `supabase init` at the project root.
+- [x] `supabase start` — verify it runs locally; copy the local URL and anon key to `.env.local`.
+- [x] Commit the generated `supabase/` directory.
 
 ### 10. Drizzle configuration
 
-- [ ] Create `drizzle.config.ts`:
+- [x] Create `drizzle.config.ts`:
   ```ts
   import type { Config } from 'drizzle-kit';
   import { env } from '@/lib/env';
@@ -172,12 +172,12 @@ scripts
     dbCredentials: { url: env.DATABASE_URL },
   } satisfies Config;
   ```
-- [ ] Create a temporary `lib/db/schema/_placeholder.ts` so `drizzle-kit` has something to scan:
+- [x] Create a temporary `lib/db/schema/_placeholder.ts` so `drizzle-kit` has something to scan:
   ```ts
   // Replaced in Phase 02.
   export const _placeholder = true;
   ```
-- [ ] Create `lib/db/index.ts`:
+- [x] Create `lib/db/index.ts`:
   ```ts
   import { drizzle } from 'drizzle-orm/postgres-js';
   import postgres from 'postgres';
@@ -189,17 +189,17 @@ scripts
 
 ### 11. Sentry + PostHog
 
-- [ ] Follow `pnpm dlx @sentry/wizard@latest -i nextjs` — accept defaults.
-- [ ] Create `lib/analytics.ts` with a PostHog client (no-op in dev unless key is set).
+- [x] Follow `pnpm dlx @sentry/wizard@latest -i nextjs` — accept defaults.
+- [x] Create `lib/analytics.ts` with a PostHog client (no-op in dev unless key is set).
 
 ### 12. Root layout & "Hello Asaulia" page
 
-- [ ] Replace `app/page.tsx` with a minimal landing: an H1 "Asaulia" and a subtitle. No design effort — Phase 08+ handles UI.
-- [ ] Confirm dark-mode classes work (Tailwind's `dark:` variants). shadcn provides a `ThemeProvider`.
+- [x] Replace `app/page.tsx` with a minimal landing: an H1 "Asaulia" and a subtitle. No design effort — Phase 08+ handles UI.
+- [x] Confirm dark-mode classes work (Tailwind's `dark:` variants). shadcn provides a `ThemeProvider`.
 
 ### 13. GitHub Actions CI
 
-- [ ] Create `.github/workflows/ci.yml`:
+- [x] Create `.github/workflows/ci.yml`:
   ```yaml
   name: CI
   on: [push, pull_request]
@@ -220,9 +220,9 @@ scripts
 
 ### 14. Deploy preview
 
-- [ ] Link the repo to Vercel.
-- [ ] Set env vars in Vercel project settings for Preview and Production environments.
-- [ ] Confirm the default `app/page.tsx` renders at the preview URL.
+- [x] Link the repo to Vercel.
+- [x] Set env vars in Vercel project settings for Preview and Production environments.
+- [x] Confirm the default `app/page.tsx` renders at the preview URL.
 
 ---
 

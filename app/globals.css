@@ -1,0 +1,117 @@
+@import 'tailwindcss';
+
+/* =========================================================================
+   Asaulia design tokens — dark-first. Source of truth lives in
+   design-system/colors_and_type.css; this file mirrors the tokens into
+   Tailwind 4's @theme layer so Tailwind utilities resolve against them.
+   ========================================================================= */
+
+:root {
+  /* Brand */
+  --asaulia-blue: #3a5bff;
+  --asaulia-blue-ink: #1f35c7;
+  --asaulia-blue-soft: #7f95ff;
+  --asaulia-blue-glow: #5b7bff;
+  --asaulia-ink: #0b1020;
+  --asaulia-cream: #f5f3ee;
+
+  /* Dark surfaces */
+  --bg-0: #05070f;
+  --bg-1: #080c1a;
+  --bg-2: #0e1428;
+  --bg-3: #151d38;
+  --bg-4: #1d2648;
+
+  /* Glass */
+  --glass-1: rgba(21, 29, 56, 0.55);
+  --glass-2: rgba(21, 29, 56, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-strong: rgba(255, 255, 255, 0.14);
+
+  /* Foreground */
+  --fg-1: #f3f5fb;
+  --fg-2: #bdc4db;
+  --fg-3: #7e87a8;
+  --fg-4: #4a5273;
+  --fg-on-blue: #ffffff;
+
+  /* Semantic */
+  --success: #35d39a;
+  --warning: #f5b544;
+  --danger: #ff5a6a;
+
+  /* Pricing */
+  --pricing-fixed: #7f95ff;
+  --pricing-variable: #35d39a;
+
+  /* Motion */
+  --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 420ms;
+  --dur-breath: 4200ms;
+
+  /* Glow */
+  --glow-voice:
+    radial-gradient(
+      60% 50% at 50% 100%,
+      rgba(58, 91, 255, 0.55) 0%,
+      rgba(58, 91, 255, 0.22) 35%,
+      rgba(58, 91, 255, 0) 70%
+    );
+}
+
+@theme inline {
+  --color-asaulia-blue: var(--asaulia-blue);
+  --color-asaulia-blue-ink: var(--asaulia-blue-ink);
+  --color-asaulia-blue-soft: var(--asaulia-blue-soft);
+  --color-asaulia-blue-glow: var(--asaulia-blue-glow);
+  --color-asaulia-ink: var(--asaulia-ink);
+  --color-asaulia-cream: var(--asaulia-cream);
+
+  --color-bg-0: var(--bg-0);
+  --color-bg-1: var(--bg-1);
+  --color-bg-2: var(--bg-2);
+  --color-bg-3: var(--bg-3);
+  --color-bg-4: var(--bg-4);
+
+  --color-fg-1: var(--fg-1);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-fg-4: var(--fg-4);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --color-pricing-fixed: var(--pricing-fixed);
+  --color-pricing-variable: var(--pricing-variable);
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-2xl: 36px;
+  --radius-pill: 9999px;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-serif: var(--font-instrument-serif), 'Times New Roman', Georgia, serif;
+}
+
+html,
+body {
+  background: var(--bg-0);
+  color: var(--fg-1);
+  font-family:
+    var(--font-geist-sans, 'Geist'), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-synthesis: none;
+}
+
+body {
+  min-height: 100vh;
+}
