@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { LocaleSwitcherServer } from '@/components/i18n/LocaleSwitcherServer';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -11,6 +12,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         }}
         aria-hidden
       />
+      <div className="absolute right-4 top-4 z-10">
+        <LocaleSwitcherServer variant="compact" />
+      </div>
       <main className="relative mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 py-16">
         {children}
       </main>

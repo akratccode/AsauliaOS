@@ -29,5 +29,65 @@
     "tryAgain": "Please try again.",
     "validation": "Please check the form and try again.",
     "sessionExpired": "Your session expired. Please sign in again."
+  },
+  "auth": {
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "fullName": "Full name",
+      "newPassword": "New password"
+    },
+    "actions": {
+      "signIn": "Sign in",
+      "createAccount": "Create account",
+      "sendResetLink": "Send reset link",
+      "saveNewPassword": "Save new password"
+    },
+    "links": {
+      "newHere": "New here?",
+      "forgotPassword": "Forgot your password?",
+      "alreadySignedUp": "Already signed up?",
+      "alreadyConfirmed": "Already confirmed?",
+      "backTo": "Back to"
+    },
+    "login": {
+      "metadata": "Sign in · Asaulia",
+      "title": "Welcome back.",
+      "subtitle": "Sign in to pick up where you left off."
+    },
+    "signup": {
+      "metadata": "Create account · Asaulia",
+      "title": "Start with Asaulia.",
+      "subtitleDefault": "Create your account and pick a plan on the next step.",
+      "subtitleInvite": "Finish setting up your invitation."
+    },
+    "verifyEmail": {
+      "metadata": "Verify your email · Asaulia",
+      "title": "Check your inbox.",
+      "subtitle": "We sent a confirmation link to your email. Click it to finish setting up your account."
+    },
+    "resetPassword": {
+      "request": {
+        "metadata": "Reset password · Asaulia",
+        "title": "Reset your password.",
+        "subtitle": "We'll email you a link to set a new one."
+      },
+      "confirm": {
+        "metadata": "Set a new password · Asaulia",
+        "title": "Choose a new password.",
+        "subtitle": "Once saved we'll take you to sign in again."
+      }
+    },
+    "errors": {
+      "invalidCredentials": "We couldn't sign you in with those credentials. Double-check and try again.",
+      "rateLimited": "Too many attempts. Try again in a few minutes.",
+      "accountCreationFailed": "We couldn't create that account. Try a different email.",
+      "invalidInvitation": "This invitation is no longer valid.",
+      "validation": "Please check the form and try again.",
+      "resetTooManyRequests": "Too many reset requests. Try again later.",
+      "resetInfo": "If that email has an account, we sent a reset link.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "resetFailed": "Could not update your password. Try requesting a new link."
+    }
   }
 }
