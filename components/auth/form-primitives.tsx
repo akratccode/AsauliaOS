@@ -1,4 +1,7 @@
+'use client';
+
 import type { ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 
 type FieldProps = {
   label: string;
@@ -26,17 +29,20 @@ export function AuthField({ label, name, type = 'text', ...rest }: FieldProps) {
 export function SubmitButton({
   pending,
   children,
+  pendingLabel,
 }: {
   pending: boolean;
   children: ReactNode;
+  pendingLabel?: ReactNode;
 }) {
+  const t = useTranslations('forms');
   return (
     <button
       type="submit"
       disabled={pending}
       className="bg-asaulia-blue text-fg-1 hover:bg-asaulia-blue/90 inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {pending ? 'Working…' : children}
+      {pending ? (pendingLabel ?? t('submitting')) : children}
     </button>
   );
 }

@@ -4,5 +4,30 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "loading": "Cargando..."
+  },
+  "locale": {
+    "ariaLabel": "Elegir idioma",
+    "short": {
+      "en": "EN",
+      "es": "ES"
+    },
+    "full": {
+      "en": "Inglés",
+      "es": "Español"
+    }
+  },
+  "forms": {
+    "submitting": "Enviando…"
+  },
+  "errors": {
+    "generic": "Algo salió mal. Por favor intenta de nuevo.",
+    "unauthorized": "Necesitás iniciar sesión para continuar.",
+    "forbidden": "No tenés permiso para hacer eso.",
+    "notFound": "No pudimos encontrar lo que buscabas.",
+    "rateLimit": "Demasiadas solicitudes. Por favor esperá un momento.",
+    "networkError": "Error de red. Revisá tu conexión e intenta de nuevo.",
+    "tryAgain": "Por favor intenta de nuevo.",
+    "validation": "Por favor revisá el formulario e intenta de nuevo.",
+    "sessionExpired": "Tu sesión expiró. Por favor iniciá sesión de nuevo."
   }
 }
