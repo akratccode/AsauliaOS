@@ -89,5 +89,66 @@
       "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
       "resetFailed": "No pudimos actualizar tu contraseña. Probá solicitando un nuevo enlace."
     }
+  },
+  "onboarding": {
+    "brand": {
+      "metadata": "Configurá tu marca · Asaulia",
+      "title": "Contanos sobre tu marca.",
+      "subtitle": "Solo lo esencial. Podés editar todo después.",
+      "fields": {
+        "name": "Nombre de la marca",
+        "slug": "Slug de URL",
+        "website": "Sitio web",
+        "websitePlaceholder": "https://",
+        "timezone": "Zona horaria"
+      },
+      "submit": "Continuar"
+    },
+    "plan": {
+      "metadata": "Elegí tu plan · Asaulia",
+      "title": "Elegí tu división.",
+      "subtitle": "Deslizá entre una base fija baja y una tarifa fija más alta con un corte menor sobre ventas.",
+      "submit": "Continuar al pago",
+      "slider": {
+        "fixedLabel": "Tarifa fija mensual",
+        "yourPlan": "Tu plan",
+        "perMonth": "/ mes",
+        "variableSuffix": "de ventas atribuidas",
+        "projectedTotal": "Total proyectado",
+        "starter": "Starter",
+        "pro": "Pro",
+        "expectedSales": "Ventas mensuales atribuidas esperadas (USD)",
+        "expectedSalesAria": "Ventas mensuales atribuidas esperadas en dólares",
+        "current": "Actual"
+      }
+    },
+    "payment": {
+      "metadata": "Configurá la facturación · Asaulia",
+      "title": "Configurá la facturación.",
+      "subtitle": "Cobramos la parte fija mensualmente; la variable se liquida al cierre de cada ciclo.",
+      "submit": "Continuar a Stripe",
+      "cancelledInfo": "El pago fue cancelado. Intentá de nuevo cuando estés listo.",
+      "stripeInfo": "Te redirigiremos a Stripe para guardar una tarjeta. No se cobra nada hasta que cierre tu primer ciclo.",
+      "supportText": "¿Algún problema? Escribinos a"
+    },
+    "complete": {
+      "metadata": "Listo · Asaulia",
+      "title": "Listo.",
+      "subtitle": "Te llevamos al panel ahora.",
+      "skipLink": "Saltar"
+    },
+    "errors": {
+      "invalidInput": "Por favor revisá los campos de la marca e intenta de nuevo.",
+      "slugTaken": "No pudimos reservar ese nombre de marca. Probá con otro.",
+      "invalidPlan": "Ese plan no es válido. Probá deslizando de nuevo.",
+      "planMismatch": "Las partes fija y variable no coinciden. Por favor intenta de nuevo.",
+      "stripeFailed": "Stripe no devolvió una URL de checkout.",
+      "paymentPending": "El pago fue cancelado. Intentá de nuevo cuando estés listo.",
+      "noBrand": "Empezá por el paso de configuración de la marca.",
+      "noBrandRestart": "Reiniciá el onboarding para configurar la facturación.",
+      "brandNotFound": "Perdimos el rastro de tu marca. Por favor reiniciá el onboarding.",
+      "noPlan": "Elegí un plan antes de configurar el pago.",
+      "generic": "Algo salió mal. Por favor intenta de nuevo."
+    }
   }
 }

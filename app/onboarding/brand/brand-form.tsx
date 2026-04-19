@@ -1,9 +1,12 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { createBrandAction, type OnboardingState } from '../actions';
 import { FormAlert, SubmitButton } from '@/components/auth/form-primitives';
 import { slugify } from '@/lib/utils/slug';
+
+type BrandErrorCode = 'invalid_input' | 'slug_taken' | 'generic';
 
 function detectTimezone() {
   if (typeof window === 'undefined') return 'UTC';
@@ -23,6 +26,21 @@ export function BrandForm() {
   const [slug, setSlug] = useState('');
   const [slugTouched, setSlugTouched] = useState(false);
   const [timezone] = useState(detectTimezone);
+  const t = useTranslations('onboarding.brand');
+  const tFields = useTranslations('onboarding.brand.fields');
+  const tErrors = useTranslations('onboarding.errors');
+
+  function translateError(code: string | undefined): string {
+    switch (code as BrandErrorCode) {
+      case 'invalid_input':
+        return tErrors('invalidInput');
+      case 'slug_taken':
+        return tErrors('slugTaken');
+      case 'generic':
+      default:
+        return tErrors('generic');
+    }
+  }
 
   const inputClass =
     'border-fg-4/20 bg-bg-1 text-fg-1 placeholder:text-fg-4 focus:border-asaulia-blue focus:ring-asaulia-blue/30 block w-full rounded-md border px-3 py-2 text-sm outline-none transition focus:ring-2';
@@ -32,7 +50,7 @@ export function BrandForm() {
   return (
     <form action={formAction} className="space-y-4">
       <label className={labelClass}>
-        <span className={spanClass}>Brand name</span>
+        <span className={spanClass}>{tFields('name')}</span>
         <input
           name="name"
           required
@@ -45,7 +63,7 @@ export function BrandForm() {
         />
       </label>
       <label className={labelClass}>
-        <span className={spanClass}>URL slug</span>
+        <span className={spanClass}>{tFields('slug')}</span>
         <input
           name="slug"
           value={slug}
@@ -57,15 +75,20 @@ export function BrandForm() {
         />
       </label>
       <label className={labelClass}>
-        <span className={spanClass}>Website</span>
-        <input name="website" type="url" className={inputClass} placeholder="https://" />
+        <span className={spanClass}>{tFields('website')}</span>
+        <input
+          name="website"
+          type="url"
+          className={inputClass}
+          placeholder={tFields('websitePlaceholder')}
+        />
       </label>
       <label className={labelClass}>
-        <span className={spanClass}>Timezone</span>
+        <span className={spanClass}>{tFields('timezone')}</span>
         <input name="timezone" readOnly value={timezone} className={inputClass} />
       </label>
-      {state?.error ? <FormAlert tone="error">{state.error}</FormAlert> : null}
-      <SubmitButton pending={pending}>Continue</SubmitButton>
+      {state && !state.ok ? <FormAlert tone="error">{translateError(state.error)}</FormAlert> : null}
+      <SubmitButton pending={pending}>{t('submit')}</SubmitButton>
     </form>
   );
 }

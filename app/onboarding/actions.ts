@@ -26,12 +26,35 @@ const brandSchema = z.object({
   timezone: z.string().min(1).default('UTC'),
 });
 
-export type OnboardingState = { error?: string; info?: string } | undefined;
+export type OnboardingErrorCode =
+  | 'invalid_input'
+  | 'slug_taken'
+  | 'invalid_plan'
+  | 'plan_mismatch'
+  | 'stripe_failed'
+  | 'payment_pending'
+  | 'no_brand'
+  | 'no_brand_restart'
+  | 'brand_not_found'
+  | 'no_plan'
+  | 'generic';
+
+export type OnboardingActionState =
+  | { ok: true; redirectTo?: string }
+  | { ok: false; error: OnboardingErrorCode }
+  | undefined;
+
+// Backwards-compatible alias for forms still importing the old name.
+export type OnboardingState = OnboardingActionState;
+
+function fail(error: OnboardingErrorCode): OnboardingActionState {
+  return { ok: false, error };
+}
 
 export async function createBrandAction(
-  _prev: OnboardingState,
+  _prev: OnboardingActionState,
   formData: FormData,
-): Promise<OnboardingState> {
+): Promise<OnboardingActionState> {
   const ctx = await requireAuth();
 
   const parsed = brandSchema.safeParse({
@@ -41,7 +64,7 @@ export async function createBrandAction(
     timezone: (formData.get('timezone') as string) || 'UTC',
   });
   if (!parsed.success) {
-    return { error: 'Please check the brand fields and try again.' };
+    return fail('invalid_input');
   }
 
   let slug = parsed.data.slug ?? slugify(parsed.data.name);
@@ -73,7 +96,7 @@ export async function createBrandAction(
     }
   }
 
-  if (!brandId) return { error: 'We could not reserve that brand name. Try a different one.' };
+  if (!brandId) return fail('slug_taken');
 
   await db.insert(schema.brandMembers).values({
     brandId,
@@ -102,23 +125,23 @@ const planActionSchema = z.object({
 });
 
 export async function savePlanAction(
-  _prev: OnboardingState,
+  _prev: OnboardingActionState,
   formData: FormData,
-): Promise<OnboardingState> {
+): Promise<OnboardingActionState> {
   const ctx = await requireAuth();
   const store = await cookies();
   const brandId = store.get(BRAND_COOKIE)?.value;
-  if (!brandId) return { error: 'Start with the brand setup step first.' };
+  if (!brandId) return fail('no_brand');
 
   const raw = planActionSchema.safeParse({
     fixedAmountCents: formData.get('fixedAmountCents'),
     variablePercentBps: formData.get('variablePercentBps'),
   });
-  if (!raw.success) return { error: 'That plan is not valid. Try sliding again.' };
+  if (!raw.success) return fail('invalid_plan');
 
   const validated = PlanInputSchema.safeParse(raw.data);
   if (!validated.success) {
-    return { error: 'The fixed and variable portions do not match. Please try again.' };
+    return fail('plan_mismatch');
   }
 
   await savePlanRecord({
@@ -132,25 +155,27 @@ export async function savePlanAction(
   redirect('/onboarding/payment');
 }
 
-export async function createCheckoutSessionAction(_prev: OnboardingState): Promise<OnboardingState> {
+export async function createCheckoutSessionAction(
+  _prev: OnboardingActionState,
+): Promise<OnboardingActionState> {
   const ctx = await requireAuth();
   const store = await cookies();
   const brandId = store.get(BRAND_COOKIE)?.value;
-  if (!brandId) return { error: 'Restart onboarding to set up billing.' };
+  if (!brandId) return fail('no_brand_restart');
 
   const [brand] = await db
     .select()
     .from(schema.brands)
     .where(eq(schema.brands.id, brandId))
     .limit(1);
-  if (!brand) return { error: 'We lost track of your brand. Please restart onboarding.' };
+  if (!brand) return fail('brand_not_found');
 
   const [plan] = await db
     .select()
     .from(schema.plans)
     .where(and(eq(schema.plans.brandId, brandId), isNull(schema.plans.effectiveTo)))
     .limit(1);
-  if (!plan) return { error: 'Pick a plan before setting up payment.' };
+  if (!plan) return fail('no_plan');
 
   if (!isStripeConfigured()) {
     await db
@@ -199,7 +224,7 @@ export async function createCheckoutSessionAction(_prev: OnboardingState): Promi
     subscription_data: { metadata: { brand_id: brandId } },
   });
 
-  if (!session.url) return { error: 'Stripe did not return a checkout URL.' };
+  if (!session.url) return fail('stripe_failed');
   redirect(session.url);
 }
 
