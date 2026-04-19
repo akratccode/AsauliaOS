@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const I18N_REQUEST_PATH = './i18n/request.ts';
 const withNextIntl = createNextIntlPlugin(I18N_REQUEST_PATH);
@@ -60,4 +61,8 @@ if (wrapped.experimental && 'turbo' in wrapped.experimental) {
   wrapped.experimental = Object.keys(restExperimental).length > 0 ? restExperimental : undefined;
 }
 
-export default wrapped as NextConfig;
+const withAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+export default withAnalyzer(wrapped as NextConfig);
