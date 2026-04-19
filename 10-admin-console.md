@@ -43,7 +43,7 @@ app/(admin)/
 
 ### 1. Admin shell
 
-- [ ] `app/(admin)/layout.tsx`:
+- [x] `app/(admin)/layout.tsx`:
   - Sidebar: Overview, Brands, Contractors, Finances, Audit, Config.
   - Top bar: search-anything (brand, contractor, invoice ID, deliverable ID).
   - An "impersonate" affordance for admin-only: opens a brand's client view "as if" the admin were that client owner (server-side, logs to audit).
