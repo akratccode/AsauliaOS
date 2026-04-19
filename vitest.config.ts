@@ -12,6 +12,11 @@ export default defineConfig({
     exclude: ['node_modules/**', '.next/**', 'tests/e2e/**'],
   },
   resolve: {
-    alias: { '@': path.resolve(__dirname, '.') },
+    alias: {
+      '@': path.resolve(__dirname, '.'),
+      'server-only': path.resolve(__dirname, './tests/stubs/server-only.ts'),
+      'next/navigation': path.resolve(__dirname, './tests/stubs/next-navigation.ts'),
+      'next/headers': path.resolve(__dirname, './tests/stubs/next-headers.ts'),
+    },
   },
 });

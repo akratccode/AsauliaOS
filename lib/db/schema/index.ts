@@ -9,4 +9,5 @@ export * from './sales';
 export * from './billing';
 export * from './notifications';
 export * from './audit';
+export * from './invitations';
 export * from './relations';

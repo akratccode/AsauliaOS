@@ -23,6 +23,10 @@ const schema = z.object({
   SHOPIFY_APP_API_SECRET: z.string().optional(),
   SHOPIFY_APP_SCOPES: z.string().optional(),
   CRON_SECRET: z.string().optional(),
+
+  // Upstash rate limiting (Phase 03+). When unset the limiter no-ops.
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 });
 
 function parseEnv() {

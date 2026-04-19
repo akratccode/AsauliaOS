@@ -35,4 +35,20 @@ All user-visible changes per phase. Phases are completed in dependency order
 #### Deviations from phase file
 - `pnpm db:push`, `pnpm db:seed`, `pnpm db:studio`, and the runtime constraint-violation assertions from the phase's Tests section require a running Postgres; none is available in this environment. The migration SQL and RLS SQL have been statically inspected and committed, and the live checks will run in the Supabase-backed CI/dev environments. Integration-level DB tests land in `tests/integration/` in Phase 03 once a CI Postgres service is wired up.
 
-### Phase 03 — pending
+### Phase 03 — Authentication & authorization
+- Three Supabase clients per SSR guidance: `lib/auth/supabase-browser.ts`, `lib/auth/supabase-server.ts` (cookie-aware), `lib/auth/supabase-admin.ts` (service-role, `server-only`-guarded).
+- `middleware.ts` + `lib/auth/middleware-client.ts` refresh the session on every request, redirect unauthenticated traffic off `/dashboard`, `/onboarding`, `/tasks`, `/clients`, `/earnings`, `/admin`, and bounce logged-in users away from auth-only pages. Webhooks and static assets are excluded from the matcher.
+- Auth pages under `app/(auth)/`: login, signup (plain + invite-consuming), password reset request, password reset confirm, verify-email notice, logout route. All submit via server actions in `app/(auth)/actions.ts`. Error messages are generic so we don't leak account enumeration.
+- Rate limiting: `lib/auth/rate-limit.ts` with `@upstash/ratelimit` — 5 logins / 10 min per `email+ip`, 3 password resets / hour. Falls back to a no-op when `UPSTASH_REDIS_REST_*` env vars aren't set.
+- RBAC core: `lib/auth/rbac.ts` exports `requireAuth`, `requireRole`, `requireAdmin`, `requireBrandAccess` plus typed `Unauthorized` / `Forbidden` error classes. Resolver injection lets unit tests mock sessions without touching Supabase.
+- Invitations: new `invitations` table (migration 0001) with `scope ∈ {global, brand}` + role, 7-day expiry, unique token, audit entry on creation. `lib/auth/admin-ops.ts` wraps invite creation and role changes with audit-log writes.
+- User row sync with Supabase auth: `lib/db/migrations/0002_auth_triggers.sql` defines the `on_auth_user_created` + `on_auth_user_email_updated` triggers. Applied manually from the Supabase SQL editor since the `auth` schema is managed outside drizzle-kit.
+- Email stub: `lib/notifications/email.ts` uses Resend when configured and falls back to console-logging the outgoing message in dev.
+- Tests: `tests/unit/rbac.test.ts` covers the four RBAC helpers via `tests/helpers/auth.ts`. Vitest picks up `server-only`, `next/navigation`, and `next/headers` stubs under `tests/stubs/`.
+
+#### Deviations from phase file
+- Supabase dashboard email-template customisation requires a human with dashboard access — documented as a launch-checklist item for Phase 12.
+- Playwright invite integration test deferred: it needs a running Supabase + Postgres + Next.js server; wiring the CI service containers lands in Phase 12 along with the rest of the e2e suite.
+- shadcn Form components not used — the shadcn CLI was never invoked in Phase 01 (documented). Forms use the lightweight `components/auth/form-primitives.tsx` shared by every auth page; migrating to shadcn when the CLI runs is a mechanical swap.
+
+### Phase 04 — pending

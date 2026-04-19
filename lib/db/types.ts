@@ -16,6 +16,7 @@ import {
   payouts,
   notifications,
   auditLog,
+  invitations,
 } from './schema';
 
 export type User = InferSelectModel<typeof users>;
@@ -65,3 +66,6 @@ export type NewNotification = InferInsertModel<typeof notifications>;
 
 export type AuditLog = InferSelectModel<typeof auditLog>;
 export type NewAuditLog = InferInsertModel<typeof auditLog>;
+
+export type Invitation = InferSelectModel<typeof invitations>;
+export type NewInvitation = InferInsertModel<typeof invitations>;
