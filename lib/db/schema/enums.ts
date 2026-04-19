@@ -86,3 +86,15 @@ export const billingJobStatusEnum = pgEnum('billing_job_status', [
   'completed',
   'failed',
 ]);
+
+export const financeRegionEnum = pgEnum('finance_region', ['us', 'co']);
+
+export const brandPaymentMethodEnum = pgEnum('brand_payment_method', [
+  'stripe_subscription',
+  'manual',
+]);
+
+export const financePeriodStatusEnum = pgEnum('finance_period_status', [
+  'open',
+  'closed',
+]);

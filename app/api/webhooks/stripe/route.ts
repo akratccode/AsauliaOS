@@ -136,6 +136,8 @@ async function handleInvoicePaid(event: Stripe.Event): Promise<void> {
   await writeLedger({
     kind: 'invoice_paid',
     amountCents: stripeInvoice.amount_paid ?? 0,
+    currency: ourInvoice.currency,
+    financeRegion: ourInvoice.financeRegion,
     brandId: ourInvoice.brandId,
     invoiceId: ourInvoice.id,
     stripeEventId: event.id,
@@ -148,6 +150,8 @@ async function handleInvoicePaid(event: Stripe.Event): Promise<void> {
     await writeLedger({
       kind: 'stripe_fee',
       amountCents: -stripeFeeCents,
+      currency: ourInvoice.currency,
+      financeRegion: ourInvoice.financeRegion,
       brandId: ourInvoice.brandId,
       invoiceId: ourInvoice.id,
       stripeEventId: `${event.id}:fee`,
@@ -181,6 +185,8 @@ async function handleInvoicePaid(event: Stripe.Event): Promise<void> {
           periodEnd: ourInvoice.periodEnd,
           fixedAmountCents: ourInvoice.fixedAmountCents,
           variableAmountCents: ourInvoice.variableAmountCents,
+          currency: ourInvoice.currency,
+          financeRegion: ourInvoice.financeRegion,
         },
         now,
       });

@@ -14,7 +14,14 @@ import {
 import { sql } from 'drizzle-orm';
 import { brands } from './brands';
 import { users } from './users';
-import { invoiceStatusEnum, payoutStatusEnum, ledgerKindEnum, billingJobStatusEnum } from './enums';
+import {
+  invoiceStatusEnum,
+  payoutStatusEnum,
+  ledgerKindEnum,
+  billingJobStatusEnum,
+  financeRegionEnum,
+  financePeriodStatusEnum,
+} from './enums';
 
 export const invoices = pgTable(
   'invoices',
@@ -31,6 +38,7 @@ export const invoices = pgTable(
       sql`fixed_amount_cents + variable_amount_cents`,
     ),
     currency: char('currency', { length: 3 }).notNull().default('USD'),
+    financeRegion: financeRegionEnum('finance_region').notNull().default('us'),
     status: invoiceStatusEnum('status').notNull().default('draft'),
     stripeInvoiceId: text('stripe_invoice_id'),
     issuedAt: timestamp('issued_at', { withTimezone: true, mode: 'date' }),
@@ -60,6 +68,7 @@ export const payouts = pgTable(
     periodEnd: date('period_end', { mode: 'string' }).notNull(),
     amountCents: integer('amount_cents').notNull(),
     currency: char('currency', { length: 3 }).notNull().default('USD'),
+    financeRegion: financeRegionEnum('finance_region').notNull().default('us'),
     status: payoutStatusEnum('status').notNull().default('pending'),
     stripeTransferId: text('stripe_transfer_id'),
     breakdown: jsonb('breakdown'),
@@ -109,6 +118,7 @@ export const ledgerEntries = pgTable(
     kind: ledgerKindEnum('kind').notNull(),
     amountCents: bigint('amount_cents', { mode: 'number' }).notNull(),
     currency: char('currency', { length: 3 }).notNull().default('USD'),
+    financeRegion: financeRegionEnum('finance_region').notNull().default('us'),
     brandId: uuid('brand_id').references(() => brands.id, { onDelete: 'set null' }),
     contractorUserId: uuid('contractor_user_id').references(() => users.id, { onDelete: 'set null' }),
     invoiceId: uuid('invoice_id').references(() => invoices.id, { onDelete: 'set null' }),
@@ -120,5 +130,32 @@ export const ledgerEntries = pgTable(
   (t) => ({
     stripeEventUnique: uniqueIndex('ledger_entries_stripe_event_unique').on(t.stripeEventId),
     occurredAtIdx: index('ledger_entries_occurred_at_idx').on(t.occurredAt),
+  }),
+);
+
+export const financePeriods = pgTable(
+  'finance_periods',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    financeRegion: financeRegionEnum('finance_region').notNull(),
+    currency: char('currency', { length: 3 }).notNull(),
+    year: integer('year').notNull(),
+    month: integer('month').notNull(),
+    status: financePeriodStatusEnum('status').notNull().default('open'),
+    revenueCents: bigint('revenue_cents', { mode: 'number' }).notNull().default(0),
+    payoutsCents: bigint('payouts_cents', { mode: 'number' }).notNull().default(0),
+    bonusesCents: bigint('bonuses_cents', { mode: 'number' }).notNull().default(0),
+    netCents: bigint('net_cents', { mode: 'number' }).notNull().default(0),
+    closedAt: timestamp('closed_at', { withTimezone: true, mode: 'date' }),
+    closedByUserId: uuid('closed_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (t) => ({
+    regionYearMonthUnique: uniqueIndex('finance_periods_region_year_month_unique').on(
+      t.financeRegion,
+      t.year,
+      t.month,
+    ),
   }),
 );

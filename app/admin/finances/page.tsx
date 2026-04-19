@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { db, schema } from '@/lib/db';
 import { PRICING } from '@/lib/pricing/constants';
 import { formatCents, formatDate } from '@/lib/format';
+import { FINANCE_REGIONS, type FinanceRegion } from '@/lib/billing/region';
 
 export async function generateMetadata() {
   const t = await getTranslations('admin.finances');
@@ -20,8 +21,10 @@ export default async function AdminFinancesPage() {
   const monthly = await db
     .select({
       month: sql<string>`to_char(date_trunc('month', ${schema.invoices.periodStart}::date), 'YYYY-MM-01')`,
-      fixed: sql<number>`coalesce(sum(${schema.invoices.fixedAmountCents}), 0)::int`,
-      variable: sql<number>`coalesce(sum(${schema.invoices.variableAmountCents}), 0)::int`,
+      financeRegion: schema.invoices.financeRegion,
+      currency: schema.invoices.currency,
+      fixed: sql<number>`coalesce(sum(${schema.invoices.fixedAmountCents}), 0)::bigint`,
+      variable: sql<number>`coalesce(sum(${schema.invoices.variableAmountCents}), 0)::bigint`,
     })
     .from(schema.invoices)
     .where(
@@ -30,7 +33,11 @@ export default async function AdminFinancesPage() {
         gte(schema.invoices.periodStart, ymd(twelveMonthsAgo)),
       ),
     )
-    .groupBy(sql`date_trunc('month', ${schema.invoices.periodStart}::date)`)
+    .groupBy(
+      sql`date_trunc('month', ${schema.invoices.periodStart}::date)`,
+      schema.invoices.financeRegion,
+      schema.invoices.currency,
+    )
     .orderBy(sql`date_trunc('month', ${schema.invoices.periodStart}::date)`);
 
   const pastDue = await db
@@ -39,6 +46,8 @@ export default async function AdminFinancesPage() {
       brandId: schema.invoices.brandId,
       brandName: schema.brands.name,
       total: schema.invoices.totalAmountCents,
+      currency: schema.invoices.currency,
+      financeRegion: schema.invoices.financeRegion,
       issuedAt: schema.invoices.issuedAt,
       periodEnd: schema.invoices.periodEnd,
     })
@@ -58,6 +67,8 @@ export default async function AdminFinancesPage() {
       id: schema.payouts.id,
       contractorUserId: schema.payouts.contractorUserId,
       amount: schema.payouts.amountCents,
+      currency: schema.payouts.currency,
+      financeRegion: schema.payouts.financeRegion,
       periodEnd: schema.payouts.periodEnd,
       status: schema.payouts.status,
     })
@@ -66,53 +77,97 @@ export default async function AdminFinancesPage() {
     .orderBy(schema.payouts.periodEnd)
     .limit(25);
 
+  type MonthRow = (typeof monthly)[number];
+  const byRegion = new Map<FinanceRegion, MonthRow[]>();
+  for (const region of FINANCE_REGIONS) byRegion.set(region, []);
+  for (const row of monthly) {
+    byRegion.get(row.financeRegion)!.push(row);
+  }
+
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-6">
-      <header>
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('moneyLabel')}</p>
-        <h1 className="text-fg-1 font-serif text-3xl italic">{t('financesTitle')}</h1>
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('moneyLabel')}</p>
+          <h1 className="text-fg-1 font-serif text-3xl italic">{t('financesTitle')}</h1>
+        </div>
+        <Link
+          href="/admin/finances/close"
+          className="bg-asaulia-blue text-fg-on-blue rounded-md px-3 py-1.5 text-xs"
+        >
+          {t('monthlyClose')}
+        </Link>
       </header>
 
-      <section className="border-fg-4/15 bg-bg-1 overflow-x-auto rounded-2xl border">
-        <table className="w-full min-w-[720px] text-xs">
-          <thead className="text-fg-3 uppercase tracking-[0.1em]">
-            <tr>
-              <th className="px-3 py-2 text-left">{t('month')}</th>
-              <th className="px-3 py-2 text-right">{t('revenue')}</th>
-              <th className="px-3 py-2 text-right">{t('contractorPool')}</th>
-              <th className="px-3 py-2 text-right">{t('asauliaMargin')}</th>
-              <th className="px-3 py-2 text-right">{t('marginPercent')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {monthly.length === 0 ? (
-              <tr>
-                <td className="text-fg-3 px-3 py-4" colSpan={5}>
-                  {t('noPaidInvoices')}
-                </td>
-              </tr>
-            ) : (
-              monthly.map((m) => {
-                const revenue = m.fixed + m.variable;
-                const pool =
-                  Math.floor((m.fixed * PRICING.CONTRACTOR_SHARE_OF_FIXED_BPS) / 10_000) +
-                  Math.floor((m.variable * PRICING.CONTRACTOR_SHARE_OF_VARIABLE_BPS) / 10_000);
-                const margin = revenue - pool;
-                const marginPct = revenue > 0 ? Math.round((margin / revenue) * 100) : 0;
-                return (
-                  <tr key={m.month} className="border-fg-4/10 border-t">
-                    <td className="text-fg-2 px-3 py-2">{m.month.slice(0, 7)}</td>
-                    <td className="text-fg-1 px-3 py-2 text-right">{formatCents(revenue)}</td>
-                    <td className="text-fg-2 px-3 py-2 text-right">{formatCents(pool)}</td>
-                    <td className="text-fg-1 px-3 py-2 text-right">{formatCents(margin)}</td>
-                    <td className="text-fg-3 px-3 py-2 text-right">{marginPct}%</td>
+      {FINANCE_REGIONS.map((region) => {
+        const rows = byRegion.get(region) ?? [];
+        return (
+          <section
+            key={region}
+            className="border-fg-4/15 bg-bg-1 overflow-x-auto rounded-2xl border"
+          >
+            <div className="border-fg-4/10 flex items-center justify-between border-b px-4 py-2 text-xs">
+              <h2 className="text-fg-1 font-serif text-sm italic">
+                {region === 'co' ? t('sectionCo') : t('sectionUs')}
+              </h2>
+              <Link
+                href={`/admin/finances/invoices?region=${region}`}
+                className="text-fg-3 hover:text-fg-1"
+              >
+                {t('viewInvoices')}
+              </Link>
+            </div>
+            <table className="w-full min-w-[720px] text-xs">
+              <thead className="text-fg-3 uppercase tracking-[0.1em]">
+                <tr>
+                  <th className="px-3 py-2 text-left">{t('month')}</th>
+                  <th className="px-3 py-2 text-right">{t('revenue')}</th>
+                  <th className="px-3 py-2 text-right">{t('contractorPool')}</th>
+                  <th className="px-3 py-2 text-right">{t('asauliaMargin')}</th>
+                  <th className="px-3 py-2 text-right">{t('marginPercent')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.length === 0 ? (
+                  <tr>
+                    <td className="text-fg-3 px-3 py-4" colSpan={5}>
+                      {t('noPaidInvoices')}
+                    </td>
                   </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </section>
+                ) : (
+                  rows.map((m) => {
+                    const fixed = Number(m.fixed);
+                    const variable = Number(m.variable);
+                    const revenue = fixed + variable;
+                    const pool =
+                      Math.floor((fixed * PRICING.CONTRACTOR_SHARE_OF_FIXED_BPS) / 10_000) +
+                      Math.floor(
+                        (variable * PRICING.CONTRACTOR_SHARE_OF_VARIABLE_BPS) / 10_000,
+                      );
+                    const margin = revenue - pool;
+                    const marginPct = revenue > 0 ? Math.round((margin / revenue) * 100) : 0;
+                    return (
+                      <tr key={`${region}-${m.month}`} className="border-fg-4/10 border-t">
+                        <td className="text-fg-2 px-3 py-2">{m.month.slice(0, 7)}</td>
+                        <td className="text-fg-1 px-3 py-2 text-right">
+                          {formatCents(revenue, m.currency)}
+                        </td>
+                        <td className="text-fg-2 px-3 py-2 text-right">
+                          {formatCents(pool, m.currency)}
+                        </td>
+                        <td className="text-fg-1 px-3 py-2 text-right">
+                          {formatCents(margin, m.currency)}
+                        </td>
+                        <td className="text-fg-3 px-3 py-2 text-right">{marginPct}%</td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </section>
+        );
+      })}
 
       <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
         <div className="mb-3 flex items-center justify-between">
@@ -137,10 +192,13 @@ export default async function AdminFinancesPage() {
                   {i.brandName}
                 </Link>
                 <span className="text-fg-3">
+                  {i.financeRegion === 'co' ? t('sectionCo') : t('sectionUs')}
+                </span>
+                <span className="text-fg-3">
                   {t('periodEnded', { date: formatDate(i.periodEnd) })}
                 </span>
                 <span className="text-fg-1 font-medium">
-                  {formatCents(i.total ?? 0)}
+                  {formatCents(i.total ?? 0, i.currency)}
                 </span>
               </li>
             ))}
@@ -167,9 +225,12 @@ export default async function AdminFinancesPage() {
                 >
                   {p.contractorUserId.slice(0, 8)}
                 </Link>
+                <span className="text-fg-3">
+                  {p.financeRegion === 'co' ? t('sectionCo') : t('sectionUs')}
+                </span>
                 <span className="text-fg-3">{p.status}</span>
                 <span className="text-fg-3">{t('ends', { date: formatDate(p.periodEnd) })}</span>
-                <span className="text-fg-1 font-medium">{formatCents(p.amount)}</span>
+                <span className="text-fg-1 font-medium">{formatCents(p.amount, p.currency)}</span>
               </li>
             ))}
           </ul>

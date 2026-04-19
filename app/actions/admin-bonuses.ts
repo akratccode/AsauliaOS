@@ -9,6 +9,7 @@ import {
   evaluatePendingBonusesForContractor,
   resolveBonusManually,
 } from '@/lib/billing/bonuses';
+import { currencyForRegion } from '@/lib/billing/region';
 
 const DateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const UuidSchema = z.string().uuid();
@@ -16,6 +17,7 @@ const UuidSchema = z.string().uuid();
 const CreateSchema = z.object({
   contractorUserId: UuidSchema,
   brandId: UuidSchema.optional(),
+  financeRegion: z.enum(['us', 'co']),
   periodStart: DateSchema,
   periodEnd: DateSchema,
   amountCents: z
@@ -53,6 +55,7 @@ export async function adminCreateBonusAction(
     const parsed = CreateSchema.safeParse({
       contractorUserId: String(formData.get('contractorUserId') ?? ''),
       brandId: optionalString(formData.get('brandId')),
+      financeRegion: String(formData.get('financeRegion') ?? 'us'),
       periodStart: String(formData.get('periodStart') ?? ''),
       periodEnd: String(formData.get('periodEnd') ?? ''),
       amountCents: String(formData.get('amountCents') ?? ''),
@@ -62,11 +65,15 @@ export async function adminCreateBonusAction(
     });
     if (!parsed.success) return { ok: false, error: 'invalid_input' };
 
+    const currency = currencyForRegion(parsed.data.financeRegion);
+
     const [inserted] = await db
       .insert(schema.contractorBonuses)
       .values({
         contractorUserId: parsed.data.contractorUserId,
         brandId: parsed.data.brandId ?? null,
+        financeRegion: parsed.data.financeRegion,
+        currency,
         periodStart: parsed.data.periodStart,
         periodEnd: parsed.data.periodEnd,
         amountCents: parsed.data.amountCents,
@@ -183,9 +190,10 @@ export async function adminMarkBonusPaidAction(
     });
     if (!parsed.success) return { ok: false, error: 'invalid_input' };
 
+    const now = new Date();
     await db
       .update(schema.contractorBonuses)
-      .set({ status: 'paid', updatedAt: new Date() })
+      .set({ status: 'paid', resolvedAt: now, updatedAt: now })
       .where(eq(schema.contractorBonuses.id, parsed.data.bonusId));
 
     await db.insert(schema.auditLog).values({
