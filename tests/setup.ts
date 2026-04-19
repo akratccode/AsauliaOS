@@ -10,6 +10,8 @@ const DEFAULTS: Record<string, string> = {
   SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key',
   NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
   NODE_ENV: process.env.NODE_ENV ?? 'test',
+  INTEGRATIONS_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64'),
+  SHOPIFY_WEBHOOK_SECRET: 'shh',
 };
 for (const [k, v] of Object.entries(DEFAULTS)) {
   if (!process.env[k]) process.env[k] = v;

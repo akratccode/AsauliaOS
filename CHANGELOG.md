@@ -97,4 +97,32 @@ All user-visible changes per phase. Phases are completed in dependency order
 - List-view filters (assignee / type / status dropdowns + month picker + search + List / Kanban toggle) are not wired — the current page defaults to Kanban + current UTC month. The SSR page reads `?brandId` and `?period=YYYY-MM` from the URL today; the richer filter UI arrives in Phase 08 (client dashboard polish).
 - Realtime stays out (phase file explicitly marks Phase 12).
 
-### Phase 07 — pending
+### Phase 07 — Sales attribution & integrations
+- Adapter framework under `lib/integrations/`:
+  - `types.ts` — `NormalizedSale`, `AttributionRule` union, `SalesAdapter` contract.
+  - `registry.ts` — central provider → adapter lookup.
+  - `classify.ts` — any-match rule engine; returns `{ attributed, reason }` where the reason encodes which rule fired (audit trail).
+  - `crypto.ts` — AES-256-GCM sealing for per-integration config (12-byte IV + 16-byte auth tag prepended). New env var `INTEGRATIONS_ENCRYPTION_KEY` (32 bytes base64).
+  - `service.ts` — single entry point for `connectIntegration`, `ingestSales` (with `ON CONFLICT (integration_id, external_id) DO NOTHING` + per-sale `classify`), `syncIntegration` (decrypts config, calls adapter `pullSince`, tracks `last_error`/`last_synced_at`), `updateIntegrationRules`, `reclassifyIntegration` (scoped to sales since a period start so closed periods stay immutable), `addManualSale` (admin-only, writes audit entry), `attributedSalesForPeriod` shared aggregator.
+- Adapters — all implementing the shared contract:
+  - `shopify/index.ts` — OAuth-token config, paginated `GET /orders.json` with `Link: rel="next"` parser, note_attributes + landing-site-query-string UTM extraction, HMAC-SHA256 webhook verification (timing-safe compare).
+  - `woocommerce/index.ts` — Basic-auth REST polling, `after=ISO8601` pagination, UTM extraction from `meta_data`.
+  - `stripe-sales/index.ts` — platform-key + `Stripe-Account` header, `starting_after` cursor, refund-netting (`amount - amount_refunded`, only `status = succeeded`).
+  - `manual/index.ts` — no pull; used to back admin-entered sales with a real `sales_integrations` row.
+- API & cron:
+  - `app/api/integrations/shopify/install/route.ts` — redirects to Shopify OAuth grant.
+  - `app/api/integrations/shopify/callback/route.ts` — exchanges the auth code for an access token, delegates persistence to `connectIntegration`, requires admin/operator.
+  - `app/api/webhooks/shopify/route.ts` — looks up the integration by shop domain, decrypts config, verifies HMAC, ingests. Invalid HMAC → 401; malformed body → 400.
+  - `app/api/cron/sync-integrations/route.ts` — `x-cron-secret`-gated endpoint that walks every `status='active'` integration (skipping `manual`), runs `syncIntegration`, returns per-integration `{ inserted }` or `{ error }`. Wired to Vercel cron `*/15 * * * *` via `vercel.json`.
+- PII-safe persistence — manual `stripPii` drops email/name/phone keys from sale metadata before inserting `sales_records.raw_payload`.
+- Tests: `tests/unit/integrations.test.ts` covers the classifier for every rule type (including `utm_campaign_prefix`, `coupon`, `landing_page_prefix`, and first-match `reason`), Shopify mapping (note_attributes UTMs, landing-query-string UTMs, `Link` rel parsing, HMAC verification), WooCommerce mapping, Stripe charge mapping (refund netting + currency upper-casing), and the AES-GCM crypto round-trip. 15 new assertions.
+- `tests/setup.ts` now also seeds `INTEGRATIONS_ENCRYPTION_KEY` + `SHOPIFY_WEBHOOK_SECRET` so the integrations suite doesn't need real secrets.
+
+#### Deviations from phase file
+- Stripe Connect OAuth flow is stubbed — the Stripe-sales adapter takes a `stripeAccountId` and relies on a platform-owned `STRIPE_SALES_SECRET_KEY` with the `Stripe-Account` header instead. The full Connect wizard (and Connect Express account creation for payouts) lands in Phase 11 where Connect accounts also back contractor payouts.
+- Attribution-rules editor UI + admin integrations page (`app/(admin)/brands/[brandId]/integrations/…`) are not rendered yet — the admin console is Phase 10, and that phase calls the service functions shipped here. The API is complete.
+- `lib/integrations/aggregate.ts` is unified with `service.ts#attributedSalesForPeriod` instead of a separate file — the phase file named a module path, we named the function inside the existing service. No behavioral change.
+- Playwright scenario "Shopify dev-store OAuth" requires a real Shopify partner app; deferred to Phase 12.
+- `msw`-mocked integration tests for the Shopify pull paginator are not wired — the unit suite covers the mapping and `Link` parser pure-functions; a live-fetch paginator test lands in Phase 12 when we introduce `msw`.
+
+### Phase 08 — pending

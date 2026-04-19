@@ -22,6 +22,10 @@ const schema = z.object({
   SHOPIFY_APP_API_KEY: z.string().optional(),
   SHOPIFY_APP_API_SECRET: z.string().optional(),
   SHOPIFY_APP_SCOPES: z.string().optional(),
+  SHOPIFY_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_SALES_SECRET_KEY: z.string().optional(),
+  STRIPE_SALES_WEBHOOK_SECRET: z.string().optional(),
+  INTEGRATIONS_ENCRYPTION_KEY: z.string().optional(),
   CRON_SECRET: z.string().optional(),
 
   // Upstash rate limiting (Phase 03+). When unset the limiter no-ops.
