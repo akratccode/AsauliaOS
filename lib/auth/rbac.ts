@@ -5,14 +5,21 @@ import { db } from '@/lib/db';
 import { users, brandMembers } from '@/lib/db/schema';
 import { createSupabaseServerClient } from './supabase-server';
 import { Forbidden, Unauthorized } from './errors';
+import { readImpersonationCookie } from './impersonation';
 
 export type GlobalRole = 'admin' | 'operator' | 'contractor' | 'client';
 export type BrandRole = 'owner' | 'member';
+
+export type ImpersonatedBy = {
+  userId: string;
+  email: string;
+};
 
 export type AuthContext = {
   userId: string;
   email: string;
   globalRole: GlobalRole;
+  impersonatedBy?: ImpersonatedBy;
 };
 
 export type BrandContext = AuthContext & {
@@ -36,6 +43,25 @@ async function defaultAuthResolver(): Promise<AuthContext | null> {
 
   const profile = row[0];
   if (profile) {
+    if (profile.globalRole === 'admin') {
+      const impersonation = await readImpersonationCookie();
+      if (impersonation && impersonation.adminUserId === profile.id) {
+        const targetRow = await db
+          .select({ id: users.id, email: users.email, globalRole: users.globalRole })
+          .from(users)
+          .where(eq(users.id, impersonation.targetUserId))
+          .limit(1);
+        const target = targetRow[0];
+        if (target) {
+          return {
+            userId: target.id,
+            email: target.email,
+            globalRole: target.globalRole,
+            impersonatedBy: { userId: profile.id, email: profile.email },
+          };
+        }
+      }
+    }
     return { userId: profile.id, email: profile.email, globalRole: profile.globalRole };
   }
 

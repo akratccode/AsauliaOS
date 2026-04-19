@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { desc, eq, sql } from 'drizzle-orm';
 import { getTranslations } from 'next-intl/server';
 import { db, schema } from '@/lib/db';
+import { startImpersonationAction } from '@/app/actions/impersonation';
 
 type SearchParams = Promise<{ status?: string; onboarding?: string; q?: string }>;
 
@@ -105,12 +106,13 @@ export default async function AdminContractorsPage({
               <th className="px-4 py-2 text-left">{t('payouts')}</th>
               <th className="px-4 py-2 text-right">{t('activeBrands')}</th>
               <th className="px-4 py-2 text-left">{t('skills')}</th>
+              <th className="px-4 py-2 text-right">{t('actions')}</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td className="text-fg-3 px-4 py-4" colSpan={5}>
+                <td className="text-fg-3 px-4 py-4" colSpan={6}>
                   {t('noContractors')}
                 </td>
               </tr>
@@ -143,6 +145,17 @@ export default async function AdminContractorsPage({
                   <td className="text-fg-1 px-4 py-2 text-right">{r.activeAssignments}</td>
                   <td className="text-fg-3 px-4 py-2 text-xs">
                     {(r.skills ?? []).slice(0, 3).join(', ')}
+                  </td>
+                  <td className="px-4 py-2 text-right">
+                    <form action={startImpersonationAction}>
+                      <input type="hidden" name="targetUserId" value={r.userId} />
+                      <button
+                        type="submit"
+                        className="border-fg-4/20 text-fg-2 hover:bg-bg-2 rounded-md border px-2 py-1 text-xs"
+                      >
+                        {t('impersonate')}
+                      </button>
+                    </form>
                   </td>
                 </tr>
               ))

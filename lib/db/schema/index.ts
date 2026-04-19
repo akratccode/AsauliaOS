@@ -11,4 +11,6 @@ export * from './notifications';
 export * from './chat';
 export * from './audit';
 export * from './invitations';
+export * from './bonuses';
+export * from './recurrences';
 export * from './relations';

@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/sync-integrations",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/materialize-recurring-deliverables",
+      "schedule": "15 1 * * *"
     }
   ]
 }
