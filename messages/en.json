@@ -213,6 +213,34 @@
       "inReview": "In review",
       "done": "Done",
       "rejected": "Rejected"
+    },
+    "brand": {
+      "trial": "trial",
+      "active": "active",
+      "past_due": "past due",
+      "paused": "paused",
+      "cancelled": "cancelled"
+    },
+    "contractor": {
+      "active": "active",
+      "paused": "paused"
+    },
+    "payout": {
+      "pending": "pending",
+      "processing": "processing",
+      "paid": "paid",
+      "failed": "failed"
+    },
+    "invoice": {
+      "draft": "draft",
+      "open": "open",
+      "paid": "paid",
+      "failed": "failed",
+      "void": "void"
+    },
+    "period": {
+      "open": "open",
+      "closed": "closed"
     }
   },
   "dashboard": {
@@ -716,6 +744,23 @@
       "active": "active",
       "paused": "paused"
     },
+    "brandPlan": {
+      "historyTitle": "Plan history",
+      "noPlans": "No plans on file.",
+      "from": "from {date}",
+      "until": "until {date}",
+      "current": "current",
+      "active": "active",
+      "overrideTitle": "Override",
+      "overrideDesc": "Bypasses the client-side cooldown. Every override is audit-logged with the reason.",
+      "fixedCents": "Fixed (cents)",
+      "variableBps": "Variable (bps)",
+      "effectiveFrom": "Effective from (ISO)",
+      "reasonLabel": "Reason (≥ 8 chars, audited)",
+      "reasonPlaceholder": "Escalation from support ticket #…",
+      "save": "Save override",
+      "saving": "Saving override…"
+    },
     "brandContractors": {
       "assignedTitle": "Assigned contractors",
       "noActiveAssignments": "No active assignments yet.",
@@ -733,6 +778,53 @@
       "assignedInfo": "Contractor assigned.",
       "weightsTitle": "Variable-pool weights",
       "weightsDesc": "Weights default to an equal split among active contractors. Per-period overrides land with the cycle-close job."
+    },
+    "commissionPool": {
+      "tabTitle": "Commission pool",
+      "poolTitle": "Brand commission pool",
+      "poolDesc": "The ceiling of variable commissions for this brand, per close cycle. Choose a fixed cents amount, a basis-points share of attributed sales, or both.",
+      "currency": "Currency",
+      "currencyUSD": "USD",
+      "currencyCOP": "COP",
+      "scope": "Scope",
+      "scopeMonthly": "Monthly",
+      "scopeQuarterly": "Quarterly",
+      "scopePerProject": "Per project",
+      "poolBps": "Pool share (bps)",
+      "poolBpsHint": "1000 = 10%",
+      "poolAmountCents": "Pool cap (cents)",
+      "poolAmountHint": "Optional hard cap in the chosen currency",
+      "noteLabel": "Note (optional)",
+      "notePlaceholder": "Context for this pool configuration…",
+      "save": "Save pool",
+      "saving": "Saving…",
+      "poolSavedInfo": "Pool saved.",
+      "currentPoolTitle": "Current pool",
+      "noPool": "No pool configured yet.",
+      "poolSummary": "{bps}% of attributed sales · cap {cap} · {scope}",
+      "poolSummaryBpsOnly": "{bps}% of attributed sales · {scope}",
+      "poolSummaryCapOnly": "{cap} ceiling · {scope}",
+      "allocationsTitle": "Per-contractor allocations",
+      "allocationsDesc": "Split the pool across active contractors. The sum of active allocations per currency cannot exceed 100%.",
+      "noAllocations": "No allocations yet.",
+      "currentSum": "Allocated: {percent}% · remaining {remaining}%",
+      "addAllocation": "Add allocation",
+      "addAllocationDesc": "Assign a share of the pool to a contractor already working on this brand.",
+      "allocationBps": "Share (bps)",
+      "allocationBpsHint": "Max {remaining} bps remaining",
+      "saveAllocation": "Save allocation",
+      "savingAllocation": "Saving…",
+      "allocationSavedInfo": "Allocation saved.",
+      "endAllocation": "End",
+      "endingAllocation": "Ending…",
+      "allocationEndedInfo": "Allocation ended.",
+      "contractor": "Contractor",
+      "selectContractor": "Select a contractor…",
+      "contractorColumn": "Contractor",
+      "shareColumn": "Share",
+      "startedColumn": "Since",
+      "actionsColumn": "",
+      "noEligibleContractors": "Assign a contractor to this brand first."
     },
     "deliverablePlanner": {
       "planTitle": "Plan a new deliverable",
@@ -1011,6 +1103,17 @@
         "contractor_not_found": "Contractor not found or inactive.",
         "assignment_exists": "That contractor already holds this role on this brand.",
         "assignment_not_found": "Assignment not found.",
+        "generic": "Something went wrong. Try again."
+      },
+      "commissionPool": {
+        "invalid_input": "Please check the fields and try again.",
+        "brand_not_found": "Brand not found.",
+        "contractor_not_found": "Contractor not found or inactive.",
+        "pool_not_found": "Configure the brand pool before assigning allocations.",
+        "allocation_not_found": "Allocation not found.",
+        "currency_mismatch": "The allocation currency must match the pool currency. End active allocations before switching.",
+        "exceeds_100_percent": "Allocations cannot exceed 100% of the pool.",
+        "contractor_not_assigned": "Assign the contractor to this brand first.",
         "generic": "Something went wrong. Try again."
       },
       "finances": {

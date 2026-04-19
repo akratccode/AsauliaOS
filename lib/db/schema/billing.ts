@@ -54,6 +54,12 @@ export const invoices = pgTable(
   },
   (t) => ({
     brandPeriodUnique: uniqueIndex('invoices_brand_period_unique').on(t.brandId, t.periodStart),
+    regionStatusPaidAtIdx: index('invoices_region_status_paid_at_idx').on(
+      t.financeRegion,
+      t.status,
+      t.paidAt,
+    ),
+    brandPeriodEndIdx: index('invoices_brand_period_end_idx').on(t.brandId, t.periodEnd),
   }),
 );
 
@@ -81,6 +87,15 @@ export const payouts = pgTable(
     contractorPeriodUnique: uniqueIndex('payouts_contractor_period_unique').on(
       t.contractorUserId,
       t.periodStart,
+    ),
+    regionStatusPaidAtIdx: index('payouts_region_status_paid_at_idx').on(
+      t.financeRegion,
+      t.status,
+      t.paidAt,
+    ),
+    contractorPeriodEndIdx: index('payouts_contractor_period_end_idx').on(
+      t.contractorUserId,
+      t.periodEnd,
     ),
   }),
 );
@@ -130,6 +145,10 @@ export const ledgerEntries = pgTable(
   (t) => ({
     stripeEventUnique: uniqueIndex('ledger_entries_stripe_event_unique').on(t.stripeEventId),
     occurredAtIdx: index('ledger_entries_occurred_at_idx').on(t.occurredAt),
+    regionCreatedAtIdx: index('ledger_entries_region_created_at_idx').on(
+      t.financeRegion,
+      t.createdAt,
+    ),
   }),
 );
 

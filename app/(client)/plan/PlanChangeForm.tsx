@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { PricingSlider } from '@/components/pricing-slider/PricingSlider';
+import { PricingSliderLazy as PricingSlider } from '@/components/pricing-slider/PricingSliderLazy';
 import { changePlanAction, type PlanActionState, type PlanErrorCode } from './actions';
 
 type Props = {

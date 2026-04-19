@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { and, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth/rbac';
@@ -8,6 +8,7 @@ import { db, schema } from '@/lib/db';
 import { writeLedger } from '@/lib/billing/ledger';
 import { runPayoutsForInvoice } from '@/lib/billing/payout';
 import { currencyForRegion } from '@/lib/billing/region';
+import { tags } from '@/lib/cache/tags';
 
 const UuidSchema = z.string().uuid();
 const RegionSchema = z.enum(['us', 'co']);
@@ -117,6 +118,7 @@ export async function adminMarkInvoicePaidAction(
 
     revalidatePath('/admin/finances');
     revalidatePath('/admin/finances/invoices');
+    revalidateTag(tags.invoicesByRegion(invoice.financeRegion), 'max');
     return { ok: true, info: 'marked_paid' };
   } catch {
     return { ok: false, error: 'generic' };
@@ -182,6 +184,7 @@ export async function adminMarkPayoutPaidAction(
     });
 
     revalidatePath('/admin/finances/payouts');
+    revalidateTag(tags.payoutsByRegion(payout.financeRegion), 'max');
     return { ok: true, info: 'marked_paid' };
   } catch {
     return { ok: false, error: 'generic' };
@@ -300,6 +303,7 @@ export async function adminCloseFinancePeriodAction(
     });
 
     revalidatePath('/admin/finances/close');
+    revalidateTag(tags.financePeriods(financeRegion), 'max');
     return { ok: true, info: 'period_closed' };
   } catch {
     return { ok: false, error: 'generic' };
@@ -352,6 +356,7 @@ export async function adminReopenFinancePeriodAction(
     });
 
     revalidatePath('/admin/finances/close');
+    revalidateTag(tags.financePeriods(financeRegion), 'max');
     return { ok: true, info: 'period_reopened' };
   } catch {
     return { ok: false, error: 'generic' };
@@ -370,47 +375,47 @@ export async function computeFinancePeriodTotals(params: {
 }> {
   const { financeRegion, monthStart, monthEnd } = params;
 
-  const revenue = await db
-    .select({
-      total: sql<number>`coalesce(sum(${schema.invoices.totalAmountCents}), 0)::bigint`,
-    })
-    .from(schema.invoices)
-    .where(
-      and(
-        eq(schema.invoices.financeRegion, financeRegion),
-        eq(schema.invoices.status, 'paid'),
-        sql`${schema.invoices.paidAt} >= ${monthStart}`,
-        sql`${schema.invoices.paidAt} < ${monthEnd}`,
+  const [revenue, payouts, bonuses] = await Promise.all([
+    db
+      .select({
+        total: sql<number>`coalesce(sum(${schema.invoices.totalAmountCents}), 0)::bigint`,
+      })
+      .from(schema.invoices)
+      .where(
+        and(
+          eq(schema.invoices.financeRegion, financeRegion),
+          eq(schema.invoices.status, 'paid'),
+          sql`${schema.invoices.paidAt} >= ${monthStart}`,
+          sql`${schema.invoices.paidAt} < ${monthEnd}`,
+        ),
       ),
-    );
-
-  const payouts = await db
-    .select({
-      total: sql<number>`coalesce(sum(${schema.payouts.amountCents}), 0)::bigint`,
-    })
-    .from(schema.payouts)
-    .where(
-      and(
-        eq(schema.payouts.financeRegion, financeRegion),
-        eq(schema.payouts.status, 'paid'),
-        sql`${schema.payouts.paidAt} >= ${monthStart}`,
-        sql`${schema.payouts.paidAt} < ${monthEnd}`,
+    db
+      .select({
+        total: sql<number>`coalesce(sum(${schema.payouts.amountCents}), 0)::bigint`,
+      })
+      .from(schema.payouts)
+      .where(
+        and(
+          eq(schema.payouts.financeRegion, financeRegion),
+          eq(schema.payouts.status, 'paid'),
+          sql`${schema.payouts.paidAt} >= ${monthStart}`,
+          sql`${schema.payouts.paidAt} < ${monthEnd}`,
+        ),
       ),
-    );
-
-  const bonuses = await db
-    .select({
-      total: sql<number>`coalesce(sum(${schema.contractorBonuses.amountCents}), 0)::bigint`,
-    })
-    .from(schema.contractorBonuses)
-    .where(
-      and(
-        eq(schema.contractorBonuses.financeRegion, financeRegion),
-        eq(schema.contractorBonuses.status, 'paid'),
-        sql`${schema.contractorBonuses.resolvedAt} >= ${monthStart}`,
-        sql`${schema.contractorBonuses.resolvedAt} < ${monthEnd}`,
+    db
+      .select({
+        total: sql<number>`coalesce(sum(${schema.contractorBonuses.amountCents}), 0)::bigint`,
+      })
+      .from(schema.contractorBonuses)
+      .where(
+        and(
+          eq(schema.contractorBonuses.financeRegion, financeRegion),
+          eq(schema.contractorBonuses.status, 'paid'),
+          sql`${schema.contractorBonuses.resolvedAt} >= ${monthStart}`,
+          sql`${schema.contractorBonuses.resolvedAt} < ${monthEnd}`,
+        ),
       ),
-    );
+  ]);
 
   const revenueCents = Number(revenue[0]?.total ?? 0);
   const payoutsCents = Number(payouts[0]?.total ?? 0);
@@ -418,4 +423,98 @@ export async function computeFinancePeriodTotals(params: {
   const netCents = revenueCents - payoutsCents - bonusesCents;
 
   return { revenueCents, payoutsCents, bonusesCents, netCents };
+}
+
+export type FinancePeriodTotals = {
+  revenueCents: number;
+  payoutsCents: number;
+  bonusesCents: number;
+  netCents: number;
+};
+
+export async function computeFinancePeriodTotalsBatch(
+  earliestMonthStartIso: string,
+): Promise<Map<string, FinancePeriodTotals>> {
+  const [revenueRows, payoutRows, bonusRows] = await Promise.all([
+    db
+      .select({
+        financeRegion: schema.invoices.financeRegion,
+        year: sql<number>`extract(year from ${schema.invoices.paidAt})::int`,
+        month: sql<number>`extract(month from ${schema.invoices.paidAt})::int`,
+        total: sql<number>`coalesce(sum(${schema.invoices.totalAmountCents}), 0)::bigint`,
+      })
+      .from(schema.invoices)
+      .where(
+        and(
+          eq(schema.invoices.status, 'paid'),
+          sql`${schema.invoices.paidAt} >= ${earliestMonthStartIso}`,
+        ),
+      )
+      .groupBy(
+        schema.invoices.financeRegion,
+        sql`extract(year from ${schema.invoices.paidAt})`,
+        sql`extract(month from ${schema.invoices.paidAt})`,
+      ),
+    db
+      .select({
+        financeRegion: schema.payouts.financeRegion,
+        year: sql<number>`extract(year from ${schema.payouts.paidAt})::int`,
+        month: sql<number>`extract(month from ${schema.payouts.paidAt})::int`,
+        total: sql<number>`coalesce(sum(${schema.payouts.amountCents}), 0)::bigint`,
+      })
+      .from(schema.payouts)
+      .where(
+        and(
+          eq(schema.payouts.status, 'paid'),
+          sql`${schema.payouts.paidAt} >= ${earliestMonthStartIso}`,
+        ),
+      )
+      .groupBy(
+        schema.payouts.financeRegion,
+        sql`extract(year from ${schema.payouts.paidAt})`,
+        sql`extract(month from ${schema.payouts.paidAt})`,
+      ),
+    db
+      .select({
+        financeRegion: schema.contractorBonuses.financeRegion,
+        year: sql<number>`extract(year from ${schema.contractorBonuses.resolvedAt})::int`,
+        month: sql<number>`extract(month from ${schema.contractorBonuses.resolvedAt})::int`,
+        total: sql<number>`coalesce(sum(${schema.contractorBonuses.amountCents}), 0)::bigint`,
+      })
+      .from(schema.contractorBonuses)
+      .where(
+        and(
+          eq(schema.contractorBonuses.status, 'paid'),
+          sql`${schema.contractorBonuses.resolvedAt} >= ${earliestMonthStartIso}`,
+        ),
+      )
+      .groupBy(
+        schema.contractorBonuses.financeRegion,
+        sql`extract(year from ${schema.contractorBonuses.resolvedAt})`,
+        sql`extract(month from ${schema.contractorBonuses.resolvedAt})`,
+      ),
+  ]);
+
+  const map = new Map<string, FinancePeriodTotals>();
+  const ensure = (key: string): FinancePeriodTotals => {
+    let t = map.get(key);
+    if (!t) {
+      t = { revenueCents: 0, payoutsCents: 0, bonusesCents: 0, netCents: 0 };
+      map.set(key, t);
+    }
+    return t;
+  };
+  for (const r of revenueRows) {
+    ensure(`${r.financeRegion}:${r.year}:${r.month}`).revenueCents = Number(r.total);
+  }
+  for (const r of payoutRows) {
+    ensure(`${r.financeRegion}:${r.year}:${r.month}`).payoutsCents = Number(r.total);
+  }
+  for (const r of bonusRows) {
+    ensure(`${r.financeRegion}:${r.year}:${r.month}`).bonusesCents = Number(r.total);
+  }
+  for (const t of map.values()) {
+    t.netCents = t.revenueCents - t.payoutsCents - t.bonusesCents;
+  }
+  return map;
 }

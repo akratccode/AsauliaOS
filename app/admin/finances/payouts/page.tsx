@@ -19,6 +19,7 @@ export default async function AdminPayoutsQueuePage({
   searchParams: SearchParams;
 }) {
   const t = await getTranslations('admin.financesPayouts');
+  const tStatus = await getTranslations('statuses.payout');
   const sp = await searchParams;
   const regionFilter = isFinanceRegion(sp.region) ? sp.region : undefined;
 
@@ -113,7 +114,7 @@ export default async function AdminPayoutsQueuePage({
                             : 'bg-bg-2 text-fg-2'
                       }`}
                     >
-                      {p.status}
+                      {tStatus(p.status as 'pending' | 'processing' | 'paid' | 'failed')}
                     </span>
                   </td>
                   <td className="text-fg-3 px-3 py-2 font-mono">

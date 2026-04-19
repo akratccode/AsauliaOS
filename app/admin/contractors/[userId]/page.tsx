@@ -15,94 +15,94 @@ export default async function AdminContractorDetailPage({ params }: { params: Pa
   const { userId } = await params;
   const t = await getTranslations('admin.contractors');
 
-  const [user] = await db
-    .select({
-      id: schema.users.id,
-      email: schema.users.email,
-      fullName: schema.users.fullName,
-      timezone: schema.users.timezone,
-    })
-    .from(schema.users)
-    .where(eq(schema.users.id, userId))
-    .limit(1);
+  const [userRow, profileRow, assignments, payouts, deliverables, bonusRows] = await Promise.all([
+    db
+      .select({
+        id: schema.users.id,
+        email: schema.users.email,
+        fullName: schema.users.fullName,
+        timezone: schema.users.timezone,
+      })
+      .from(schema.users)
+      .where(eq(schema.users.id, userId))
+      .limit(1),
+    db
+      .select()
+      .from(schema.contractorProfiles)
+      .where(eq(schema.contractorProfiles.userId, userId))
+      .limit(1),
+    db
+      .select({
+        id: schema.brandContractors.id,
+        brandId: schema.brands.id,
+        brandName: schema.brands.name,
+        role: schema.brandContractors.role,
+        startedAt: schema.brandContractors.startedAt,
+        endedAt: schema.brandContractors.endedAt,
+      })
+      .from(schema.brandContractors)
+      .innerJoin(schema.brands, eq(schema.brands.id, schema.brandContractors.brandId))
+      .where(eq(schema.brandContractors.contractorUserId, userId))
+      .orderBy(desc(schema.brandContractors.startedAt)),
+    db
+      .select({
+        id: schema.payouts.id,
+        periodStart: schema.payouts.periodStart,
+        periodEnd: schema.payouts.periodEnd,
+        amountCents: schema.payouts.amountCents,
+        status: schema.payouts.status,
+      })
+      .from(schema.payouts)
+      .where(eq(schema.payouts.contractorUserId, userId))
+      .orderBy(desc(schema.payouts.periodStart))
+      .limit(24),
+    db
+      .select({
+        id: schema.deliverables.id,
+        title: schema.deliverables.title,
+        brandName: schema.brands.name,
+        status: schema.deliverables.status,
+        completedAt: schema.deliverables.completedAt,
+        dueDate: schema.deliverables.dueDate,
+      })
+      .from(schema.deliverables)
+      .innerJoin(schema.brands, eq(schema.brands.id, schema.deliverables.brandId))
+      .where(
+        and(
+          eq(schema.deliverables.assigneeUserId, userId),
+          isNull(schema.deliverables.archivedAt),
+        ),
+      )
+      .orderBy(desc(schema.deliverables.createdAt))
+      .limit(50),
+    db
+      .select({
+        id: schema.contractorBonuses.id,
+        brandId: schema.contractorBonuses.brandId,
+        brandName: schema.brands.name,
+        periodStart: schema.contractorBonuses.periodStart,
+        periodEnd: schema.contractorBonuses.periodEnd,
+        amountCents: schema.contractorBonuses.amountCents,
+        conditionType: schema.contractorBonuses.conditionType,
+        conditionMinCount: schema.contractorBonuses.conditionMinCount,
+        status: schema.contractorBonuses.status,
+        note: schema.contractorBonuses.note,
+        createdAt: schema.contractorBonuses.createdAt,
+      })
+      .from(schema.contractorBonuses)
+      .leftJoin(schema.brands, eq(schema.brands.id, schema.contractorBonuses.brandId))
+      .where(eq(schema.contractorBonuses.contractorUserId, userId))
+      .orderBy(desc(schema.contractorBonuses.createdAt))
+      .limit(50),
+  ]);
+
+  const user = userRow[0];
   if (!user) notFound();
-
-  const [profile] = await db
-    .select()
-    .from(schema.contractorProfiles)
-    .where(eq(schema.contractorProfiles.userId, userId))
-    .limit(1);
-
-  const assignments = await db
-    .select({
-      id: schema.brandContractors.id,
-      brandId: schema.brands.id,
-      brandName: schema.brands.name,
-      role: schema.brandContractors.role,
-      startedAt: schema.brandContractors.startedAt,
-      endedAt: schema.brandContractors.endedAt,
-    })
-    .from(schema.brandContractors)
-    .innerJoin(schema.brands, eq(schema.brands.id, schema.brandContractors.brandId))
-    .where(eq(schema.brandContractors.contractorUserId, userId))
-    .orderBy(desc(schema.brandContractors.startedAt));
-
-  const payouts = await db
-    .select({
-      id: schema.payouts.id,
-      periodStart: schema.payouts.periodStart,
-      periodEnd: schema.payouts.periodEnd,
-      amountCents: schema.payouts.amountCents,
-      status: schema.payouts.status,
-    })
-    .from(schema.payouts)
-    .where(eq(schema.payouts.contractorUserId, userId))
-    .orderBy(desc(schema.payouts.periodStart))
-    .limit(24);
-
-  const deliverables = await db
-    .select({
-      id: schema.deliverables.id,
-      title: schema.deliverables.title,
-      brandName: schema.brands.name,
-      status: schema.deliverables.status,
-      completedAt: schema.deliverables.completedAt,
-      dueDate: schema.deliverables.dueDate,
-    })
-    .from(schema.deliverables)
-    .innerJoin(schema.brands, eq(schema.brands.id, schema.deliverables.brandId))
-    .where(
-      and(
-        eq(schema.deliverables.assigneeUserId, userId),
-        isNull(schema.deliverables.archivedAt),
-      ),
-    )
-    .orderBy(desc(schema.deliverables.createdAt))
-    .limit(50);
+  const profile = profileRow[0];
 
   const completed = deliverables.filter((d) => d.status === 'done').length;
   const rejected = deliverables.filter((d) => d.status === 'rejected').length;
   const rejectionRate = deliverables.length > 0 ? Math.round((rejected / deliverables.length) * 100) : 0;
-
-  const bonusRows = await db
-    .select({
-      id: schema.contractorBonuses.id,
-      brandId: schema.contractorBonuses.brandId,
-      brandName: schema.brands.name,
-      periodStart: schema.contractorBonuses.periodStart,
-      periodEnd: schema.contractorBonuses.periodEnd,
-      amountCents: schema.contractorBonuses.amountCents,
-      conditionType: schema.contractorBonuses.conditionType,
-      conditionMinCount: schema.contractorBonuses.conditionMinCount,
-      status: schema.contractorBonuses.status,
-      note: schema.contractorBonuses.note,
-      createdAt: schema.contractorBonuses.createdAt,
-    })
-    .from(schema.contractorBonuses)
-    .leftJoin(schema.brands, eq(schema.brands.id, schema.contractorBonuses.brandId))
-    .where(eq(schema.contractorBonuses.contractorUserId, userId))
-    .orderBy(desc(schema.contractorBonuses.createdAt))
-    .limit(50);
 
   const activeBrands = assignments
     .filter((a) => !a.endedAt)

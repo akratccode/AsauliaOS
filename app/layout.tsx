@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Instrument_Serif } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ImpersonationBanner } from '@/components/auth/ImpersonationBanner';
 import './globals.css';
 
@@ -40,6 +42,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           <ImpersonationBanner />
           {children}
         </NextIntlClientProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { asc, eq, isNull } from 'drizzle-orm';
 import { db, schema } from '@/lib/db';
 
+export const revalidate = 300;
+
 export default async function AdminMatrixPage() {
   const [contractors, brands, assignments] = await Promise.all([
     db

@@ -18,6 +18,7 @@ export default async function AdminContractorsPage({
 }) {
   const sp = await searchParams;
   const t = await getTranslations('admin.contractors');
+  const tStatus = await getTranslations('statuses.contractor');
 
   const rows = await db
     .select({
@@ -129,7 +130,9 @@ export default async function AdminContractorsPage({
                     <div className="text-fg-3 text-xs">{r.headline ?? r.email}</div>
                   </td>
                   <td className="px-4 py-2 text-xs">
-                    <span className="bg-bg-2 text-fg-2 rounded-full px-2 py-0.5">{r.status}</span>
+                    <span className="bg-bg-2 text-fg-2 rounded-full px-2 py-0.5">
+                      {tStatus(r.status as 'active' | 'paused')}
+                    </span>
                   </td>
                   <td className="px-4 py-2 text-xs">
                     <span

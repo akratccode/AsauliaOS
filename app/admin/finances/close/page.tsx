@@ -4,7 +4,7 @@ import { requireAdmin } from '@/lib/auth/rbac';
 import { db, schema } from '@/lib/db';
 import { formatCents, formatDate } from '@/lib/format';
 import { FINANCE_REGIONS, currencyForRegion, type FinanceRegion } from '@/lib/billing/region';
-import { computeFinancePeriodTotals } from '@/app/actions/admin-finances';
+import { computeFinancePeriodTotalsBatch } from '@/app/actions/admin-finances';
 import { ClosePeriodForm } from './close-period-form';
 
 export async function generateMetadata() {
@@ -88,29 +88,7 @@ export default async function AdminFinancesClosePage() {
     monthsByRegion.set(region, list);
   }
 
-  const liveTotals = new Map<
-    string,
-    Awaited<ReturnType<typeof computeFinancePeriodTotals>>
-  >();
-  await Promise.all(
-    FINANCE_REGIONS.flatMap((region) =>
-      (monthsByRegion.get(region) ?? []).map(async (mk) => {
-        const { year: y, month: m } = parseMonthKey(mk);
-        const key = `${region}:${y}:${m}`;
-        if (closedByKey.has(key)) return;
-        const monthStart = `${y}-${String(m).padStart(2, '0')}-01`;
-        const nextMonth = m === 12 ? 1 : m + 1;
-        const nextYear = m === 12 ? y + 1 : y;
-        const monthEnd = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
-        const totals = await computeFinancePeriodTotals({
-          financeRegion: region,
-          monthStart,
-          monthEnd,
-        });
-        liveTotals.set(key, totals);
-      }),
-    ),
-  );
+  const liveTotals = await computeFinancePeriodTotalsBatch(earliestIso);
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-6">

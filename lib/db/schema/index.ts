@@ -13,4 +13,5 @@ export * from './audit';
 export * from './invitations';
 export * from './bonuses';
 export * from './recurrences';
+export * from './commission-pools';
 export * from './relations';
