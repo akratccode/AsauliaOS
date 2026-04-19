@@ -8,6 +8,7 @@ export * from './integrations';
 export * from './sales';
 export * from './billing';
 export * from './notifications';
+export * from './chat';
 export * from './audit';
 export * from './invitations';
 export * from './relations';

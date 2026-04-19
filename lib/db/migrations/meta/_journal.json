@@ -36,6 +36,13 @@
       "when": 1776576420867,
       "tag": "0005_phase11_billing_payouts",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776577352064,
+      "tag": "0006_phase12_notifications_chat",
+      "breakpoints": true
     }
   ]
 }

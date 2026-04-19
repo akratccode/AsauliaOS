@@ -6,6 +6,8 @@ import { db, schema } from '@/lib/db';
 import { writeLedger } from '@/lib/billing/ledger';
 import { runPayoutsForInvoice } from '@/lib/billing/payout';
 import { BILLING_POLICY } from '@/lib/billing/policy';
+import { notifyInvoicePaid, notifyPaymentFailed } from '@/lib/billing/notify';
+import { captureEvent } from '@/lib/observability/events';
 import type Stripe from 'stripe';
 
 export async function POST(req: NextRequest) {
@@ -153,6 +155,20 @@ async function handleInvoicePaid(event: Stripe.Event): Promise<void> {
     });
   }
 
+  // Transactional emails + owner-facing in-app alert. Bypasses preferences.
+  try {
+    await notifyInvoicePaid({ invoiceId: ourInvoice.id, brandId: ourInvoice.brandId });
+  } catch {
+    // Non-fatal — payment already landed; email delivery is best-effort.
+  }
+  // Product analytics — fire-and-forget.
+  captureEvent({
+    event: 'invoice_paid',
+    distinctId: ourInvoice.brandId,
+    brandId: ourInvoice.brandId,
+    properties: { amount_cents: stripeInvoice.amount_paid ?? 0 },
+  });
+
   // Schedule payout inline — cron catches up if this races, guarded by the
   // billing_jobs unique index.
   if (stripeInvoice.amount_paid && stripeInvoice.amount_paid > 0) {
@@ -199,6 +215,16 @@ async function handleInvoicePaymentFailed(event: Stripe.Event): Promise<void> {
       updatedAt: now,
     })
     .where(eq(schema.brands.id, ourInvoice.brandId));
+
+  try {
+    await notifyPaymentFailed({
+      invoiceId: ourInvoice.id,
+      brandId: ourInvoice.brandId,
+      retryCount: (ourInvoice.retryCount ?? 0) + 1,
+    });
+  } catch {
+    // Non-fatal.
+  }
 }
 
 async function handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
