@@ -716,6 +716,24 @@
       "active": "activa",
       "paused": "pausada"
     },
+    "brandContractors": {
+      "assignedTitle": "Contratistas asignados",
+      "noActiveAssignments": "Sin asignaciones activas todavía.",
+      "roleSince": "{role} · desde {date}",
+      "end": "Finalizar",
+      "ending": "Finalizando…",
+      "assignTitle": "Asignar un contratista",
+      "noContractorsAvailable": "No hay contratistas activos disponibles para asignar.",
+      "contractor": "Contratista",
+      "selectContractor": "Elegí un contratista…",
+      "role": "Rol",
+      "rolePlaceholder": "p. ej. copywriter, diseñador",
+      "assign": "Asignar",
+      "assigning": "Asignando…",
+      "assignedInfo": "Contratista asignado.",
+      "weightsTitle": "Pesos del pool variable",
+      "weightsDesc": "Los pesos se reparten por defecto en partes iguales entre los contratistas activos. Las anulaciones por período se aplican en el cierre de ciclo."
+    },
     "deliverablePlanner": {
       "planTitle": "Planificar un nuevo entregable",
       "titleLabel": "Título",
@@ -985,6 +1003,14 @@
         "invalid_input": "Verificá los campos e intentá de nuevo.",
         "owner_not_found": "No hay cuenta con ese email. Pedile al propietario que se registre primero.",
         "slug_taken": "Ese slug ya está en uso.",
+        "generic": "Algo salió mal. Intentá de nuevo."
+      },
+      "brandContractors": {
+        "invalid_input": "Verificá los campos e intentá de nuevo.",
+        "brand_not_found": "Marca no encontrada.",
+        "contractor_not_found": "Contratista no encontrado o inactivo.",
+        "assignment_exists": "Ese contratista ya tiene este rol en esta marca.",
+        "assignment_not_found": "Asignación no encontrada.",
         "generic": "Algo salió mal. Intentá de nuevo."
       },
       "finances": {

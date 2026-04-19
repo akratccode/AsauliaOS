@@ -716,6 +716,24 @@
       "active": "active",
       "paused": "paused"
     },
+    "brandContractors": {
+      "assignedTitle": "Assigned contractors",
+      "noActiveAssignments": "No active assignments yet.",
+      "roleSince": "{role} · since {date}",
+      "end": "End",
+      "ending": "Ending…",
+      "assignTitle": "Assign a contractor",
+      "noContractorsAvailable": "No active contractors available to assign.",
+      "contractor": "Contractor",
+      "selectContractor": "Select a contractor…",
+      "role": "Role",
+      "rolePlaceholder": "e.g. copywriter, designer",
+      "assign": "Assign",
+      "assigning": "Assigning…",
+      "assignedInfo": "Contractor assigned.",
+      "weightsTitle": "Variable-pool weights",
+      "weightsDesc": "Weights default to an equal split among active contractors. Per-period overrides land with the cycle-close job."
+    },
     "deliverablePlanner": {
       "planTitle": "Plan a new deliverable",
       "titleLabel": "Title",
@@ -985,6 +1003,14 @@
         "invalid_input": "Please check the fields and try again.",
         "owner_not_found": "No account found with that email. Ask the owner to sign up first.",
         "slug_taken": "That slug is already in use.",
+        "generic": "Something went wrong. Try again."
+      },
+      "brandContractors": {
+        "invalid_input": "Please check the fields and try again.",
+        "brand_not_found": "Brand not found.",
+        "contractor_not_found": "Contractor not found or inactive.",
+        "assignment_exists": "That contractor already holds this role on this brand.",
+        "assignment_not_found": "Assignment not found.",
         "generic": "Something went wrong. Try again."
       },
       "finances": {
