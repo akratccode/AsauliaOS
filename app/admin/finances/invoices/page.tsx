@@ -24,6 +24,7 @@ export default async function AdminAllInvoicesPage({
   searchParams: SearchParams;
 }) {
   const t = await getTranslations('admin.financesInvoices');
+  const tStatus = await getTranslations('statuses.invoice');
   const sp = await searchParams;
   const filter = sp.filter ?? 'all';
   const regionFilter = isFinanceRegion(sp.region) ? sp.region : undefined;
@@ -197,7 +198,10 @@ export default async function AdminAllInvoicesPage({
                       {formatDate(r.periodStart)} – {formatDate(r.periodEnd)}
                     </td>
                     <td className="px-3 py-2">
-                      <StatusPill status={r.status} />
+                      <StatusPill
+                        status={r.status}
+                        label={tStatus(r.status as 'draft' | 'open' | 'paid' | 'failed' | 'void')}
+                      />
                     </td>
                     <td className="text-fg-2 px-3 py-2 text-right">
                       {formatCents(r.fixed, r.currency)}
@@ -252,7 +256,7 @@ function FilterLink({
   );
 }
 
-function StatusPill({ status }: { status: string }) {
+function StatusPill({ status, label }: { status: string; label: string }) {
   const tone =
     status === 'paid'
       ? 'bg-asaulia-green/15 text-asaulia-green'
@@ -261,7 +265,7 @@ function StatusPill({ status }: { status: string }) {
         : status === 'open'
           ? 'bg-warning/15 text-warning'
           : 'bg-bg-2 text-fg-2';
-  return <span className={`rounded-full px-2 py-0.5 ${tone}`}>{status}</span>;
+  return <span className={`rounded-full px-2 py-0.5 ${tone}`}>{label}</span>;
 }
 
 function ymd(d: Date): string {

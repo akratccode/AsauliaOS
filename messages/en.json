@@ -213,6 +213,34 @@
       "inReview": "In review",
       "done": "Done",
       "rejected": "Rejected"
+    },
+    "brand": {
+      "trial": "trial",
+      "active": "active",
+      "past_due": "past due",
+      "paused": "paused",
+      "cancelled": "cancelled"
+    },
+    "contractor": {
+      "active": "active",
+      "paused": "paused"
+    },
+    "payout": {
+      "pending": "pending",
+      "processing": "processing",
+      "paid": "paid",
+      "failed": "failed"
+    },
+    "invoice": {
+      "draft": "draft",
+      "open": "open",
+      "paid": "paid",
+      "failed": "failed",
+      "void": "void"
+    },
+    "period": {
+      "open": "open",
+      "closed": "closed"
     }
   },
   "dashboard": {

@@ -18,6 +18,7 @@ export default async function AdminBrandsPage({
 }) {
   const sp = await searchParams;
   const t = await getTranslations('admin.brands');
+  const tStatus = await getTranslations('statuses.brand');
   const rows = await db
     .select({
       id: schema.brands.id,
@@ -126,7 +127,7 @@ export default async function AdminBrandsPage({
                             : 'bg-bg-2 text-fg-2'
                       }`}
                     >
-                      {r.status}
+                      {tStatus(r.status as 'trial' | 'active' | 'past_due' | 'paused' | 'cancelled')}
                     </span>
                   </td>
                   <td className="px-4 py-2">

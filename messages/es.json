@@ -207,6 +207,34 @@
     }
   },
   "statuses": {
+    "brand": {
+      "trial": "prueba",
+      "active": "activa",
+      "past_due": "vencida",
+      "paused": "pausada",
+      "cancelled": "cancelada"
+    },
+    "contractor": {
+      "active": "activo",
+      "paused": "pausado"
+    },
+    "payout": {
+      "pending": "pendiente",
+      "processing": "procesando",
+      "paid": "pagado",
+      "failed": "fallido"
+    },
+    "invoice": {
+      "draft": "borrador",
+      "open": "abierta",
+      "paid": "pagada",
+      "failed": "fallida",
+      "void": "anulada"
+    },
+    "period": {
+      "open": "abierto",
+      "closed": "cerrado"
+    },
     "deliverable": {
       "todo": "Por hacer",
       "inProgress": "En progreso",
