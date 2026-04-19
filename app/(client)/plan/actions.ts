@@ -13,9 +13,16 @@ import {
   changePlan,
 } from '@/lib/plans/change';
 
+export type PlanErrorCode =
+  | 'no_active_brand'
+  | 'only_owner_can_change'
+  | 'select_valid_plan'
+  | 'plan_change_cooldown'
+  | 'plan_change_validation';
+
 export type PlanActionState =
-  | { error: string; availableOn?: string }
-  | { success: true; effectiveFrom: string }
+  | { ok: false; error: PlanErrorCode; availableOn?: string; detail?: string }
+  | { ok: true; effectiveFrom: string }
   | undefined;
 
 const inputSchema = z.object({
@@ -29,17 +36,17 @@ export async function changePlanAction(
 ): Promise<PlanActionState> {
   const actor = await requireAuth();
   const { active } = await resolveActiveBrand(actor);
-  if (!active) return { error: 'No active brand' };
+  if (!active) return { ok: false, error: 'no_active_brand' };
   const { role } = await requireClientBrandAccess(actor, active.id);
   if (role !== 'owner' && actor.globalRole !== 'admin' && actor.globalRole !== 'operator') {
-    return { error: 'Only the brand owner can change the plan.' };
+    return { ok: false, error: 'only_owner_can_change' };
   }
 
   const parsed = inputSchema.safeParse({
     fixedAmountCents: formData.get('fixedAmountCents'),
     variablePercentBps: formData.get('variablePercentBps'),
   });
-  if (!parsed.success) return { error: 'Select a valid plan on the slider first.' };
+  if (!parsed.success) return { ok: false, error: 'select_valid_plan' };
 
   const brandRow = await db
     .select({ billingCycleDay: dbSchema.brands.billingCycleDay })
@@ -60,16 +67,21 @@ export async function changePlanAction(
     revalidatePath('/plan');
     revalidatePath('/billing');
     revalidatePath('/dashboard');
-    return { success: true, effectiveFrom: row.effectiveFrom.toISOString() };
+    return { ok: true, effectiveFrom: row.effectiveFrom.toISOString() };
   } catch (err) {
     if (err instanceof PlanChangeCooldownError) {
       return {
-        error: 'You can change your plan again after the cooldown.',
+        ok: false,
+        error: 'plan_change_cooldown',
         availableOn: err.availableOn.toISOString(),
       };
     }
     if (err instanceof PlanChangeValidationError) {
-      return { error: err.message };
+      return {
+        ok: false,
+        error: 'plan_change_validation',
+        detail: err.message,
+      };
     }
     throw err;
   }

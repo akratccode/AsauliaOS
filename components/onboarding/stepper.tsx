@@ -1,19 +1,21 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 const STEPS = [
-  { href: '/onboarding/brand', label: 'Brand' },
-  { href: '/onboarding/plan', label: 'Plan' },
-  { href: '/onboarding/payment', label: 'Payment' },
-];
+  { href: '/onboarding/brand', key: 'brand' },
+  { href: '/onboarding/plan', key: 'plan' },
+  { href: '/onboarding/payment', key: 'payment' },
+] as const;
 
 export function OnboardingStepper() {
   const pathname = usePathname();
+  const t = useTranslations('onboarding.stepper');
   const currentIndex = STEPS.findIndex((step) => pathname?.startsWith(step.href));
 
   return (
-    <ol className="text-fg-3 flex items-center gap-2 text-xs" aria-label="Onboarding progress">
+    <ol className="text-fg-3 flex items-center gap-2 text-xs" aria-label={t('ariaLabel')}>
       {STEPS.map((step, i) => {
         const active = i === currentIndex;
         const done = currentIndex !== -1 && i < currentIndex;
@@ -30,7 +32,8 @@ export function OnboardingStepper() {
             >
               {i + 1}
             </span>
-            <span className={active ? 'text-fg-1' : ''}>{step.label}</span>
+            <span className={active ? 'text-fg-1' : ''}>{t(step.key)}</span>
+            {/* eslint-disable-next-line i18next/no-literal-string -- decorative separator */}
             {i < STEPS.length - 1 ? <span className="text-fg-4/60">·</span> : null}
           </li>
         );

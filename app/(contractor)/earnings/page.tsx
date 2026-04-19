@@ -1,10 +1,17 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 import { requireAuth } from '@/lib/auth/rbac';
 import { resolveBillingWindow } from '@/lib/brand/billing-period';
 import { projectEarningsForPeriod } from '@/lib/contractor/earnings';
 import { formatCents, formatBps, formatDate } from '@/lib/format';
 
 const PAYOUT_BUFFER_DAYS = 5;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('contractor.earnings');
+  return { title: t('metadata') };
+}
 
 export default async function ContractorEarningsPage() {
   const actor = await requireAuth();
@@ -19,47 +26,53 @@ export default async function ContractorEarningsPage() {
   const fixedPct = total > 0 ? Math.round((projection.fixedTotalCents / total) * 100) : 0;
   const variablePct = total > 0 ? 100 - fixedPct : 0;
 
+  const t = await getTranslations('contractor.earnings');
+  const tLayout = await getTranslations('dashboard.contractor');
+
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 p-6">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Compensation</p>
-          <h1 className="text-fg-1 font-serif text-3xl italic">Earnings</h1>
+          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('compensationLabel')}</p>
+          <h1 className="text-fg-1 font-serif text-3xl italic">{t('earningsTitle')}</h1>
         </div>
         <Link
           href="/earnings/history"
           className="text-fg-3 hover:text-fg-1 text-xs uppercase tracking-[0.12em]"
         >
-          Past payouts →
+          {t('pastPayouts')}
         </Link>
       </header>
 
       <section className="border-fg-4/15 bg-bg-1 grid gap-4 rounded-2xl border p-5 md:grid-cols-3">
         <div>
-          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Projected this period</p>
+          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('projectedThisPeriod')}</p>
           <p className="text-fg-1 mt-1 font-serif text-3xl italic">{formatCents(total)}</p>
-          <p className="text-fg-3 mt-2 text-xs">Period · {window.label}</p>
+          {/* eslint-disable-next-line i18next/no-literal-string -- window.label is a formatted period range */}
+          <p className="text-fg-3 mt-2 text-xs">{tLayout('periodLabel')} · {window.label}</p>
         </div>
         <div>
-          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Fixed</p>
+          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('fixed')}</p>
           <p className="text-fg-1 mt-1 font-serif text-xl italic">
             {formatCents(projection.fixedTotalCents)}
           </p>
+          {/* eslint-disable-next-line i18next/no-literal-string -- numeric percentage composition */}
           <p className="text-fg-3 mt-1 text-xs">{fixedPct}% of projected</p>
         </div>
         <div>
-          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Variable</p>
+          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('variable')}</p>
           <p className="text-fg-1 mt-1 font-serif text-xl italic">
             {formatCents(projection.variableTotalCents)}
           </p>
-          <p className="text-fg-3 mt-1 text-xs">{variablePct}% · based on attributed sales so far</p>
+          {/* eslint-disable-next-line i18next/no-literal-string -- numeric percentage prefix before translated phrase */}
+          <p className="text-fg-3 mt-1 text-xs">{variablePct}% · {t('basedOnAttributedSales')}</p>
         </div>
       </section>
 
       <section>
-        <h2 className="text-fg-1 mb-3 font-serif text-lg italic">By brand</h2>
+        <h2 className="text-fg-1 mb-3 font-serif text-lg italic">{t('byBrand')}</h2>
         {projection.byBrand.length === 0 ? (
-          <p className="text-fg-3 text-sm">No active brand assignments this period.</p>
+          <p className="text-fg-3 text-sm">{t('noActiveBrandAssignments')}</p>
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {projection.byBrand.map((b) => {
@@ -72,31 +85,31 @@ export default async function ContractorEarningsPage() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="text-fg-1 font-serif text-lg italic">{b.brandName}</div>
-                    <div className="text-fg-3 text-xs">{share}% of pool</div>
+                    <div className="text-fg-3 text-xs">{share}{t('ofPool')}</div>
                   </div>
                   <div className="text-fg-1 mt-2 font-serif text-2xl italic">
                     {formatCents(b.totalCents)}
                   </div>
                   <dl className="text-fg-3 mt-3 grid grid-cols-2 gap-1 text-xs">
-                    <dt>Fixed</dt>
+                    <dt>{t('fixed')}</dt>
                     <dd className="text-fg-2 text-right">
                       {formatCents(b.myFixedShareCents)}
                     </dd>
-                    <dt>Variable</dt>
+                    <dt>{t('variable')}</dt>
                     <dd className="text-fg-2 text-right">
                       {formatCents(b.myVariableShareCents)}
                     </dd>
-                    <dt>Deliverables contributing</dt>
+                    <dt>{t('contributing')}</dt>
                     <dd className="text-fg-2 text-right">
                       {b.contributingDeliverableIds.length}
                     </dd>
-                    <dt>Attributed sales</dt>
+                    <dt>{t('attributedSales')}</dt>
                     <dd className="text-fg-2 text-right">
                       {formatCents(b.attributedSalesCents)}
                     </dd>
                     {b.plan && (
                       <>
-                        <dt>Plan</dt>
+                        <dt>{t('plan')}</dt>
                         <dd className="text-fg-2 text-right">
                           {formatCents(b.plan.fixedAmountCents)} +{' '}
                           {formatBps(b.plan.variablePercentBps)}
@@ -112,11 +125,10 @@ export default async function ContractorEarningsPage() {
       </section>
 
       <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Next payout</p>
+        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('nextPayout')}</p>
         <p className="text-fg-1 mt-1 font-serif text-2xl italic">{formatDate(nextPayoutDate)}</p>
         <p className="text-fg-3 mt-2 text-xs">
-          Amount locks in at cycle close ({formatDate(window.end)}) and pays{' '}
-          {PAYOUT_BUFFER_DAYS} days after reconciliation. Projection above is indicative.
+          {t('amountLocks', { date: formatDate(window.end), days: PAYOUT_BUFFER_DAYS })}
         </p>
       </section>
     </main>

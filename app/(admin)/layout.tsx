@@ -7,6 +7,7 @@ import { AdminSearchBar } from '@/components/admin-shell/SearchBar';
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const actor = await requireAuth();
   if (actor.globalRole !== 'admin' && actor.globalRole !== 'operator') {
+     
     throw new Forbidden('Admin access only');
   }
 

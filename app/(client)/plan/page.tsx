@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { eq } from 'drizzle-orm';
+import { getTranslations } from 'next-intl/server';
 import { requireAuth } from '@/lib/auth/rbac';
 import { db, schema } from '@/lib/db';
 import { resolveActiveBrand, requireClientBrandAccess } from '@/lib/brand/context';
@@ -12,6 +13,11 @@ import { attributedSalesForPeriod } from '@/lib/integrations/service';
 import { resolveBillingWindow } from '@/lib/brand/billing-period';
 import { formatBps, formatCents, formatDate } from '@/lib/format';
 import { PlanChangeForm } from './PlanChangeForm';
+
+export async function generateMetadata() {
+  const t = await getTranslations('client.plan');
+  return { title: t('metadata') };
+}
 
 export default async function PlanPage() {
   const actor = await requireAuth();
@@ -40,11 +46,13 @@ export default async function PlanPage() {
   const fixed = current?.fixedAmountCents ?? 0;
   const variable = current?.variablePercentBps ?? 0;
 
+  const t = await getTranslations('client.plan');
+
   return (
     <main className="mx-auto w-full max-w-4xl space-y-6 p-6">
       <header>
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Pricing</p>
-        <h1 className="text-fg-1 font-serif text-3xl italic">Your plan</h1>
+        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('pricingLabel')}</p>
+        <h1 className="text-fg-1 font-serif text-3xl italic">{t('planTitle')}</h1>
       </header>
 
       <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
@@ -52,41 +60,43 @@ export default async function PlanPage() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="text-fg-3 text-xs uppercase tracking-[0.12em]">
-                Current plan
+                {t('currentPlan')}
               </div>
               <div className="text-fg-1 font-serif text-4xl italic">
                 {formatCents(fixed)}
-                <span className="text-fg-3 ml-2 text-sm">/ month</span>
+                <span className="text-fg-3 ml-2 text-sm">{t('perMonth')}</span>
               </div>
               <div className="text-fg-2 mt-1 text-sm">
-                + {formatBps(variable)} of attributed sales
+                + {formatBps(variable)} {t('ofAttributedSales')}
               </div>
             </div>
             <div className="text-fg-3 text-xs">
-              <div>Next close: {formatDate(window.end)}</div>
+              <div>{t('nextClose')} {formatDate(window.end)}</div>
               <div>
-                Period sales so far: {formatCents(sales.totalCents)} · {sales.count} orders
+                {t('periodSalesSoFar')} {formatCents(sales.totalCents)} · {sales.count} {t('orders')}
               </div>
             </div>
           </div>
         ) : (
-          <p className="text-fg-3 text-sm">No active plan. Finish onboarding first.</p>
+          <p className="text-fg-3 text-sm">{t('noActivePlan')}</p>
         )}
       </section>
 
       {upcoming && (
         <section className="border-asaulia-blue/30 bg-asaulia-blue/5 rounded-2xl border p-5 text-sm">
-          <div className="text-fg-3 text-xs uppercase tracking-[0.12em]">Scheduled</div>
+          <div className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('scheduled')}</div>
           <div className="text-fg-1 mt-1">
-            Moves to {formatCents(upcoming.fixedAmountCents)} +{' '}
-            {formatBps(upcoming.variablePercentBps)} on{' '}
-            {formatDate(upcoming.effectiveFrom)}.
+            {t('movesTo', {
+              fixed: formatCents(upcoming.fixedAmountCents),
+              variable: formatBps(upcoming.variablePercentBps),
+              date: formatDate(upcoming.effectiveFrom),
+            })}
           </div>
         </section>
       )}
 
       <section>
-        <h2 className="text-fg-2 mb-3 text-sm uppercase tracking-[0.12em]">Adjust plan</h2>
+        <h2 className="text-fg-2 mb-3 text-sm uppercase tracking-[0.12em]">{t('adjustPlan')}</h2>
         <PlanChangeForm
           currentFixedCents={fixed || 19_900}
           currentVariableBps={variable}
@@ -98,7 +108,7 @@ export default async function PlanPage() {
       </section>
 
       <Link href="/plan/history" className="text-asaulia-blue-soft text-xs hover:underline">
-        See plan history →
+        {t('seePlanHistory')}
       </Link>
     </main>
   );

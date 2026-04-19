@@ -6,7 +6,13 @@ import { eq } from 'drizzle-orm';
 import { requireAuth } from '@/lib/auth/rbac';
 import { db, schema } from '@/lib/db';
 
-export type ProfileActionState = { error?: string; info?: string } | undefined;
+export type ContractorProfileErrorCode = 'profile_action_invalid_input';
+export type ContractorProfileInfoCode = 'profile_saved';
+
+export type ProfileActionState =
+  | { error: ContractorProfileErrorCode }
+  | { info: ContractorProfileInfoCode }
+  | undefined;
 
 const skillsSchema = z
   .string()
@@ -36,7 +42,7 @@ export async function updateContractorProfileAction(
     skills: formData.get('skills') ?? '',
     timezone: formData.get('timezone') ?? 'UTC',
   });
-  if (!parsed.success) return { error: 'Check the fields and try again.' };
+  if (!parsed.success) return { error: 'profile_action_invalid_input' };
 
   const existing = await db
     .select({ userId: schema.contractorProfiles.userId })
@@ -68,5 +74,5 @@ export async function updateContractorProfileAction(
 
   revalidatePath('/profile');
   revalidatePath('/onboarding');
-  return { info: 'Profile saved.' };
+  return { info: 'profile_saved' };
 }

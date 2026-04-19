@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { desc, eq } from 'drizzle-orm';
+import { getTranslations } from 'next-intl/server';
 import { requireAuth } from '@/lib/auth/rbac';
 import { db, schema } from '@/lib/db';
 import { resolveActiveBrand, requireClientBrandAccess } from '@/lib/brand/context';
@@ -10,6 +11,11 @@ import { currentAndUpcomingPlan } from '@/lib/plans/change';
 import { quote } from '@/lib/pricing';
 import { formatCents, formatDate } from '@/lib/format';
 import { UndoCancelForm } from './undo-cancel-form';
+
+export async function generateMetadata() {
+  const t = await getTranslations('client.billing');
+  return { title: t('metadata') };
+}
 
 export default async function BillingPage() {
   const actor = await requireAuth();
@@ -56,17 +62,19 @@ export default async function BillingPage() {
     (i) => i.status === 'failed' || i.status === 'void',
   );
 
+  const t = await getTranslations('client.billing');
+
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 p-6">
       <header>
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Finance</p>
-        <h1 className="text-fg-1 font-serif text-3xl italic">Billing</h1>
+        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('headerLabel')}</p>
+        <h1 className="text-fg-1 font-serif text-3xl italic">{t('headerTitle')}</h1>
       </header>
 
       <section className="grid gap-4 md:grid-cols-2">
         <div className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
           <div className="text-fg-3 text-xs uppercase tracking-[0.12em]">
-            Next invoice preview
+            {t('nextInvoicePreview')}
           </div>
           {preview ? (
             <>
@@ -75,34 +83,36 @@ export default async function BillingPage() {
               </div>
               <ul className="text-fg-2 mt-3 space-y-1 text-sm">
                 <li className="flex justify-between">
-                  <span>Fixed fee</span>
+                  <span>{t('fixedFee')}</span>
                   <span>{formatCents(preview.fixedAmountCents)}</span>
                 </li>
                 <li className="flex justify-between">
                   <span>
-                    Variable ({(preview.variablePercentBps / 100).toFixed(1)}% on{' '}
+                    {t('variable')} ({(preview.variablePercentBps / 100).toFixed(1)}%{' '}
+                    { }
+                    on{' '}
                     {formatCents(preview.attributedSalesCents)})
                   </span>
                   <span>{formatCents(preview.variableAmountCents)}</span>
                 </li>
               </ul>
               <p className="text-fg-3 mt-3 text-xs">
-                Closes on {formatDate(window.end)}.
+                {t('closesOn')} {formatDate(window.end)}.
               </p>
             </>
           ) : (
-            <p className="text-fg-3 text-sm">No active plan.</p>
+            <p className="text-fg-3 text-sm">{t('noActivePlan')}</p>
           )}
         </div>
 
         <div className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
           <div className="text-fg-3 text-xs uppercase tracking-[0.12em]">
-            Payment method
+            {t('paymentMethod')}
           </div>
           <p className="text-fg-2 mt-2 text-sm">
             {brand?.stripeCustomerId
-              ? 'Managed via Stripe Customer Portal.'
-              : 'Payment method is set during onboarding.'}
+              ? t('managedViaStripe')
+              : t('paymentMethodSetDuringOnboarding')}
           </p>
           {brand?.stripeCustomerId && (
             <form action="/api/billing/portal" method="post" className="mt-4">
@@ -110,7 +120,7 @@ export default async function BillingPage() {
                 type="submit"
                 className="border-fg-4/20 text-fg-2 hover:text-fg-1 rounded-md border px-3 py-1.5 text-xs"
               >
-                Open customer portal
+                {t('openCustomerPortal')}
               </button>
             </form>
           )}
@@ -119,13 +129,13 @@ export default async function BillingPage() {
 
       {lastFailedInvoice && (
         <section className="border-asaulia-red/40 bg-asaulia-red/10 rounded-2xl border p-4 text-sm">
-          <p className="text-fg-1 font-medium">Payment issue on recent invoice</p>
+          <p className="text-fg-1 font-medium">{t('paymentIssue')}</p>
           <p className="text-fg-2 mt-1 text-xs">
-            Update your payment method to resolve.
+            {t('updatePaymentMethod')}
           </p>
           {brand?.deliverablesFrozen && (
             <p className="text-fg-2 mt-2 text-xs">
-              Deliverables are frozen until payment is received.
+              {t('deliverablesFrozen')}
             </p>
           )}
         </section>
@@ -133,9 +143,9 @@ export default async function BillingPage() {
 
       {brand?.cancelledAt && brand.status !== 'cancelled' && (
         <section className="border-fg-4/20 bg-bg-1 rounded-2xl border p-4 text-sm">
-          <p className="text-fg-1 font-medium">Subscription set to cancel</p>
+          <p className="text-fg-1 font-medium">{t('subscriptionSetToCancel')}</p>
           <p className="text-fg-2 mt-1 text-xs">
-            Ends on {formatDate(brand.cancelledAt)}. You can reverse this before then.
+            {t('canReverseBefore', { date: formatDate(brand.cancelledAt) })}
           </p>
           <UndoCancelForm />
         </section>
@@ -144,34 +154,35 @@ export default async function BillingPage() {
       {!brand?.cancelledAt && brand?.status !== 'cancelled' && (
         <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
           <div className="text-fg-3 text-xs uppercase tracking-[0.12em]">
-            Cancel subscription
+            {t('cancelSubscription')}
           </div>
           <p className="text-fg-2 mt-2 text-sm">
-            Your plan stays active through the current cycle. Variable fees
-            are prorated for days your plan was active.
+            {t('planStaysActive')}
           </p>
           <Link
             href="/billing/cancel"
             className="border-asaulia-red/40 text-asaulia-red hover:bg-asaulia-red/5 mt-3 inline-block rounded-md border px-3 py-1.5 text-xs"
           >
-            Cancel at period end
+            {t('cancelAtPeriodEnd')}
           </Link>
         </section>
       )}
 
       <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
         <div className="text-fg-3 mb-3 text-xs uppercase tracking-[0.12em]">
-          Invoice history
+          {t('invoiceHistory')}
         </div>
         {invoices.length === 0 ? (
-          <p className="text-fg-3 text-sm">No invoices yet. First close: {formatDate(window.end)}.</p>
+          <p className="text-fg-3 text-sm">
+            {t('noInvoicesYet', { date: formatDate(window.end) })}
+          </p>
         ) : (
           <table className="w-full text-left text-sm">
             <thead className="text-fg-3 text-xs uppercase tracking-[0.12em]">
               <tr>
-                <th className="py-2">Period</th>
-                <th className="py-2">Status</th>
-                <th className="py-2 text-right">Amount</th>
+                <th className="py-2">{t('period')}</th>
+                <th className="py-2">{t('status')}</th>
+                <th className="py-2 text-right">{t('amount')}</th>
                 <th className="py-2" />
               </tr>
             </thead>
@@ -193,7 +204,7 @@ export default async function BillingPage() {
                       href={`/billing/${inv.id}`}
                       className="text-asaulia-blue-soft text-xs hover:underline"
                     >
-                      View
+                      {t('view')}
                     </Link>
                   </td>
                 </tr>

@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { eq } from 'drizzle-orm';
+import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 import { requireAuth } from '@/lib/auth/rbac';
 import { db, schema } from '@/lib/db';
 import { resolveActiveBrand, requireClientBrandAccess } from '@/lib/brand/context';
@@ -21,12 +23,13 @@ type SearchParams = Promise<{
   page?: string;
 }>;
 
-const RANGE_PRESETS = {
-  period: 'This period',
-  '30d': 'Last 30 days',
-  '90d': 'Last 90 days',
-  all: 'All time',
-} as const;
+const RANGE_KEYS = ['period', '30d', '90d', 'all'] as const;
+type RangeKey = (typeof RANGE_KEYS)[number];
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('client.sales');
+  return { title: t('metadata') };
+}
 
 export default async function SalesPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
@@ -42,7 +45,9 @@ export default async function SalesPage({ searchParams }: { searchParams: Search
     .limit(1);
 
   const window = resolveBillingWindow(brand?.billingCycleDay ?? null);
-  const range = (sp.range as keyof typeof RANGE_PRESETS) ?? 'period';
+  const range = ((RANGE_KEYS as readonly string[]).includes(sp.range ?? '')
+    ? (sp.range as RangeKey)
+    : 'period') as RangeKey;
 
   const filter: SalesFilter = {
     brandId: active.id,
@@ -95,65 +100,78 @@ export default async function SalesPage({ searchParams }: { searchParams: Search
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, cents]) => ({ date, cents }));
 
+  const t = await getTranslations('client.sales');
+
+  const rangeLabels: Record<RangeKey, string> = {
+     
+    period: 'This period',
+     
+    '30d': 'Last 30 days',
+     
+    '90d': 'Last 90 days',
+     
+    all: 'All time',
+  };
+
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-6">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Transparency</p>
-          <h1 className="text-fg-1 font-serif text-3xl italic">Sales</h1>
+          <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('transparencyLabel')}</p>
+          <h1 className="text-fg-1 font-serif text-3xl italic">{t('salesTitle')}</h1>
         </div>
         <a
           href={csvHref}
           className="border-fg-4/20 text-fg-2 hover:text-fg-1 rounded-md border px-3 py-1.5 text-xs"
         >
-          Export CSV
+          {t('exportCsv')}
         </a>
       </header>
 
       <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <Metric label="Attributed" value={formatCents(totalAttributedCents)} sub="in view" />
-        <Metric label="Orders" value={String(list.total)} sub="matching filters" />
+        <Metric label={t('attributed')} value={formatCents(totalAttributedCents)} sub={t('inView')} />
+        <Metric label={t('ordersCount')} value={String(list.total)} sub={t('matchingFilters')} />
         <Metric
-          label="Avg order"
+          label={t('avgOrder')}
           value={formatCents(avgOrderCents)}
-          sub="on this page"
+          sub={t('onThisPage')}
         />
         <Metric
-          label="Integrations"
+          label={t('integrationsCount')}
           value={String(integrations.length)}
-          sub={integrations.length ? 'connected' : 'none connected'}
+          sub={integrations.length ? t('connected') : t('noneConnected')}
         />
       </section>
 
       <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
         <div className="text-fg-3 mb-3 text-xs uppercase tracking-[0.12em]">
-          Trend in view
+          {t('trendInView')}
         </div>
         <Sparkline data={dailyPoints} />
       </section>
 
       <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
         <form className="mb-4 flex flex-wrap items-end gap-3 text-xs" method="get">
-          <Field label="Range">
+          <Field label={t('range')}>
             <select
               name="range"
               defaultValue={range}
               className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-2 py-1"
             >
-              {Object.entries(RANGE_PRESETS).map(([k, v]) => (
+              {RANGE_KEYS.map((k) => (
                 <option key={k} value={k}>
-                  {v}
+                  {rangeLabels[k]}
                 </option>
               ))}
             </select>
           </Field>
-          <Field label="Integration">
+          <Field label={t('integration')}>
             <select
               name="integration"
               defaultValue={sp.integration ?? ''}
               className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-2 py-1"
             >
-              <option value="">All</option>
+              <option value="">{t('all')}</option>
               {integrations.map((i) => (
                 <option key={i.id} value={i.id}>
                   {i.displayName}
@@ -161,14 +179,15 @@ export default async function SalesPage({ searchParams }: { searchParams: Search
               ))}
             </select>
           </Field>
-          <Field label="Attribution">
+          <Field label={t('attribution')}>
             <select
               name="attribution"
               defaultValue={sp.attribution ?? 'all'}
               className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-2 py-1"
             >
-              <option value="all">All</option>
-              <option value="attributed">Attributed</option>
+              <option value="all">{t('all')}</option>
+              <option value="attributed">{t('attributed')}</option>
+              {/* eslint-disable-next-line i18next/no-literal-string */}
               <option value="unattributed">Unattributed</option>
             </select>
           </Field>
@@ -176,22 +195,23 @@ export default async function SalesPage({ searchParams }: { searchParams: Search
             type="submit"
             className="bg-asaulia-blue text-fg-on-blue rounded-md px-3 py-1.5 text-xs"
           >
-            Apply
+            {t('apply')}
           </button>
         </form>
 
         {list.rows.length === 0 ? (
-          <p className="text-fg-3 text-sm">No sales match these filters yet.</p>
+          <p className="text-fg-3 text-sm">{t('noSalesMatch')}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="text-fg-3 text-xs uppercase tracking-[0.12em]">
                 <tr>
-                  <th className="py-2">Date</th>
-                  <th className="py-2">Source</th>
+                  <th className="py-2">{t('date')}</th>
+                  <th className="py-2">{t('source')}</th>
+                  {/* eslint-disable-next-line i18next/no-literal-string */}
                   <th className="py-2 text-right">Amount</th>
-                  <th className="py-2">Attribution</th>
-                  <th className="py-2">Customer</th>
+                  <th className="py-2">{t('attribution')}</th>
+                  <th className="py-2">{t('customer')}</th>
                 </tr>
               </thead>
               <tbody className="divide-fg-4/10 divide-y">
@@ -212,7 +232,7 @@ export default async function SalesPage({ searchParams }: { searchParams: Search
                     <td className="py-2">
                       {r.attributed ? (
                         <span className="text-asaulia-green text-xs">
-                          {r.attributionReason ?? 'attributed'}
+                          {r.attributionReason ?? t('attributed').toLowerCase()}
                         </span>
                       ) : (
                         <span className="text-fg-3 text-xs">—</span>
@@ -230,9 +250,7 @@ export default async function SalesPage({ searchParams }: { searchParams: Search
 
         {pages > 1 && (
           <div className="text-fg-3 mt-4 flex items-center justify-between text-xs">
-            <span>
-              Page {list.page} of {pages}
-            </span>
+            <span>{t('pageOf', { page: list.page, pages })}</span>
             <div className="flex gap-2">
               {list.page > 1 && (
                 <Link
@@ -242,7 +260,7 @@ export default async function SalesPage({ searchParams }: { searchParams: Search
                   }}
                   className="text-asaulia-blue-soft hover:underline"
                 >
-                  ← Prev
+                  {t('prev')}
                 </Link>
               )}
               {list.page < pages && (
@@ -250,7 +268,7 @@ export default async function SalesPage({ searchParams }: { searchParams: Search
                   href={{ pathname: '/sales', query: { ...sp, page: list.page + 1 } }}
                   className="text-asaulia-blue-soft hover:underline"
                 >
-                  Next →
+                  {t('next')}
                 </Link>
               )}
             </div>

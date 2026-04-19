@@ -36,6 +36,8 @@ const eslintConfig = defineConfig([
       'drizzle.config.ts',
       '*.config.{ts,mjs,js}',
       'design-system/**',
+      'app/(marketing)/**',
+      'app/page.tsx',
     ],
     rules: { 'i18next/no-literal-string': 'off' },
   },

@@ -7,7 +7,17 @@ import { requireAuth } from '@/lib/auth/rbac';
 import { db, schema } from '@/lib/db';
 import { resolveActiveBrand, requireClientBrandAccess } from '@/lib/brand/context';
 
-export type SettingsActionState = { error?: string; info?: string } | undefined;
+export type SettingsErrorCode =
+  | 'no_active_brand'
+  | 'only_owner_can_update'
+  | 'check_fields';
+
+export type SettingsInfoCode = 'settings_saved';
+
+export type SettingsActionState =
+  | { error: SettingsErrorCode }
+  | { info: SettingsInfoCode }
+  | undefined;
 
 const schema$ = z.object({
   name: z.string().min(2).max(60),
@@ -25,10 +35,10 @@ export async function updateBrandSettingsAction(
 ): Promise<SettingsActionState> {
   const actor = await requireAuth();
   const { active } = await resolveActiveBrand(actor);
-  if (!active) return { error: 'No active brand' };
+  if (!active) return { error: 'no_active_brand' };
   const { role } = await requireClientBrandAccess(actor, active.id);
   if (role !== 'owner' && actor.globalRole !== 'admin' && actor.globalRole !== 'operator') {
-    return { error: 'Only owners can update settings.' };
+    return { error: 'only_owner_can_update' };
   }
 
   const parsed = schema$.safeParse({
@@ -36,7 +46,7 @@ export async function updateBrandSettingsAction(
     website: formData.get('website') ?? '',
     timezone: formData.get('timezone') ?? 'UTC',
   });
-  if (!parsed.success) return { error: 'Check the fields and try again.' };
+  if (!parsed.success) return { error: 'check_fields' };
 
   await db
     .update(schema.brands)
@@ -58,5 +68,5 @@ export async function updateBrandSettingsAction(
   });
 
   revalidatePath('/settings');
-  return { info: 'Settings saved.' };
+  return { info: 'settings_saved' };
 }

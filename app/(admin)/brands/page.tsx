@@ -1,9 +1,15 @@
 import Link from 'next/link';
 import { desc, sql } from 'drizzle-orm';
+import { getTranslations } from 'next-intl/server';
 import { db, schema } from '@/lib/db';
 import { formatCents, formatDate } from '@/lib/format';
 
 type SearchParams = Promise<{ status?: string; q?: string }>;
+
+export async function generateMetadata() {
+  const t = await getTranslations('admin.brands');
+  return { title: t('metadata') };
+}
 
 export default async function AdminBrandsPage({
   searchParams,
@@ -11,6 +17,7 @@ export default async function AdminBrandsPage({
   searchParams: SearchParams;
 }) {
   const sp = await searchParams;
+  const t = await getTranslations('admin.brands');
   const rows = await db
     .select({
       id: schema.brands.id,
@@ -37,15 +44,15 @@ export default async function AdminBrandsPage({
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-6">
       <header>
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Portfolio</p>
-        <h1 className="text-fg-1 font-serif text-3xl italic">Brands</h1>
+        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('portfolioLabel')}</p>
+        <h1 className="text-fg-1 font-serif text-3xl italic">{t('brandsTitle')}</h1>
       </header>
 
       <form method="get" className="flex flex-wrap gap-3 text-xs">
         <input
           name="q"
           defaultValue={sp.q ?? ''}
-          placeholder="Search by name"
+          placeholder={t('searchByName')}
           className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-3 py-1.5"
         />
         <select
@@ -53,18 +60,18 @@ export default async function AdminBrandsPage({
           defaultValue={sp.status ?? ''}
           className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-2 py-1.5"
         >
-          <option value="">All statuses</option>
-          <option value="trial">Trial</option>
-          <option value="active">Active</option>
-          <option value="past_due">Past due</option>
-          <option value="paused">Paused</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="">{t('allStatuses')}</option>
+          <option value="trial">{t('trial')}</option>
+          <option value="active">{t('active')}</option>
+          <option value="past_due">{t('pastDue')}</option>
+          <option value="paused">{t('paused')}</option>
+          <option value="cancelled">{t('cancelled')}</option>
         </select>
         <button
           type="submit"
           className="bg-asaulia-blue text-fg-on-blue rounded-md px-3 py-1.5"
         >
-          Filter
+          {t('filter')}
         </button>
       </form>
 
@@ -72,17 +79,17 @@ export default async function AdminBrandsPage({
         <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-fg-4/10 text-fg-3 border-b text-xs uppercase tracking-[0.12em]">
-              <th className="px-4 py-2 text-left">Brand</th>
-              <th className="px-4 py-2 text-left">Status</th>
-              <th className="px-4 py-2 text-right">Plan</th>
-              <th className="px-4 py-2 text-right">Signed up</th>
+              <th className="px-4 py-2 text-left">{t('brand')}</th>
+              <th className="px-4 py-2 text-left">{t('status')}</th>
+              <th className="px-4 py-2 text-right">{t('plan')}</th>
+              <th className="px-4 py-2 text-right">{t('signedUp')}</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
                 <td className="text-fg-3 px-4 py-4" colSpan={4}>
-                  No brands match.
+                  {t('noBrands')}
                 </td>
               </tr>
             ) : (
@@ -127,4 +134,3 @@ export default async function AdminBrandsPage({
     </main>
   );
 }
-

@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 import { requireAuth } from '@/lib/auth/rbac';
 import { listContractorTasks } from '@/lib/contractor/tasks';
 import { formatCents, formatDate } from '@/lib/format';
@@ -8,12 +10,25 @@ import type { DeliverableStatus, DeliverableType } from '@/lib/deliverables/type
 type SearchParams = Promise<{ status?: string; type?: string; brand?: string }>;
 
 const STATUS_CHOICES = [
-  ['todo', 'To do'],
-  ['in_progress', 'In progress'],
-  ['in_review', 'In review'],
-  ['done', 'Done'],
-  ['rejected', 'Rejected'],
-] as const;
+  'todo',
+  'in_progress',
+  'in_review',
+  'done',
+  'rejected',
+] as const satisfies ReadonlyArray<DeliverableStatus>;
+
+const STATUS_TRANSLATION_KEYS: Record<DeliverableStatus, 'todo' | 'inProgress' | 'inReview' | 'done' | 'rejected'> = {
+  todo: 'todo',
+  in_progress: 'inProgress',
+  in_review: 'inReview',
+  done: 'done',
+  rejected: 'rejected',
+};
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('contractor.tasks');
+  return { title: t('metadata') };
+}
 
 export default async function ContractorTasksPage({
   searchParams,
@@ -33,27 +48,30 @@ export default async function ContractorTasksPage({
     brandId: sp.brand ?? null,
   });
 
+  const t = await getTranslations('contractor.tasks');
+  const tSales = await getTranslations('client.sales');
+
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 p-6">
       <header>
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">My work</p>
-        <h1 className="text-fg-1 font-serif text-3xl italic">Tasks</h1>
+        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('myWork')}</p>
+        <h1 className="text-fg-1 font-serif text-3xl italic">{t('tasksTitle')}</h1>
       </header>
 
       <form method="get" className="flex flex-wrap gap-3 text-xs">
         <label className="flex flex-col gap-1">
-          <span className="text-fg-3 uppercase tracking-[0.12em]">Status</span>
+          <span className="text-fg-3 uppercase tracking-[0.12em]">{t('statusLabel')}</span>
           <select
             name="status"
             defaultValue={statusFilter.join(',')}
             className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-2 py-1"
           >
-            <option value="todo,in_progress,in_review">Active</option>
-            <option value="done">Done</option>
-            <option value="rejected">Rejected</option>
-            {STATUS_CHOICES.map(([v, l]) => (
+            <option value="todo,in_progress,in_review">{t('active')}</option>
+            <option value="done">{t('done')}</option>
+            <option value="rejected">{t('rejected')}</option>
+            {STATUS_CHOICES.map((v) => (
               <option key={v} value={v}>
-                {l}
+                {t(STATUS_TRANSLATION_KEYS[v])}
               </option>
             ))}
           </select>
@@ -62,13 +80,13 @@ export default async function ContractorTasksPage({
           type="submit"
           className="bg-asaulia-blue text-fg-on-blue self-end rounded-md px-3 py-1.5"
         >
-          Apply
+          {tSales('apply')}
         </button>
       </form>
 
       <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
         {rows.length === 0 ? (
-          <p className="text-fg-3 text-sm">No tasks match these filters.</p>
+          <p className="text-fg-3 text-sm">{t('noTasks')}</p>
         ) : (
           <ul className="divide-fg-4/10 divide-y">
             {rows.map((r) => {
@@ -99,7 +117,7 @@ export default async function ContractorTasksPage({
                             : 'bg-bg-2 text-fg-2'
                       }`}
                     >
-                      {r.status.replace('_', ' ')}
+                      {t(STATUS_TRANSLATION_KEYS[r.status])}
                     </span>
                     {r.dueDate && (
                       <span
@@ -109,14 +127,14 @@ export default async function ContractorTasksPage({
                             : 'text-fg-3'
                         }
                       >
-                        due {formatDate(r.dueDate)}
+                        {t('due', { date: formatDate(r.dueDate) })}
                       </span>
                     )}
                     <span
                       className="text-fg-2"
                       title={`fixed share ${(r.fixedShareBps / 100).toFixed(1)}% × brand fixed × ${PRICING.CONTRACTOR_SHARE_OF_FIXED_BPS / 100}%`}
                     >
-                      est {formatCents(estimatedCents)}
+                      {t('est', { amount: formatCents(estimatedCents) })}
                     </span>
                   </div>
                 </li>

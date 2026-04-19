@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 import { Board } from '@/components/kanban/Board';
 import type { KanbanDeliverable } from '@/components/kanban/types';
 import { requireAuth } from '@/lib/auth/rbac';
@@ -12,6 +14,11 @@ import { listDeliverablesForBrand } from '@/lib/deliverables/service';
 import { summarizeAllocation } from '@/lib/deliverables/allocation';
 
 type SearchParams = Promise<{ brandId?: string; period?: string }>;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('client.deliverables');
+  return { title: t('metadata') };
+}
 
 async function resolveBrandId(
   userId: string,
@@ -83,13 +90,21 @@ export default async function ClientDeliverablesPage({
   }));
 
   const summary = summarizeAllocation(rows);
+  const t = await getTranslations('client.deliverables');
+
+  const flagLabel =
+    summary.flag === 'exact'
+      ? t('flagExact')
+      : summary.flag === 'over_allocated'
+        ? t('flagOver')
+        : t('flagUnder');
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-4 p-6">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-fg-2 text-xs uppercase tracking-[0.12em]">Deliverables</p>
-          <h1 className="text-fg-1 font-serif text-3xl italic">This period</h1>
+          <p className="text-fg-2 text-xs uppercase tracking-[0.12em]">{t('sectionLabel')}</p>
+          <h1 className="text-fg-1 font-serif text-3xl italic">{t('pageTitle')}</h1>
         </div>
         <div
           className={`rounded-md border px-3 py-1.5 text-xs ${
@@ -98,7 +113,7 @@ export default async function ClientDeliverablesPage({
               : 'border-asaulia-red/40 text-asaulia-red'
           }`}
         >
-          Allocation: {(summary.totalBps / 100).toFixed(1)}% · {summary.flag.replace('_', ' ')}
+          {t('allocation')} {(summary.totalBps / 100).toFixed(1)}% · {flagLabel}
         </div>
       </header>
       <Board initialDeliverables={cards} />

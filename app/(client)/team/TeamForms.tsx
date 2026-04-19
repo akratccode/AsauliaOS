@@ -1,22 +1,49 @@
 'use client';
 
 import { useActionState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   inviteTeamMemberAction,
   revokeInvitationAction,
   type TeamActionState,
+  type TeamErrorCode,
 } from './actions';
+
+const ERROR_KEYS: Record<
+  TeamErrorCode,
+  | 'noActiveBrand'
+  | 'onlyOwnerCanInvite'
+  | 'validEmailAndRole'
+  | 'onlyOwnerCanRevoke'
+  | 'invalidRequest'
+> = {
+  no_active_brand: 'noActiveBrand',
+  only_owner_can_invite: 'onlyOwnerCanInvite',
+  valid_email_and_role: 'validEmailAndRole',
+  only_owner_can_revoke: 'onlyOwnerCanRevoke',
+  invalid_request: 'invalidRequest',
+};
 
 export function InviteForm({ disabled }: { disabled: boolean }) {
   const [state, action, pending] = useActionState<TeamActionState, FormData>(
     inviteTeamMemberAction,
     undefined,
   );
+  const t = useTranslations('client.team');
+  const tErr = useTranslations('moduleErrors.client.team');
+
+  const infoMessage =
+    state && 'info' in state && state.info === 'invitation_sent'
+      ? tErr('invitationSent', { email: state.email })
+      : state && 'info' in state && state.info === 'invitation_revoked'
+        ? tErr('invitationRevoked')
+        : null;
+  const errorMessage = state && 'error' in state ? tErr(ERROR_KEYS[state.error]) : null;
 
   return (
     <form action={action} className="flex flex-wrap items-end gap-2">
       <label className="flex flex-col gap-1 text-xs">
-        <span className="text-fg-3 uppercase tracking-[0.12em]">Email</span>
+        <span className="text-fg-3 uppercase tracking-[0.12em]">{t('emailLabel')}</span>
         <input
           name="email"
           type="email"
@@ -26,15 +53,15 @@ export function InviteForm({ disabled }: { disabled: boolean }) {
         />
       </label>
       <label className="flex flex-col gap-1 text-xs">
-        <span className="text-fg-3 uppercase tracking-[0.12em]">Role</span>
+        <span className="text-fg-3 uppercase tracking-[0.12em]">{t('roleLabel')}</span>
         <select
           name="role"
           defaultValue="member"
           disabled={disabled || pending}
           className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-2 py-1 text-sm"
         >
-          <option value="member">Member</option>
-          <option value="owner">Owner</option>
+          <option value="member">{t('member')}</option>
+          <option value="owner">{t('owner')}</option>
         </select>
       </label>
       <button
@@ -42,10 +69,10 @@ export function InviteForm({ disabled }: { disabled: boolean }) {
         disabled={disabled || pending}
         className="bg-asaulia-blue text-fg-on-blue rounded-md px-3 py-1.5 text-sm disabled:opacity-60"
       >
-        {pending ? 'Sending…' : 'Send invite'}
+        {pending ? t('sending') : t('sendInvite')}
       </button>
-      {state?.info && <p className="text-asaulia-green w-full text-xs">{state.info}</p>}
-      {state?.error && <p className="text-asaulia-red w-full text-xs">{state.error}</p>}
+      {infoMessage && <p className="text-asaulia-green w-full text-xs">{infoMessage}</p>}
+      {errorMessage && <p className="text-asaulia-red w-full text-xs">{errorMessage}</p>}
     </form>
   );
 }
@@ -61,6 +88,7 @@ export function RevokeInviteButton({
     revokeInvitationAction,
     undefined,
   );
+  const t = useTranslations('client.team');
   return (
     <form action={action} className="inline">
       <input type="hidden" name="invitationId" value={invitationId} />
@@ -69,7 +97,7 @@ export function RevokeInviteButton({
         disabled={disabled || pending}
         className="text-asaulia-red text-xs hover:underline disabled:opacity-50"
       >
-        {pending ? 'Revoking…' : 'Revoke'}
+        {pending ? t('revoking') : t('revoke')}
       </button>
     </form>
   );

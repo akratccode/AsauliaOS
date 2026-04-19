@@ -7,7 +7,12 @@ import { requireRole } from '@/lib/auth/rbac';
 import { db, schema } from '@/lib/db';
 import { PRICING } from '@/lib/pricing/constants';
 
-export type PlanOverrideState = { error?: string; info?: string } | undefined;
+export type PlanOverrideErrorCode = 'planOverrideError';
+export type PlanOverrideInfoCode = 'planOverrideSuccess';
+export type PlanOverrideState =
+  | { error: PlanOverrideErrorCode }
+  | { info: PlanOverrideInfoCode }
+  | undefined;
 
 const inputSchema = z.object({
   brandId: z.string().uuid(),
@@ -35,12 +40,12 @@ export async function overridePlanAction(
     reason: formData.get('reason'),
   });
   if (!parsed.success) {
-    return { error: 'Check inputs: fixed/variable out of range or reason too short.' };
+    return { error: 'planOverrideError' };
   }
 
   const effectiveFrom = new Date(parsed.data.effectiveFrom);
   if (Number.isNaN(effectiveFrom.getTime())) {
-    return { error: 'Invalid effective date.' };
+    return { error: 'planOverrideError' };
   }
 
   await db.transaction(async (tx) => {
@@ -86,5 +91,5 @@ export async function overridePlanAction(
   });
 
   revalidatePath(`/admin/brands/${parsed.data.brandId}/plan`);
-  return { info: 'Plan override scheduled.' };
+  return { info: 'planOverrideSuccess' };
 }

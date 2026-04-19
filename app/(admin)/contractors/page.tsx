@@ -1,8 +1,14 @@
 import Link from 'next/link';
 import { desc, eq, sql } from 'drizzle-orm';
+import { getTranslations } from 'next-intl/server';
 import { db, schema } from '@/lib/db';
 
 type SearchParams = Promise<{ status?: string; onboarding?: string; q?: string }>;
+
+export async function generateMetadata() {
+  const t = await getTranslations('admin.contractors');
+  return { title: t('metadata') };
+}
 
 export default async function AdminContractorsPage({
   searchParams,
@@ -10,6 +16,7 @@ export default async function AdminContractorsPage({
   searchParams: SearchParams;
 }) {
   const sp = await searchParams;
+  const t = await getTranslations('admin.contractors');
 
   const rows = await db
     .select({
@@ -51,15 +58,15 @@ export default async function AdminContractorsPage({
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-6">
       <header>
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">People</p>
-        <h1 className="text-fg-1 font-serif text-3xl italic">Contractors</h1>
+        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('peopleLabel')}</p>
+        <h1 className="text-fg-1 font-serif text-3xl italic">{t('contractorsTitle')}</h1>
       </header>
 
       <form method="get" className="flex flex-wrap gap-3 text-xs">
         <input
           name="q"
           defaultValue={sp.q ?? ''}
-          placeholder="Email, name, skill"
+          placeholder={t('emailNameSkill')}
           className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-3 py-1.5"
         />
         <select
@@ -67,25 +74,25 @@ export default async function AdminContractorsPage({
           defaultValue={sp.status ?? ''}
           className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-2 py-1.5"
         >
-          <option value="">Any status</option>
-          <option value="pending">Pending</option>
-          <option value="active">Active</option>
-          <option value="paused">Paused</option>
+          <option value="">{t('anyStatus')}</option>
+          <option value="pending">{t('pending')}</option>
+          <option value="active">{t('active')}</option>
+          <option value="paused">{t('paused')}</option>
         </select>
         <select
           name="onboarding"
           defaultValue={sp.onboarding ?? ''}
           className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-2 py-1.5"
         >
-          <option value="">Any onboarding</option>
-          <option value="complete">Payouts ready</option>
-          <option value="incomplete">Setup incomplete</option>
+          <option value="">{t('anyOnboarding')}</option>
+          <option value="complete">{t('payoutsReady')}</option>
+          <option value="incomplete">{t('setupIncomplete')}</option>
         </select>
         <button
           type="submit"
           className="bg-asaulia-blue text-fg-on-blue rounded-md px-3 py-1.5"
         >
-          Filter
+          {t('filter')}
         </button>
       </form>
 
@@ -93,18 +100,18 @@ export default async function AdminContractorsPage({
         <table className="w-full min-w-[720px] text-sm">
           <thead>
             <tr className="border-fg-4/10 text-fg-3 border-b text-xs uppercase tracking-[0.12em]">
-              <th className="px-4 py-2 text-left">Contractor</th>
-              <th className="px-4 py-2 text-left">Status</th>
-              <th className="px-4 py-2 text-left">Payouts</th>
-              <th className="px-4 py-2 text-right">Active brands</th>
-              <th className="px-4 py-2 text-left">Skills</th>
+              <th className="px-4 py-2 text-left">{t('contractor')}</th>
+              <th className="px-4 py-2 text-left">{t('status')}</th>
+              <th className="px-4 py-2 text-left">{t('payouts')}</th>
+              <th className="px-4 py-2 text-right">{t('activeBrands')}</th>
+              <th className="px-4 py-2 text-left">{t('skills')}</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
                 <td className="text-fg-3 px-4 py-4" colSpan={5}>
-                  No contractors match.
+                  {t('noContractors')}
                 </td>
               </tr>
             ) : (
@@ -130,7 +137,7 @@ export default async function AdminContractorsPage({
                           : 'bg-warning/15 text-warning'
                       }`}
                     >
-                      {r.onboardingComplete ? 'ready' : 'incomplete'}
+                      {r.onboardingComplete ? t('ready') : t('incomplete')}
                     </span>
                   </td>
                   <td className="text-fg-1 px-4 py-2 text-right">{r.activeAssignments}</td>
@@ -146,4 +153,3 @@ export default async function AdminContractorsPage({
     </main>
   );
 }
-

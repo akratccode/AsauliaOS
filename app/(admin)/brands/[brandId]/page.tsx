@@ -1,4 +1,5 @@
 import { eq, isNull, and } from 'drizzle-orm';
+import { getTranslations } from 'next-intl/server';
 import { db, schema } from '@/lib/db';
 import { resolveBillingWindow } from '@/lib/brand/billing-period';
 import { attributedSalesForPeriod } from '@/lib/integrations/service';
@@ -9,6 +10,7 @@ type Params = Promise<{ brandId: string }>;
 
 export default async function AdminBrandOverviewPage({ params }: { params: Params }) {
   const { brandId } = await params;
+  const t = await getTranslations('admin.brandOverview');
 
   const [brand] = await db
     .select({
@@ -60,41 +62,59 @@ export default async function AdminBrandOverviewPage({ params }: { params: Param
   return (
     <div className="space-y-5">
       <section className="grid gap-3 md:grid-cols-3">
-        <Card label="Owner" value={owner?.email ?? '—'} />
+        <Card label={t('owner')} value={owner?.email ?? '—'} />
         <Card
-          label="Current plan"
+          label={t('currentPlan')}
           value={
             plan
               ? `${formatCents(plan.fixedAmountCents)} + ${formatBps(plan.variablePercentBps)}`
-              : 'No active plan'
+              : t('noActivePlan')
           }
         />
-        <Card label="Period" value={window.label} hint={`${window.daysLeft}d left`} />
+        <Card
+          label={t('period')}
+          value={window.label}
+          hint={`${window.daysLeft}${t('daysLeft')}`}
+        />
       </section>
 
       <section className="grid gap-3 md:grid-cols-3">
-        <Card label="Attributed sales" value={formatCents(sales.totalCents)} hint={`${sales.count} txn`} />
-        <Card label="Projected invoice" value={q ? formatCents(q.totalAmountCents) : '—'} />
         <Card
-          label="Projected margin"
+          label={t('attributedSales')}
+          value={formatCents(sales.totalCents)}
+          hint={`${sales.count} ${t('txn')}`}
+        />
+        <Card label={t('projectedInvoice')} value={q ? formatCents(q.totalAmountCents) : '—'} />
+        <Card
+          label={t('projectedMargin')}
           value={q ? `${marginPct}%` : '—'}
-          hint={split ? `${formatCents(split.asauliaCents)} to Asaulia` : undefined}
+          hint={split ? `${formatCents(split.asauliaCents)} ${t('toAsaulia')}` : undefined}
         />
       </section>
 
       <section className="grid gap-3 md:grid-cols-3">
         <Card
-          label="Contractor pool"
+          label={t('contractorPool')}
           value={split ? formatCents(split.contractorPoolCents) : '—'}
-          hint={split ? `${formatCents(split.contractorFixedPoolCents)} fixed + ${formatCents(split.contractorVariablePoolCents)} variable` : undefined}
+          hint={
+            split
+              ? `${formatCents(split.contractorFixedPoolCents)} ${t('fixed')} + ${formatCents(
+                  split.contractorVariablePoolCents,
+                )} ${t('variable')}`
+              : undefined
+          }
         />
         <Card
-          label="MRR fixed contribution"
+          label={t('mrrFixedContribution')}
           value={plan ? formatCents(plan.fixedAmountCents) : '—'}
         />
         <Card
-          label="Billing cycle anchor"
-          value={brand.billingCycleDay ? `Day ${brand.billingCycleDay}` : 'Day 1 (default)'}
+          label={t('billingCycleAnchor')}
+          value={
+            brand.billingCycleDay
+              ? `${t('day')} ${brand.billingCycleDay}`
+              : `${t('day')} 1 (${t('default')})`
+          }
         />
       </section>
     </div>

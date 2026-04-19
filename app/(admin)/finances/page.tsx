@@ -1,10 +1,17 @@
 import Link from 'next/link';
 import { and, desc, eq, gte, inArray, lt, sql } from 'drizzle-orm';
+import { getTranslations } from 'next-intl/server';
 import { db, schema } from '@/lib/db';
 import { PRICING } from '@/lib/pricing/constants';
 import { formatCents, formatDate } from '@/lib/format';
 
+export async function generateMetadata() {
+  const t = await getTranslations('admin.finances');
+  return { title: t('metadata') };
+}
+
 export default async function AdminFinancesPage() {
+  const t = await getTranslations('admin.finances');
   const now = new Date();
   const twelveMonthsAgo = new Date(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1),
@@ -62,26 +69,26 @@ export default async function AdminFinancesPage() {
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-6">
       <header>
-        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">Money</p>
-        <h1 className="text-fg-1 font-serif text-3xl italic">Finances</h1>
+        <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('moneyLabel')}</p>
+        <h1 className="text-fg-1 font-serif text-3xl italic">{t('financesTitle')}</h1>
       </header>
 
       <section className="border-fg-4/15 bg-bg-1 overflow-x-auto rounded-2xl border">
         <table className="w-full min-w-[720px] text-xs">
           <thead className="text-fg-3 uppercase tracking-[0.1em]">
             <tr>
-              <th className="px-3 py-2 text-left">Month</th>
-              <th className="px-3 py-2 text-right">Revenue</th>
-              <th className="px-3 py-2 text-right">Contractor pool</th>
-              <th className="px-3 py-2 text-right">Asaulia margin</th>
-              <th className="px-3 py-2 text-right">Margin %</th>
+              <th className="px-3 py-2 text-left">{t('month')}</th>
+              <th className="px-3 py-2 text-right">{t('revenue')}</th>
+              <th className="px-3 py-2 text-right">{t('contractorPool')}</th>
+              <th className="px-3 py-2 text-right">{t('asauliaMargin')}</th>
+              <th className="px-3 py-2 text-right">{t('marginPercent')}</th>
             </tr>
           </thead>
           <tbody>
             {monthly.length === 0 ? (
               <tr>
                 <td className="text-fg-3 px-3 py-4" colSpan={5}>
-                  No paid invoices yet.
+                  {t('noPaidInvoices')}
                 </td>
               </tr>
             ) : (
@@ -109,16 +116,16 @@ export default async function AdminFinancesPage() {
 
       <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-fg-1 font-serif text-lg italic">Past-due invoices</h2>
+          <h2 className="text-fg-1 font-serif text-lg italic">{t('pastDueInvoices')}</h2>
           <Link
             href="/admin/finances/invoices"
             className="text-fg-3 hover:text-fg-1 text-xs"
           >
-            All invoices →
+            {t('allInvoices')}
           </Link>
         </div>
         {pastDue.length === 0 ? (
-          <p className="text-fg-3 text-sm">Nothing past due. Clean books.</p>
+          <p className="text-fg-3 text-sm">{t('cleanBooks')}</p>
         ) : (
           <ul className="divide-fg-4/10 divide-y text-xs">
             {pastDue.map((i) => (
@@ -129,7 +136,9 @@ export default async function AdminFinancesPage() {
                 >
                   {i.brandName}
                 </Link>
-                <span className="text-fg-3">period ended {formatDate(i.periodEnd)}</span>
+                <span className="text-fg-3">
+                  {t('periodEnded', { date: formatDate(i.periodEnd) })}
+                </span>
                 <span className="text-fg-1 font-medium">
                   {formatCents(i.total ?? 0)}
                 </span>
@@ -141,13 +150,13 @@ export default async function AdminFinancesPage() {
 
       <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-fg-1 font-serif text-lg italic">Upcoming payouts</h2>
+          <h2 className="text-fg-1 font-serif text-lg italic">{t('upcomingPayouts')}</h2>
           <Link href="/admin/finances/payouts" className="text-fg-3 hover:text-fg-1 text-xs">
-            Payout queue →
+            {t('payoutQueue')}
           </Link>
         </div>
         {upcomingPayouts.length === 0 ? (
-          <p className="text-fg-3 text-sm">Queue is empty.</p>
+          <p className="text-fg-3 text-sm">{t('queueEmpty')}</p>
         ) : (
           <ul className="divide-fg-4/10 divide-y text-xs">
             {upcomingPayouts.map((p) => (
@@ -159,7 +168,7 @@ export default async function AdminFinancesPage() {
                   {p.contractorUserId.slice(0, 8)}
                 </Link>
                 <span className="text-fg-3">{p.status}</span>
-                <span className="text-fg-3">ends {formatDate(p.periodEnd)}</span>
+                <span className="text-fg-3">{t('ends', { date: formatDate(p.periodEnd) })}</span>
                 <span className="text-fg-1 font-medium">{formatCents(p.amount)}</span>
               </li>
             ))}
