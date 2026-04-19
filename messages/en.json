@@ -4,5 +4,30 @@
     "cancel": "Cancel",
     "save": "Save",
     "loading": "Loading..."
+  },
+  "locale": {
+    "ariaLabel": "Choose language",
+    "short": {
+      "en": "EN",
+      "es": "ES"
+    },
+    "full": {
+      "en": "English",
+      "es": "Spanish"
+    }
+  },
+  "forms": {
+    "submitting": "Submitting…"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "unauthorized": "You need to sign in to continue.",
+    "forbidden": "You don't have permission to do that.",
+    "notFound": "We couldn't find what you were looking for.",
+    "rateLimit": "Too many requests. Please wait a moment.",
+    "networkError": "Network error. Check your connection and try again.",
+    "tryAgain": "Please try again.",
+    "validation": "Please check the form and try again.",
+    "sessionExpired": "Your session expired. Please sign in again."
   }
 }
