@@ -58,5 +58,10 @@ export const contractorBonuses = pgTable(
       t.periodStart,
     ),
     statusIdx: index('contractor_bonuses_status_idx').on(t.status),
+    contractorStatusResolvedIdx: index('contractor_bonuses_contractor_status_resolved_idx').on(
+      t.contractorUserId,
+      t.status,
+      t.resolvedAt,
+    ),
   }),
 );

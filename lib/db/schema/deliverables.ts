@@ -9,6 +9,7 @@ import {
   jsonb,
   index,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { brands } from './brands';
 import { users } from './users';
 import { deliverableStatusEnum, deliverableTypeEnum } from './enums';
@@ -45,6 +46,9 @@ export const deliverables = pgTable(
       t.periodStart,
       t.status,
     ),
+    assigneeStatusActiveIdx: index('deliverables_assignee_status_active_idx')
+      .on(t.assigneeUserId, t.status)
+      .where(sql`archived_at IS NULL`),
   }),
 );
 

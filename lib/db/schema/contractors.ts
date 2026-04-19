@@ -6,6 +6,7 @@ import {
   boolean,
   timestamp,
   uniqueIndex,
+  index,
   date,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
@@ -51,6 +52,9 @@ export const brandContractors = pgTable(
       t.contractorUserId,
       t.role,
     ),
+    activeContractorIdx: index('brand_contractors_active_contractor_idx')
+      .on(t.contractorUserId)
+      .where(sql`ended_at IS NULL`),
   }),
 );
 
