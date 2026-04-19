@@ -4,6 +4,8 @@ import { getTranslations } from 'next-intl/server';
 import { db, schema } from '@/lib/db';
 import { formatDate } from '@/lib/format';
 
+export const revalidate = 30;
+
 type SearchParams = Promise<{
   actor?: string;
   entity_type?: string;

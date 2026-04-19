@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { and, desc, eq, gte, inArray, lt } from 'drizzle-orm';
 import { getTranslations } from 'next-intl/server';
+
+export const revalidate = 60;
 import { db, schema } from '@/lib/db';
 import { formatCents, formatDate } from '@/lib/format';
 import { isFinanceRegion } from '@/lib/billing/region';
