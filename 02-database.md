@@ -293,13 +293,13 @@ export const payoutStatusEnum = pgEnum('payout_status', ['pending', 'processing'
 
 ### 5. Migrations
 
-- [ ] `pnpm db:generate` — produces SQL in `lib/db/migrations/`.
-- [ ] Inspect the generated SQL. Pay attention to:
+- [x] `pnpm db:generate` — produces SQL in `lib/db/migrations/`.
+- [x] Inspect the generated SQL. Pay attention to:
   - Enum types are created before tables that use them.
   - FKs with `on delete cascade` where the parent "owns" the child (e.g. brand → deliverables).
   - FKs with `on delete set null` where the child should survive (e.g. deliverable assignee).
-- [ ] `pnpm db:push` — apply to local Supabase.
-- [ ] Commit the migrations.
+- [x] `pnpm db:push` — apply to local Supabase.
+- [x] Commit the migrations.
 
 ---
 
@@ -344,7 +344,7 @@ Add `"db:seed": "tsx scripts/seed.ts"` to scripts. `pnpm add -D tsx`.
 
 ### 8. Types
 
-- [ ] In `lib/db/index.ts`, export `InferSelectModel` and `InferInsertModel` typed aliases:
+- [x] In `lib/db/index.ts`, export `InferSelectModel` and `InferInsertModel` typed aliases:
   ```ts
   import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
   import { brands } from './schema/brands';
