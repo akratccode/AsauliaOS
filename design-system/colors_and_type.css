@@ -1,0 +1,256 @@
+/* =========================================================================
+   Asaulia — Colors & Type tokens
+   Dark-first. Voice experience is the hero; artifacts (dashboards) inherit
+   the same palette but dial down the glow.
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ---------- BRAND ---------- */
+  --asaulia-blue:        #3A5BFF;  /* primary; exact blue of logo glyph  */
+  --asaulia-blue-ink:    #1F35C7;  /* pressed / deep                     */
+  --asaulia-blue-soft:   #7F95FF;  /* hover glow, accent text on dark    */
+  --asaulia-blue-glow:   #5B7BFF;  /* halo centres                       */
+  --asaulia-ink:         #0B1020;  /* wordmark / on-light text           */
+  --asaulia-cream:       #F5F3EE;  /* warm on-light surface (docs only)  */
+
+  /* ---------- NEUTRALS (dark) ---------- */
+  --bg-0:  #05070F;   /* outermost backdrop, behind halos               */
+  --bg-1:  #080C1A;   /* primary surface                                */
+  --bg-2:  #0E1428;   /* elevated surface / card base                   */
+  --bg-3:  #151D38;   /* hovered card / inset panel                     */
+  --bg-4:  #1D2648;   /* pressed state / selected nav                   */
+
+  /* translucent glass (for cards layered over the halo) */
+  --glass-1: rgba(21, 29, 56, 0.55);
+  --glass-2: rgba(21, 29, 56, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-strong: rgba(255, 255, 255, 0.14);
+
+  /* ---------- FOREGROUND ---------- */
+  --fg-1: #F3F5FB;   /* primary text on dark                            */
+  --fg-2: #BDC4DB;   /* secondary                                       */
+  --fg-3: #7E87A8;   /* tertiary / caption                              */
+  --fg-4: #4A5273;   /* disabled / hairline                             */
+  --fg-on-blue: #FFFFFF;
+
+  /* ---------- SEMANTIC ---------- */
+  --success: #35D39A;
+  --success-soft: rgba(53, 211, 154, 0.16);
+  --warning: #F5B544;
+  --warning-soft: rgba(245, 181, 68, 0.16);
+  --danger:  #FF5A6A;
+  --danger-soft:  rgba(255, 90, 106, 0.14);
+  --info:    var(--asaulia-blue-soft);
+
+  /* Money / pricing colors (used by pricing slider + invoice UI) */
+  --pricing-fixed:    #7F95FF;   /* fixed portion                       */
+  --pricing-variable: #35D39A;   /* attributed sales portion            */
+
+  /* ---------- RADII ---------- */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-2xl: 36px;     /* voice orb card                             */
+  --radius-pill: 9999px;
+
+  /* ---------- SPACING ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ---------- SHADOWS ---------- */
+  /* outer shadows on dark are subtle — depth comes from glow halos     */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.35);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.45);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.55);
+
+  /* inner strokes — the Asaulia card signature */
+  --stroke-inner:   inset 0 1px 0 rgba(255,255,255,0.06),
+                    inset 0 0 0 1px rgba(255,255,255,0.04);
+  --stroke-inner-strong: inset 0 1px 0 rgba(255,255,255,0.12),
+                         inset 0 0 0 1px rgba(255,255,255,0.08);
+
+  /* Voice glow — the hero effect. Place on backdrop behind card.      */
+  --glow-voice: radial-gradient(60% 50% at 50% 100%,
+                 rgba(58, 91, 255, 0.55) 0%,
+                 rgba(58, 91, 255, 0.22) 35%,
+                 rgba(58, 91, 255, 0.00) 70%);
+  --glow-voice-soft: radial-gradient(50% 40% at 50% 100%,
+                 rgba(127, 149, 255, 0.22) 0%,
+                 rgba(127, 149, 255, 0.00) 80%);
+
+  /* Card base gradient — used behind voice + primary surfaces         */
+  --gradient-card: linear-gradient(180deg,
+                    rgba(30, 42, 88, 0.70) 0%,
+                    rgba(11, 18, 44, 0.92) 100%);
+
+  /* ---------- TYPE ---------- */
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: 'Instrument Serif', 'Times New Roman', Georgia, serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* weights */
+  --w-light: 300;
+  --w-regular: 400;
+  --w-medium: 500;
+  --w-semibold: 600;
+  --w-bold: 700;
+
+  /* type ramp — dense UI sizes, 1.5 line-height for body, 1.1 for display */
+  --text-xs:    12px;
+  --text-sm:    13px;
+  --text-base:  15px;
+  --text-md:    17px;
+  --text-lg:    20px;
+  --text-xl:    24px;
+  --text-2xl:   32px;
+  --text-3xl:   44px;
+  --text-4xl:   60px;
+  --text-5xl:   84px;   /* hero voice states                            */
+
+  /* tracking */
+  --tracking-tight: -0.02em;
+  --tracking-snug:  -0.01em;
+  --tracking-wide:   0.08em;
+  --tracking-caps:   0.14em;  /* for UPPERCASE ui-labels                */
+
+  /* ---------- MOTION ---------- */
+  --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast:   120ms;
+  --dur-base:   200ms;
+  --dur-slow:   420ms;
+  --dur-breath: 4200ms;   /* voice halo breathing                       */
+}
+
+/* =========================================================================
+   Semantic type styles
+   ========================================================================= */
+
+.a-display,
+h1.a-display {
+  font-family: var(--font-serif);
+  font-weight: var(--w-regular);
+  font-style: italic;
+  font-size: var(--text-4xl);
+  line-height: 1.04;
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-1);
+}
+
+.a-h1, h1 {
+  font-family: var(--font-sans);
+  font-weight: var(--w-semibold);
+  font-size: var(--text-3xl);
+  line-height: 1.08;
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-1);
+}
+
+.a-h2, h2 {
+  font-family: var(--font-sans);
+  font-weight: var(--w-semibold);
+  font-size: var(--text-2xl);
+  line-height: 1.15;
+  letter-spacing: var(--tracking-snug);
+  color: var(--fg-1);
+}
+
+.a-h3, h3 {
+  font-family: var(--font-sans);
+  font-weight: var(--w-medium);
+  font-size: var(--text-xl);
+  line-height: 1.25;
+  color: var(--fg-1);
+}
+
+.a-body, p {
+  font-family: var(--font-sans);
+  font-weight: var(--w-regular);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  color: var(--fg-2);
+  text-wrap: pretty;
+}
+
+.a-body-lg {
+  font-family: var(--font-sans);
+  font-weight: var(--w-regular);
+  font-size: var(--text-md);
+  line-height: 1.55;
+  color: var(--fg-2);
+}
+
+.a-caption {
+  font-family: var(--font-sans);
+  font-weight: var(--w-regular);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: var(--fg-3);
+}
+
+.a-label {
+  font-family: var(--font-sans);
+  font-weight: var(--w-medium);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
+.a-mono {
+  font-family: var(--font-mono);
+  font-weight: var(--w-regular);
+  font-size: var(--text-sm);
+  color: var(--fg-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.a-number {
+  /* for money + metric displays                                      */
+  font-family: var(--font-sans);
+  font-weight: var(--w-medium);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-tight);
+}
+
+.a-voice-quote {
+  /* used for transcribed voice in the voice surface                  */
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: var(--w-regular);
+  font-size: var(--text-2xl);
+  line-height: 1.3;
+  color: var(--fg-2);
+  letter-spacing: var(--tracking-snug);
+}
+.a-voice-quote em {
+  font-style: italic;
+  color: var(--fg-1);
+  background: linear-gradient(180deg, #fff 0%, #C8D4FF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-style: normal;
+}
+
+/* Base reset-ish for prototype pages */
+html, body {
+  background: var(--bg-0);
+  color: var(--fg-1);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  font-synthesis: none;
+}

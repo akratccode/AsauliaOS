@@ -1,0 +1,13 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><link rel="stylesheet" href="_card.css">
+<style>
+.logo-card { padding: 32px; min-height: 180px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.logo-on-dark { background: var(--bg-1); border-radius: 14px; padding: 28px; display: flex; align-items: center; justify-content: center; box-shadow: var(--stroke-inner); }
+.logo-on-light { background: var(--asaulia-cream); border-radius: 14px; padding: 28px; display: flex; align-items: center; justify-content: center; }
+.logo-on-dark img, .logo-on-light img { width: 160px; height: auto; filter: brightness(1) contrast(1); }
+.logo-on-dark img { filter: invert(1) hue-rotate(180deg) brightness(1.2); }
+</style></head>
+<body><div class="card logo-card">
+  <div class="logo-on-dark"><img src="../assets/asaulia-logo-full.png" alt="asaulia on dark"></div>
+  <div class="logo-on-light"><img src="../assets/asaulia-logo-full.png" alt="asaulia on light"></div>
+</div></body></html>

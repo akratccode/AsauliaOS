@@ -1,0 +1,26 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><link rel="stylesheet" href="_card.css">
+<style>
+.stage { background: var(--bg-0); border-radius: 20px; min-height: 320px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.halo { position: absolute; inset: 0; background: radial-gradient(50% 55% at 50% 100%, rgba(58,91,255,0.55) 0%, rgba(58,91,255,0) 70%); pointer-events: none; }
+.halo-arc { position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%); width: 520px; height: 120px; border-radius: 50% 50% 0 0; box-shadow: 0 0 80px 20px rgba(91,123,255,0.5); border-top: 2px solid rgba(127,149,255,0.6); }
+.orb {
+  position: relative; width: 72px; height: 72px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fff 0%, #E8EDFF 35%, #AFC0FF 100%);
+  box-shadow: 0 8px 32px rgba(58,91,255,0.6), 0 0 0 8px rgba(58,91,255,0.12);
+  display: flex; align-items: center; justify-content: center;
+  animation: breath 4.2s ease-in-out infinite;
+}
+@keyframes breath {
+  0%,100% { transform: scale(1); box-shadow: 0 8px 32px rgba(58,91,255,0.6), 0 0 0 8px rgba(58,91,255,0.12); }
+  50%     { transform: scale(1.06); box-shadow: 0 12px 48px rgba(58,91,255,0.8), 0 0 0 14px rgba(58,91,255,0.16); }
+}
+.mic { width: 22px; height: 22px; color: #0B1020; }
+</style></head>
+<body><div class="card" style="padding: 0; background: transparent">
+  <div class="stage">
+    <div class="halo"></div>
+    <div class="halo-arc"></div>
+    <div class="orb"><svg class="mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></div>
+  </div>
+</div></body></html>
