@@ -51,4 +51,15 @@ All user-visible changes per phase. Phases are completed in dependency order
 - Playwright invite integration test deferred: it needs a running Supabase + Postgres + Next.js server; wiring the CI service containers lands in Phase 12 along with the rest of the e2e suite.
 - shadcn Form components not used — the shadcn CLI was never invoked in Phase 01 (documented). Forms use the lightweight `components/auth/form-primitives.tsx` shared by every auth page; migrating to shadcn when the CLI runs is a mechanical swap.
 
-### Phase 04 — pending
+### Phase 04 — Pricing engine
+- `lib/pricing/constants.ts` is the sole source of pricing numbers (min/max fixed in cents, min/max variable bps, contractor shares, cooldown days, derived range widths). No other file may hard-code these.
+- `interpolate.ts` provides the canonical linear interpolation between the Starter ($99 / 20%) and Pro ($1000 / 7%) anchors, with clamping at both ends. Fixed is canonical; variable is derived.
+- `validate.ts` exports a single `PlanInputSchema` Zod schema that enforces bounds and a ±1 bps tolerance between the submitted fixed and variable values — the only validator any server action uses to accept a plan from a client.
+- `quote.ts` computes invoice components (fixed + variable + total) from a plan and attributed sales total. `breakeven.ts` returns the sales amount at which two plans tie.
+- `split.ts` divides an invoice into the contractor pool (40% of fixed + 20% of variable) and the Asaulia share. Uses floor rounding so every rounding residual stays on the Asaulia side — the pool + Asaulia split always sums to the invoice total.
+- `distribute.ts` is the pure share-allocation function used by Phase 11. It uses a largest-remainder method so distributed cents match the pool exactly; rolls the fixed pool over when no deliverables are `done`; falls back to equal distribution for the variable pool when no weights are provided.
+- `slider.ts` offers slider stops, percent ↔ value converters, and `formatCents` / `formatBps` display helpers used by the upcoming pricing slider UI.
+- `lib/pricing/index.ts` re-exports the public surface so callers only ever `import { … } from '@/lib/pricing'`.
+- Tests: `tests/unit/pricing.test.ts` covers anchors, monotonicity, validation, quote, breakeven ($6,930.77), split invariants (10k random cases), distribution largest-remainder (100 random cases + rollover), and slider formatters. All 38 tests pass.
+
+### Phase 05 — pending
