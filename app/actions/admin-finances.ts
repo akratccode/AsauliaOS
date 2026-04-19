@@ -370,47 +370,47 @@ export async function computeFinancePeriodTotals(params: {
 }> {
   const { financeRegion, monthStart, monthEnd } = params;
 
-  const revenue = await db
-    .select({
-      total: sql<number>`coalesce(sum(${schema.invoices.totalAmountCents}), 0)::bigint`,
-    })
-    .from(schema.invoices)
-    .where(
-      and(
-        eq(schema.invoices.financeRegion, financeRegion),
-        eq(schema.invoices.status, 'paid'),
-        sql`${schema.invoices.paidAt} >= ${monthStart}`,
-        sql`${schema.invoices.paidAt} < ${monthEnd}`,
+  const [revenue, payouts, bonuses] = await Promise.all([
+    db
+      .select({
+        total: sql<number>`coalesce(sum(${schema.invoices.totalAmountCents}), 0)::bigint`,
+      })
+      .from(schema.invoices)
+      .where(
+        and(
+          eq(schema.invoices.financeRegion, financeRegion),
+          eq(schema.invoices.status, 'paid'),
+          sql`${schema.invoices.paidAt} >= ${monthStart}`,
+          sql`${schema.invoices.paidAt} < ${monthEnd}`,
+        ),
       ),
-    );
-
-  const payouts = await db
-    .select({
-      total: sql<number>`coalesce(sum(${schema.payouts.amountCents}), 0)::bigint`,
-    })
-    .from(schema.payouts)
-    .where(
-      and(
-        eq(schema.payouts.financeRegion, financeRegion),
-        eq(schema.payouts.status, 'paid'),
-        sql`${schema.payouts.paidAt} >= ${monthStart}`,
-        sql`${schema.payouts.paidAt} < ${monthEnd}`,
+    db
+      .select({
+        total: sql<number>`coalesce(sum(${schema.payouts.amountCents}), 0)::bigint`,
+      })
+      .from(schema.payouts)
+      .where(
+        and(
+          eq(schema.payouts.financeRegion, financeRegion),
+          eq(schema.payouts.status, 'paid'),
+          sql`${schema.payouts.paidAt} >= ${monthStart}`,
+          sql`${schema.payouts.paidAt} < ${monthEnd}`,
+        ),
       ),
-    );
-
-  const bonuses = await db
-    .select({
-      total: sql<number>`coalesce(sum(${schema.contractorBonuses.amountCents}), 0)::bigint`,
-    })
-    .from(schema.contractorBonuses)
-    .where(
-      and(
-        eq(schema.contractorBonuses.financeRegion, financeRegion),
-        eq(schema.contractorBonuses.status, 'paid'),
-        sql`${schema.contractorBonuses.resolvedAt} >= ${monthStart}`,
-        sql`${schema.contractorBonuses.resolvedAt} < ${monthEnd}`,
+    db
+      .select({
+        total: sql<number>`coalesce(sum(${schema.contractorBonuses.amountCents}), 0)::bigint`,
+      })
+      .from(schema.contractorBonuses)
+      .where(
+        and(
+          eq(schema.contractorBonuses.financeRegion, financeRegion),
+          eq(schema.contractorBonuses.status, 'paid'),
+          sql`${schema.contractorBonuses.resolvedAt} >= ${monthStart}`,
+          sql`${schema.contractorBonuses.resolvedAt} < ${monthEnd}`,
+        ),
       ),
-    );
+  ]);
 
   const revenueCents = Number(revenue[0]?.total ?? 0);
   const payoutsCents = Number(payouts[0]?.total ?? 0);
