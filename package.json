@@ -15,9 +15,9 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx scripts/seed.ts",
-    "grant:test-access": "tsx scripts/grant-test-access.ts",
-    "set-role": "tsx scripts/set-role.ts",
+    "db:seed": "tsx --env-file-if-exists=.env.local scripts/seed.ts",
+    "grant:test-access": "tsx --env-file-if-exists=.env.local scripts/grant-test-access.ts",
+    "set-role": "tsx --env-file-if-exists=.env.local scripts/set-role.ts",
     "i18n:check": "tsx scripts/i18n-check.ts",
     "prepare": "husky"
   },
