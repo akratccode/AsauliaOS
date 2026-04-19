@@ -1,7 +1,9 @@
+import path from 'node:path';
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
 
-const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
+const I18N_REQUEST_PATH = './i18n/request.ts';
+const withNextIntl = createNextIntlPlugin(I18N_REQUEST_PATH);
 
 /**
  * Security headers — report-only CSP for v1 so we don't block legitimate
@@ -22,6 +24,11 @@ const cspReportOnly = [
 ].join('; ');
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    resolveAlias: {
+      'next-intl/config': path.resolve(process.cwd(), I18N_REQUEST_PATH),
+    },
+  },
   async headers() {
     return [
       {
