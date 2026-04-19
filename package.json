@@ -30,6 +30,7 @@
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.8.0",
     "next": "16.2.4",
+    "next-intl": "^3.26.0",
     "postgres": "^3.4.9",
     "posthog-js": "^1.369.3",
     "posthog-node": "^5.29.2",
