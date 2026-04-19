@@ -7,7 +7,7 @@ import {
   type OnboardingActionState,
   type OnboardingErrorCode,
 } from '../actions';
-import { PricingSlider } from '@/components/pricing-slider/PricingSlider';
+import { PricingSliderLazy as PricingSlider } from '@/components/pricing-slider/PricingSliderLazy';
 import { FormAlert, SubmitButton } from '@/components/auth/form-primitives';
 
 // Map server action error codes to keys inside `onboarding.errors.*`.

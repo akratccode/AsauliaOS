@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
-import { Board } from '@/components/kanban/Board';
+import { BoardLazy } from '@/components/kanban/BoardLazy';
 import type { KanbanDeliverable } from '@/components/kanban/types';
 import { requireAuth } from '@/lib/auth/rbac';
 import { db, schema } from '@/lib/db';
@@ -116,7 +116,7 @@ export default async function ClientDeliverablesPage({
           {t('allocation')} {(summary.totalBps / 100).toFixed(1)}% · {flagLabel}
         </div>
       </header>
-      <Board initialDeliverables={cards} />
+      <BoardLazy initialDeliverables={cards} />
     </main>
   );
 }
