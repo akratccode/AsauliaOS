@@ -62,4 +62,18 @@ All user-visible changes per phase. Phases are completed in dependency order
 - `lib/pricing/index.ts` re-exports the public surface so callers only ever `import { … } from '@/lib/pricing'`.
 - Tests: `tests/unit/pricing.test.ts` covers anchors, monotonicity, validation, quote, breakeven ($6,930.77), split invariants (10k random cases), distribution largest-remainder (100 random cases + rollover), and slider formatters. All 38 tests pass.
 
-### Phase 05 — pending
+### Phase 05 — Client onboarding
+- Route group `app/(onboarding)/` with a shared header + three-step progress stepper (`components/onboarding/stepper.tsx`) across Brand → Plan → Payment, plus a Complete page that auto-forwards to `/dashboard`.
+- Brand step: client-side `slugify` preview with user override, zod-validated server action that retries slug up to 5 times on unique-violation, inserts `brands` + owner `brand_members` row + audit log entry, and sets the `onboarding_brand_id` cookie for the next steps.
+- Plan step: `components/pricing-slider/PricingSlider.tsx` — the headline UX. Fixed fee slider ($99 → $1,000 in $100 snaps), derived variable % in read-only form, live quote + projection widget comparing Current / Starter / Pro with the cheapest option highlighted. Keyboard-operable (arrow keys step, PageUp/Down jump $500). Hidden `fixedAmountCents` + `variablePercentBps` inputs keep the form server-submittable. `savePlanAction` revalidates through `PlanInputSchema` and commits via `lib/db/plans.ts::savePlanRecord` — an atomic transaction that closes any open plan row before inserting the new one.
+- Payment step: `createCheckoutSessionAction` creates a Stripe Customer if needed, opens a subscription Checkout session covering the fixed portion (variable reconciles at period close in Phase 11), and redirects to Stripe. When `STRIPE_SECRET_KEY` is not configured it flips the brand to `status = 'active'` locally so the developer flow still completes end-to-end. `/onboarding/complete` finalizes by retrieving the session and storing `stripe_subscription_id` + `billing_cycle_day`; webhook in Phase 11 will become the source of truth.
+- Stripe webhook stub at `app/api/webhooks/stripe/route.ts` verifies signatures and handles `checkout.session.completed` today; richer invoice/subscription events land in Phase 11.
+- Middleware additions: protected prefixes now include `/profile` and `/settings` so the user-menu links work behind auth; onboarding + auth gating unchanged.
+- Pricing slider / onboarding tests: `tests/unit/onboarding.test.ts` verifies slug slug generation / suffixing and asserts `savePlanRecord` closes the prior plan before inserting the new one (transaction sequencing).
+
+#### Deviations from phase file
+- Playwright happy-path e2e requires a running Supabase + Stripe test mode + dev server simultaneously; this lands in Phase 12 alongside the rest of the e2e suite.
+- Resume-onboarding email job scheduling is deferred to Phase 12 (the phase file explicitly marks this as Phase 12 work).
+- Logo upload to Supabase Storage is deferred until Phase 12 polish — the brand form currently omits the file input so onboarding stays functional even when Storage isn't provisioned.
+
+### Phase 06 — pending
