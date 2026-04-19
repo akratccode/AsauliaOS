@@ -23,6 +23,12 @@ const cspReportOnly = [
 ].join('; ');
 
 const baseConfig: NextConfig = {
+  images: {
+    formats: ['image/avif', 'image/webp'],
+  },
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
   async headers() {
     return [
       {
