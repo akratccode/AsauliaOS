@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { brandMembers, invitations, users } from '@/lib/db/schema';
+import { brandMembers, contractorProfiles, invitations, users } from '@/lib/db/schema';
 import { createSupabaseServerClient } from '@/lib/auth/supabase-server';
 import { getSupabaseAdminClient } from '@/lib/auth/supabase-admin';
 import { loginLimiter, passwordResetLimiter } from '@/lib/auth/rate-limit';
@@ -91,6 +91,7 @@ const signupSchema = z.object({
   password: z.string().min(8),
   fullName: z.string().min(1).max(120),
   inviteToken: z.string().optional(),
+  requestedRole: z.enum(['client', 'contractor']).optional(),
 });
 
 export async function signUpAction(
@@ -102,6 +103,7 @@ export async function signUpAction(
     password: formData.get('password'),
     fullName: formData.get('fullName'),
     inviteToken: formData.get('inviteToken') || undefined,
+    requestedRole: formData.get('requestedRole') || undefined,
   });
   if (!parsed.success) {
     return { error: 'validation' };
@@ -127,12 +129,13 @@ export async function signUpAction(
   }
 
   const supabase = await createSupabaseServerClient();
+  const nowIso = new Date().toISOString();
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
       emailRedirectTo: `${env.NEXT_PUBLIC_APP_URL}/verify-email`,
-      data: { full_name: parsed.data.fullName },
+      data: { full_name: parsed.data.fullName, password_set_at: nowIso },
     },
   });
 
@@ -140,16 +143,30 @@ export async function signUpAction(
     return { error: 'account_creation_failed' };
   }
 
+  const resolvedRole = invite
+    ? globalRoleFromInvite(invite)
+    : parsed.data.requestedRole === 'contractor'
+      ? 'contractor'
+      : 'client';
+
   const admin = getSupabaseAdminClient();
   await admin.from('users').upsert(
     {
       id: data.user.id,
       email: parsed.data.email,
       full_name: parsed.data.fullName,
-      global_role: invite ? globalRoleFromInvite(invite) : 'client',
+      global_role: resolvedRole,
+      password_set_at: new Date().toISOString(),
     },
     { onConflict: 'id' },
   );
+
+  if (resolvedRole === 'contractor') {
+    await db
+      .insert(contractorProfiles)
+      .values({ userId: data.user.id, status: 'pending' })
+      .onConflictDoNothing({ target: contractorProfiles.userId });
+  }
 
   if (invite) {
     if (invite.scope === 'brand' && invite.brandId) {
@@ -218,9 +235,46 @@ export async function confirmPasswordResetAction(
     return { error: 'password_too_short' };
   }
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  const nowIso = new Date().toISOString();
+  const { data, error } = await supabase.auth.updateUser({
+    password: parsed.data.password,
+    data: { password_set_at: nowIso },
+  });
   if (error) return { error: 'reset_failed' };
+  if (data.user) {
+    await db
+      .update(users)
+      .set({ passwordSetAt: new Date(), updatedAt: new Date() })
+      .where(eq(users.id, data.user.id));
+  }
   redirect('/login');
+}
+
+export async function setInitialPasswordAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = resetConfirmSchema.safeParse({ password: formData.get('password') });
+  if (!parsed.success) {
+    return { error: 'password_too_short' };
+  }
+  const supabase = await createSupabaseServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) return { error: 'generic' };
+
+  const nowIso = new Date().toISOString();
+  const { error } = await supabase.auth.updateUser({
+    password: parsed.data.password,
+    data: { password_set_at: nowIso },
+  });
+  if (error) return { error: 'reset_failed' };
+
+  await db
+    .update(users)
+    .set({ passwordSetAt: new Date(), updatedAt: new Date() })
+    .where(eq(users.id, userData.user.id));
+
+  redirect('/dashboard');
 }
 
 export async function signOutAction() {

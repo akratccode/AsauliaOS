@@ -18,6 +18,7 @@ export function SignupForm({ inviteToken }: { inviteToken?: string }) {
   const tActions = useTranslations('auth.actions');
   const tAuthErrors = useTranslations('auth.errors');
   const tErrors = useTranslations('errors');
+  const tRole = useTranslations('auth.signup');
 
   function translateError(code: string | undefined): string {
     switch (code as SignupErrorCode) {
@@ -47,6 +48,22 @@ export function SignupForm({ inviteToken }: { inviteToken?: string }) {
         autoComplete="new-password"
         required
       />
+      {!inviteToken ? (
+        <fieldset className="space-y-2">
+          <legend className="text-fg-2 text-sm">{tRole('roleLabel')}</legend>
+          <div className="flex gap-4 text-sm">
+            <label className="flex items-center gap-2">
+              <input type="radio" name="requestedRole" value="client" defaultChecked />
+              <span>{tRole('roleClient')}</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="radio" name="requestedRole" value="contractor" />
+              <span>{tRole('roleContractor')}</span>
+            </label>
+          </div>
+          <p className="text-fg-3 text-xs">{tRole('roleHint')}</p>
+        </fieldset>
+      ) : null}
       {state?.error ? <FormAlert tone="error">{translateError(state.error)}</FormAlert> : null}
       <SubmitButton pending={pending}>{tActions('createAccount')}</SubmitButton>
     </form>

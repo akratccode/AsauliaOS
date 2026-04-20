@@ -13,6 +13,11 @@ const PROTECTED_PREFIXES = [
   '/settings',
 ];
 const AUTH_ONLY_PREFIXES = ['/login', '/signup', '/reset-password', '/verify-email'];
+const SET_PASSWORD_EXEMPT_PREFIXES = [
+  '/onboarding/set-password',
+  '/logout',
+  '/auth/callback',
+];
 
 export async function updateSession(request: NextRequest) {
   const response = NextResponse.next({ request });
@@ -52,6 +57,13 @@ export async function updateSession(request: NextRequest) {
 
   if (user && isAuthOnly && !path.startsWith('/verify-email')) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  if (user && (isProtected || path === '/')) {
+    const exempt = SET_PASSWORD_EXEMPT_PREFIXES.some((p) => path.startsWith(p));
+    if (!exempt && !user.user_metadata?.password_set_at) {
+      return NextResponse.redirect(new URL('/onboarding/set-password', request.url));
+    }
   }
 
   return response;

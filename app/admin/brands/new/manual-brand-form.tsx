@@ -48,7 +48,7 @@ export function ManualBrandForm() {
             className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-3 py-1.5 font-mono"
           />
         </label>
-        <label className="flex flex-col gap-1 md:col-span-2">
+        <label className="flex flex-col gap-1">
           <span className="text-fg-3 text-xs">{t('ownerEmailLabel')}</span>
           <input
             name="ownerEmail"
@@ -57,6 +57,15 @@ export function ManualBrandForm() {
             className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-3 py-1.5"
           />
           <span className="text-fg-3 text-[11px]">{t('ownerEmailHint')}</span>
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-fg-3 text-xs">{t('ownerFullNameLabel')}</span>
+          <input
+            name="ownerFullName"
+            maxLength={120}
+            className="border-fg-4/20 bg-bg-2 text-fg-1 rounded-md border px-3 py-1.5"
+          />
+          <span className="text-fg-3 text-[11px]">{t('ownerFullNameHint')}</span>
         </label>
         <label className="flex flex-col gap-1">
           <span className="text-fg-3 text-xs">{t('regionLabel')}</span>
