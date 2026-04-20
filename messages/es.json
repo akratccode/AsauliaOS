@@ -59,7 +59,16 @@
       "metadata": "Crear cuenta · Asaulia",
       "title": "Comenzá con Asaulia.",
       "subtitleDefault": "Creá tu cuenta y elegí un plan en el siguiente paso.",
-      "subtitleInvite": "Terminá de configurar tu invitación."
+      "subtitleInvite": "Terminá de configurar tu invitación.",
+      "roleLabel": "Me registro como",
+      "roleClient": "Cliente",
+      "roleContractor": "Contratista",
+      "roleHint": "Un administrador puede cambiar esto más adelante."
+    },
+    "setPassword": {
+      "metadata": "Configurá una contraseña · Asaulia",
+      "title": "Configurá una contraseña para continuar.",
+      "subtitle": "Te invitamos a {email} con un enlace mágico. Elegí una contraseña para poder iniciar sesión la próxima vez."
     },
     "verifyEmail": {
       "metadata": "Verificá tu correo · Asaulia",
@@ -608,7 +617,9 @@
       "nameLabel": "Nombre de la marca",
       "slugLabel": "Slug (minúsculas, guiones)",
       "ownerEmailLabel": "Email del propietario",
-      "ownerEmailHint": "El propietario ya debe tener cuenta en Asaulia.",
+      "ownerEmailHint": "Le enviaremos un enlace mágico si el propietario aún no tiene cuenta.",
+      "ownerFullNameLabel": "Nombre completo del propietario (opcional)",
+      "ownerFullNameHint": "Solo se usa cuando creamos la cuenta para un propietario nuevo.",
       "regionLabel": "Región financiera",
       "regionUs": "Estados Unidos (USD)",
       "regionCo": "Colombia (COP)",
@@ -664,6 +675,17 @@
       "noContractors": "Sin contratistas que coincidan.",
       "actions": "Acciones",
       "impersonate": "Suplantar"
+    },
+    "contractorInvite": {
+      "title": "Invitar a un contratista",
+      "description": "Enviaremos un enlace mágico por correo. En el primer inicio de sesión configurará su contraseña y entrará directo a sus tareas.",
+      "emailLabel": "Email del contratista",
+      "emailHint": "Si el correo ya pertenece a un cliente, lo promovemos a contratista.",
+      "fullNameLabel": "Nombre completo (opcional)",
+      "send": "Enviar invitación",
+      "sending": "Enviando…",
+      "invitedInfo": "Invitación enviada.",
+      "linkedInfo": "Cuenta vinculada como contratista."
     },
     "impersonation": {
       "bannerActive": "Suplantando usuario",
@@ -1093,8 +1115,15 @@
       },
       "brandNew": {
         "invalid_input": "Verificá los campos e intentá de nuevo.",
-        "owner_not_found": "No hay cuenta con ese email. Pedile al propietario que se registre primero.",
+        "owner_role_conflict": "Ese email pertenece a un admin o contratista. Elegí otro propietario.",
+        "invite_failed": "No pudimos enviar el enlace mágico. Intentá de nuevo en un momento.",
         "slug_taken": "Ese slug ya está en uso.",
+        "generic": "Algo salió mal. Intentá de nuevo."
+      },
+      "contractorInvite": {
+        "invalid_input": "Verificá los campos e intentá de nuevo.",
+        "role_conflict": "Ese email pertenece a un admin. Elegí otra cuenta.",
+        "invite_failed": "No pudimos enviar el enlace mágico. Intentá de nuevo en un momento.",
         "generic": "Algo salió mal. Intentá de nuevo."
       },
       "brandContractors": {

@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth/rbac';
 import { db, schema } from '@/lib/db';
 import { currencyForRegion, type FinanceRegion } from '@/lib/billing/region';
+import { inviteUserByEmail } from '@/lib/auth/invite';
 
 const SlugSchema = z
   .string()
@@ -17,6 +18,7 @@ const CreateBrandSchema = z.object({
   name: z.string().min(1).max(200),
   slug: SlugSchema,
   ownerEmail: z.string().email(),
+  ownerFullName: z.string().trim().min(1).max(120).optional(),
   financeRegion: z.enum(['us', 'co']),
   timezone: z.string().min(1).max(64).optional(),
   fixedAmountCents: z.coerce.number().int().min(0).max(10_000_000_000),
@@ -26,10 +28,11 @@ const CreateBrandSchema = z.object({
 
 export type AdminBrandErrorCode =
   | 'invalid_input'
-  | 'owner_not_found'
+  | 'owner_role_conflict'
+  | 'invite_failed'
   | 'slug_taken'
   | 'generic';
-export type AdminBrandInfoCode = 'created';
+export type AdminBrandInfoCode = 'created' | 'created_and_invited';
 export type AdminBrandActionResult =
   | { ok: true; info: AdminBrandInfoCode; brandId: string }
   | { ok: false; error: AdminBrandErrorCode };
@@ -44,6 +47,9 @@ export async function adminCreateManualBrandAction(
       name: String(formData.get('name') ?? ''),
       slug: String(formData.get('slug') ?? '').toLowerCase(),
       ownerEmail: String(formData.get('ownerEmail') ?? '').toLowerCase(),
+      ownerFullName: formData.get('ownerFullName')
+        ? String(formData.get('ownerFullName'))
+        : undefined,
       financeRegion: String(formData.get('financeRegion') ?? 'co'),
       timezone: String(formData.get('timezone') ?? '') || undefined,
       fixedAmountCents: String(formData.get('fixedAmountCents') ?? ''),
@@ -55,13 +61,6 @@ export async function adminCreateManualBrandAction(
     const region = parsed.data.financeRegion as FinanceRegion;
     const currency = currencyForRegion(region);
 
-    const [owner] = await db
-      .select({ id: schema.users.id, email: schema.users.email })
-      .from(schema.users)
-      .where(eq(schema.users.email, parsed.data.ownerEmail))
-      .limit(1);
-    if (!owner) return { ok: false, error: 'owner_not_found' };
-
     const [existing] = await db
       .select({ id: schema.brands.id })
       .from(schema.brands)
@@ -69,12 +68,24 @@ export async function adminCreateManualBrandAction(
       .limit(1);
     if (existing) return { ok: false, error: 'slug_taken' };
 
+    const invite = await inviteUserByEmail({
+      kind: 'client',
+      email: parsed.data.ownerEmail,
+      fullName: parsed.data.ownerFullName ?? null,
+      invitedByUserId: admin.userId,
+    });
+    if (!invite.ok) {
+      if (invite.error === 'role_conflict') return { ok: false, error: 'owner_role_conflict' };
+      return { ok: false, error: 'invite_failed' };
+    }
+    const ownerId = invite.userId;
+
     const [inserted] = await db
       .insert(schema.brands)
       .values({
         slug: parsed.data.slug,
         name: parsed.data.name,
-        ownerUserId: owner.id,
+        ownerUserId: ownerId,
         status: 'active',
         timezone: parsed.data.timezone ?? 'UTC',
         billingCycleDay: parsed.data.billingCycleDay,
@@ -86,12 +97,15 @@ export async function adminCreateManualBrandAction(
 
     if (!inserted) return { ok: false, error: 'generic' };
 
-    await db.insert(schema.brandMembers).values({
-      brandId: inserted.id,
-      userId: owner.id,
-      role: 'owner',
-      acceptedAt: new Date(),
-    });
+    await db
+      .insert(schema.brandMembers)
+      .values({
+        brandId: inserted.id,
+        userId: ownerId,
+        role: 'owner',
+        acceptedAt: new Date(),
+      })
+      .onConflictDoNothing();
 
     await db
       .update(schema.plans)
@@ -118,12 +132,17 @@ export async function adminCreateManualBrandAction(
         slug: parsed.data.slug,
         financeRegion: region,
         currency,
-        ownerEmail: owner.email,
+        ownerEmail: parsed.data.ownerEmail,
+        ownerInvited: !invite.reused,
       },
     });
 
     revalidatePath('/admin/brands');
-    return { ok: true, info: 'created', brandId: inserted.id };
+    return {
+      ok: true,
+      info: invite.reused ? 'created' : 'created_and_invited',
+      brandId: inserted.id,
+    };
   } catch {
     return { ok: false, error: 'generic' };
   }

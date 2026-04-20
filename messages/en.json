@@ -59,7 +59,16 @@
       "metadata": "Create account · Asaulia",
       "title": "Start with Asaulia.",
       "subtitleDefault": "Create your account and pick a plan on the next step.",
-      "subtitleInvite": "Finish setting up your invitation."
+      "subtitleInvite": "Finish setting up your invitation.",
+      "roleLabel": "I'm signing up as",
+      "roleClient": "Client",
+      "roleContractor": "Contractor",
+      "roleHint": "You can ask an admin to change this later."
+    },
+    "setPassword": {
+      "metadata": "Set a password · Asaulia",
+      "title": "Set a password to continue.",
+      "subtitle": "We invited {email} via magic link. Choose a password so you can sign in next time."
     },
     "verifyEmail": {
       "metadata": "Verify your email · Asaulia",
@@ -608,7 +617,9 @@
       "nameLabel": "Brand name",
       "slugLabel": "Slug (lowercase, dashes)",
       "ownerEmailLabel": "Owner email",
-      "ownerEmailHint": "The owner must already have an account in Asaulia.",
+      "ownerEmailHint": "We'll email a magic link if the owner doesn't have an account yet.",
+      "ownerFullNameLabel": "Owner full name (optional)",
+      "ownerFullNameHint": "Used only when we create the account for a new owner.",
       "regionLabel": "Finance region",
       "regionUs": "United States (USD)",
       "regionCo": "Colombia (COP)",
@@ -664,6 +675,17 @@
       "noContractors": "No contractors match.",
       "actions": "Actions",
       "impersonate": "Impersonate"
+    },
+    "contractorInvite": {
+      "title": "Invite a contractor",
+      "description": "We'll email a magic link. On first sign-in, they'll set a password and land on their tasks.",
+      "emailLabel": "Contractor email",
+      "emailHint": "If the address already belongs to a client, we promote them to contractor.",
+      "fullNameLabel": "Full name (optional)",
+      "send": "Send invite",
+      "sending": "Sending…",
+      "invitedInfo": "Invitation sent.",
+      "linkedInfo": "Account linked as contractor."
     },
     "impersonation": {
       "bannerActive": "Impersonating user",
@@ -1093,8 +1115,15 @@
       },
       "brandNew": {
         "invalid_input": "Please check the fields and try again.",
-        "owner_not_found": "No account found with that email. Ask the owner to sign up first.",
+        "owner_role_conflict": "That email belongs to an admin or contractor. Pick a different owner.",
+        "invite_failed": "We couldn't send the magic-link invite. Try again in a moment.",
         "slug_taken": "That slug is already in use.",
+        "generic": "Something went wrong. Try again."
+      },
+      "contractorInvite": {
+        "invalid_input": "Please check the fields and try again.",
+        "role_conflict": "That email belongs to an admin. Pick a different account.",
+        "invite_failed": "We couldn't send the magic-link invite. Try again in a moment.",
         "generic": "Something went wrong. Try again."
       },
       "brandContractors": {

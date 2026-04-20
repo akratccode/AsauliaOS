@@ -9,6 +9,7 @@ export const users = pgTable('users', {
   globalRole: globalRoleEnum('global_role').notNull().default('client'),
   timezone: text('timezone').notNull().default('UTC'),
   locale: text('locale').notNull().default('en'),
+  passwordSetAt: timestamp('password_set_at', { withTimezone: true, mode: 'date' }),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });

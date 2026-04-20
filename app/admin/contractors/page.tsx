@@ -3,6 +3,7 @@ import { desc, eq, sql } from 'drizzle-orm';
 import { getTranslations } from 'next-intl/server';
 import { db, schema } from '@/lib/db';
 import { startImpersonationAction } from '@/app/actions/impersonation';
+import { InviteContractorForm } from './invite-form';
 
 type SearchParams = Promise<{ status?: string; onboarding?: string; q?: string }>;
 
@@ -18,6 +19,7 @@ export default async function AdminContractorsPage({
 }) {
   const sp = await searchParams;
   const t = await getTranslations('admin.contractors');
+  const tInvite = await getTranslations('admin.contractorInvite');
   const tStatus = await getTranslations('statuses.contractor');
 
   const rows = await db
@@ -63,6 +65,12 @@ export default async function AdminContractorsPage({
         <p className="text-fg-3 text-xs uppercase tracking-[0.12em]">{t('peopleLabel')}</p>
         <h1 className="text-fg-1 font-serif text-3xl italic">{t('contractorsTitle')}</h1>
       </header>
+
+      <section className="border-fg-4/15 bg-bg-1 rounded-2xl border p-5">
+        <h2 className="text-fg-1 mb-1 font-serif text-lg italic">{tInvite('title')}</h2>
+        <p className="text-fg-3 mb-3 text-xs">{tInvite('description')}</p>
+        <InviteContractorForm />
+      </section>
 
       <form method="get" className="flex flex-wrap gap-3 text-xs">
         <input
